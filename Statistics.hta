@@ -163,34 +163,40 @@ Function msgboxArray(strArray)
     Msgbox(tmpStr)
 End Function
 
-Function getCloseNumArray(intArray, diffNum, countNum)
+Function getCloseNumArray(intArray, countNum)
 	'Dim intArray, diffNum, countNum
 	'intArray = Array(1,5,8,15,16,17,25,34,54,55,56,57)
 	'diffNum = 1
 	'countNum = 5
 	Dim i, j, newArray(), tmpArray, finalArray, flagNew, flagTmp
-	j = 0
+	j = 2
 	flagNew = False
 	flagTmp = False
-	For i = 0 To UBound(intArray)-1
-		If j = countNum Then
-			Exit For
-		End If
-
-		If intArray(i+1) - intArray(i) <= diffNum Then
-			Redim Preserve newArray(j+1)
-            newArray(j) = intArray(i)
-            newArray(j+1) = intArray(i+1)
+    Redim Preserve newArray(1)
+    newArray(0) = intArray(0)
+    newArray(1) = intArray(1)
+    diffNum = newArray(1) - newArray(0)
+	For i = 1 To UBound(intArray)-1
+        If j = countNum Then
+            Exit For
+        End If
+        
+        If Abs(intArray(i+1) - intArray(i) - diffNum) <= 3  Then
+            Redim Preserve newArray(j)
+            newArray(j) = intArray(i+1)
             j = j + 1
             flagNew = True
         Else
-            If j > 3 Then
-            	Exit For
+            If j >= 4 Then
+                Exit For
             ElseIf flagNew Then
-	            tmpArray = newArray
-	            j = 0
-	            flagTmp = True
-	        End If
+                tmpArray = newArray
+                newArray(0) = intArray(i)
+                newArray(1) = intArray(i+1)
+                diffNum = newArray(1) - newArray(0)
+                j = 2
+                flagTmp = True
+            End If
         End If
     Next
     If flagTmp Then
@@ -342,17 +348,23 @@ Function getFiveResult(str, countStart, numResult)
     dnfStep = getAllStepInStr(tmpStr, "D0.00")
     tmpStep = getAllStepInStr(tmpStr, "0.00")
     If UBound(tmpStep) > 0 Then
-        tmpStep = getCloseNumArray(tmpStep, 10, 5)
+        tmpStep = getCloseNumArray(tmpStep, 5)
         If UBound(tmpStep) > 0 Then
-	        For i = 0 To UBound(tmpStep)
-	        	If dnfStep(0) <> "" Then
-	        		For j = 0 To UBound(dnfStep)
-	        			If tmpStep(i) > dnfStep(j) Then
-	        				tmpStep(i) = tmpStep(i) + 3
-	        				Exit For
-	        			End If
+            '//'modified tmpStep For DNF
+            If dnfStep(0) <> "" Then
+                For k = UBound(dnfStep) To 0 Step -1
+                    For l = 0 To UBound(tmpStep)
+                        If tmpStep(l)-1 = dnfStep(k) Then
+                            tmpStep(l) = dnfStep(k)
+                        ElseIf tmpStep(l)-2 > dnfStep(k) Then
+                            tmpStep(l) = tmpStep(l) - 2
+                        End If
                     Next
-                End If
+                Next
+            End If
+
+            '//'get result with tmpStep
+	        For i = 0 To UBound(tmpStep)
 	        	tmpStep(i) = tmpStep(i) + countStart - 1
 	        	resultArray(i) = Mid(str, tmpStep(i), 4)
 	        	If isD(Mid(str, tmpStep(i), 1)) Then
@@ -812,7 +824,7 @@ Function WritePagesCode()
         url = getUrl() & "?pn=" & i
         getSource(url)
     Next
-
+    'getTextFromCode()
     Msgbox("Done!")
 End Function
 
