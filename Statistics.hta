@@ -163,66 +163,14 @@ Function msgboxArray(strArray)
     Msgbox(tmpStr)
 End Function
 
-Function getCloseNumArray(intArray, countNum)
-	'Dim intArray, diffNum, countNum
-	'intArray = Array(1,5,8,15,16,17,25,34,54,55,56,57)
-	'diffNum = 1
-	'countNum = 5
-	Dim i, j, newArray(), tmpArray, finalArray, flagNew, flagTmp
-	j = 2
-	flagNew = False
-	flagTmp = False
-    Redim Preserve newArray(1)
-    newArray(0) = intArray(0)
-    newArray(1) = intArray(1)
-    diffNum = newArray(1) - newArray(0)
-	For i = 1 To UBound(intArray)-1
-        If j = countNum Then
+Function getExistInArray(strArray, str)
+    Dim countFinded, count
+    countFinded = ""
+    For count = 0 To UBound(strArray)
+        If str = strArray(count) Then
+            countFinded = count
             Exit For
         End If
-        
-        If Abs(intArray(i+1) - intArray(i) - diffNum) <= 3  Then
-            Redim Preserve newArray(j)
-            newArray(j) = intArray(i+1)
-            j = j + 1
-            flagNew = True
-        Else
-            If j >= 4 Then
-                Exit For
-            ElseIf flagNew Then
-                tmpArray = newArray
-                newArray(0) = intArray(i)
-                newArray(1) = intArray(i+1)
-                diffNum = newArray(1) - newArray(0)
-                j = 2
-                flagTmp = True
-            End If
-        End If
-    Next
-    If flagTmp Then
-        If UBound(tmpArray) >= UBound(newArray) Then
-    	    finalArray = tmpArray
-    	Else
-    	    finalArray = newArray
-    	End If
-    ElseIf flagNew Then
-        finalArray = newArray
-    Else
-        Redim Preserve newArray(0)
-        finalArray = newArray
-    End If
-    getCloseNumArray = finalArray
-    'msgboxArray(finalArray)
-End Function
-
-Function getExistInArray(strArray, str)
-	Dim countFinded, count
-	countFinded = ""
-    For count = 0 To UBound(strArray)
-    	If str = strArray(count) Then
-            countFinded = count
-    		Exit For
-    	End If
     Next
     getExistInArray = countFinded
 End Function
@@ -256,88 +204,150 @@ Function isNumber(str)
 End Function
 
 Function isD(str)
-	Dim flag
-	flag = False
-	Select Case str
-		Case "D"
-		    flag = True
-		Case "d"
-		    flag = True
+    Dim flag
+    flag = False
+    Select Case str
+        Case "D"
+            flag = True
+        Case "d"
+            flag = True
     End Select
     isD = flag
 End Function
 
 Function isN(str)
-	Dim flag
-	flag = False
-	Select Case str
-		Case "N"
-		    flag = True
-		Case "n"
-		    flag = True
+    Dim flag
+    flag = False
+    Select Case str
+        Case "N"
+            flag = True
+        Case "n"
+            flag = True
     End Select
     isN = flag
 End Function
 
 Function isF(str)
-	Dim flag
-	flag = False
-	Select Case str
-		Case "F"
-		    flag = True
-		Case "f"
-		    flag = True
+    Dim flag
+    flag = False
+    Select Case str
+        Case "F"
+            flag = True
+        Case "f"
+            flag = True
     End Select
     isF = flag
 End Function
 
 Function isPoint(str)
-	Dim flag
-	flag = False
-	Select Case str
-		Case "."
-		    flag = True
-		Case "。"
-		    flag = True
+    Dim flag
+    flag = False
+    Select Case str
+        Case "."
+            flag = True
+        Case "。"
+            flag = True
     End Select
     isPoint = flag
 End Function
 
 Function isColon(str)
-	Dim flag
-	flag = False
-	Select Case str
-		Case ":"
-		    flag = True
-		Case "："
-		    flag = True
+    Dim flag
+    flag = False
+    Select Case str
+        Case ":"
+            flag = True
+        Case "："
+            flag = True
     End Select
     isColon = flag
 End Function
 
 Function changeStrToSimple(str)
-	Dim tmpStr
-	tmpStr = ""
-    For searchStep = 1 To Len(str)
-    	Select Case True
-    		Case isNumber(Mid(str, searchStep, 1))
-                tmpStr = tmpStr & "0"
-            Case isD(Mid(str, searchStep, 1))
-                tmpStr = tmpStr & "D"
-            Case isN(Mid(str, searchStep, 1))
-                tmpStr = tmpStr & "N"
-            Case isF(Mid(str, searchStep, 1))
-                tmpStr = tmpStr & "F"
-            Case isPoint(Mid(str, searchStep, 1))
-                tmpStr = tmpStr & "."
-            Case isColon(Mid(str, searchStep, 1))
-                tmpStr = tmpStr & ":"
+    Dim tmpStr, simpleStr
+    tmpStr = str
+    simpleStr = ""
+    For searchStep = 1 To Len(tmpStr)
+        Select Case True
+            Case isNumber(Mid(tmpStr, searchStep, 1))
+                simpleStr = simpleStr & "0"
+            Case isD(Mid(tmpStr, searchStep, 1))
+                simpleStr = simpleStr & "D"
+            Case isN(Mid(tmpStr, searchStep, 1))
+                simpleStr = simpleStr & "N"
+            Case isF(Mid(tmpStr, searchStep, 1))
+                simpleStr = simpleStr & "F"
+            Case isPoint(Mid(tmpStr, searchStep, 1))
+                simpleStr = simpleStr & "."
+            Case isColon(Mid(tmpStr, searchStep, 1))
+                simpleStr = simpleStr & ":"
             Case Else
-                tmpStr = tmpStr & "_"
+                simpleStr = simpleStr & "_"
         End Select
     Next
-    tmpStr = RePlace(tmpStr, "DNF", "D0.00")
-    changeStrToSimple = tmpStr
+    simpleStr = RePlace(simpleStr, "DNF", "D0.00")
+    changeStrToSimple = simpleStr
+End Function
+
+Function getDiffStepArray(intArray)
+    Dim tmpArray()
+    For i = 0 To UBound(intArray)-1
+        ReDim Preserve tmpArray(i)
+        tmpArray(i) = intArray(i+1) - intArray(i)
+    Next
+    getDiffStepArray = tmpArray
+End Function
+
+Function getCloseNumArray(intArray, countNum)
+	'Dim intArray, diffNum, countNum
+	'intArray = Array(1,5,8,15,16,17,25,34,54,55,56,57)
+	'diffNum = 1
+	'countNum = 5
+	Dim i, j, diffStepArray1, diffStepArray2, newArray(), tmpArray, finalArray, flagNew, flagTmp
+	j = 2
+    diffStepArray1 = getDiffStepArray(intArray)
+    diffStepArray2 = getDiffStepArray(diffStepArray1)
+	flagNew = False
+	flagTmp = False
+    Redim Preserve newArray(1)
+    newArray(0) = intArray(0)
+    newArray(1) = intArray(1)
+	For i = 0 To UBound(diffStepArray2)
+        If j = countNum Then
+            Exit For
+        End If
+        
+        If Abs(diffStepArray2(i)) <= 2  Then
+            Redim Preserve newArray(j)
+            newArray(j) = intArray(i+2)
+            j = j + 1
+            flagNew = True
+        Else
+            If j > 4 Then
+                Exit For
+            ElseIf flagNew Then
+                tmpArray = newArray
+                newArray(0) = intArray(i)
+                newArray(1) = intArray(i+1)
+                j = 2
+                flagTmp = True
+            End If
+        End If
+    Next
+    If flagTmp Then
+        If UBound(tmpArray) >= UBound(newArray) Then
+    	    finalArray = tmpArray
+    	Else
+    	    finalArray = newArray
+    	End If
+    ElseIf flagNew Then
+        finalArray = newArray
+    Else
+        Redim Preserve newArray(0)
+        finalArray = newArray
+    End If
+    getCloseNumArray = finalArray
+    'msgboxArray(finalArray)
 End Function
 
 Function getFiveResult(str, countStart, numResult)
@@ -347,7 +357,7 @@ Function getFiveResult(str, countStart, numResult)
     tmpStr = changeStrToSimple(Mid(str, countStart))
     dnfStep = getAllStepInStr(tmpStr, "D0.00")
     tmpStep = getAllStepInStr(tmpStr, "0.00")
-    If UBound(tmpStep) > 0 Then
+    If UBound(tmpStep) >= 4 Then
         tmpStep = getCloseNumArray(tmpStep, 5)
         If UBound(tmpStep) > 0 Then
             '//'modified tmpStep For DNF
@@ -388,7 +398,7 @@ Function getFiveResult(str, countStart, numResult)
 	        Next
 	    End If
 	End If
-	getFiveResult = resultArray
+    getFiveResult = resultArray
 End Function
 
 
@@ -824,6 +834,7 @@ Function WritePagesCode()
         url = getUrl() & "?pn=" & i
         getSource(url)
     Next
+    'Sleep(1000)
     'getTextFromCode()
     Msgbox("Done!")
 End Function
@@ -850,57 +861,18 @@ Function getCleanResult(strResultArray, strUserNameArray, countStart)
     addProjectName("333")
     For i = countStart+1 To UBound(strResultArray)
         getCommonStrResult strResultArray(i), strUserNameArray(i), check333Result(strResultArray(i)), 5, "333"
-    Next
-    addProjectName("444")
-    For i = countStart+1 To UBound(strResultArray)
         getCommonStrResult strResultArray(i), strUserNameArray(i), check444Result(strResultArray(i)), 5, "444"
-    Next
-    addProjectName("555")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), check555Result(strResultArray(i)), 5, "555"
-    Next
-    addProjectName("222")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), check222Result(strResultArray(i)), 5, "222"
-    Next
-    addProjectName("333bf")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), check333bfResult(strResultArray(i)), 3, "333bf"
-    Next
-    addProjectName("333oh")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), check333ohResult(strResultArray(i)), 5, "333oh"
-    Next
-    addProjectName("333fm")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), check333fmResult(strResultArray(i)), 3, "333fm"
-    Next
-    addProjectName("Mega")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), checkMegaResult(strResultArray(i)), 5, "Mega"
-    Next
-    addProjectName("py")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), checkPyResult(strResultArray(i)), 5, "py"
-    Next
-    addProjectName("SQ")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), checkSQResult(strResultArray(i)), 5, "SQ"
-    Next
-    addProjectName("clock")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), checkClockResult(strResultArray(i)), 5, "clock"
-    Next
-    addProjectName("sk")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), checkSkResult(strResultArray(i)), 5, "sk"
-    Next
-    addProjectName("666")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), check666Result(strResultArray(i)), 5, "666"
-    Next
-    addProjectName("777")
-    For i = countStart+1 To UBound(strResultArray)    
         getCommonStrResult strResultArray(i), strUserNameArray(i), check777Result(strResultArray(i)), 5, "777"
     Next
 
