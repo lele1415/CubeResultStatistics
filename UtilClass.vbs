@@ -1,26 +1,61 @@
 Class PostInfo
-    Private mPostNum, mUserID, mMsgStr, mPureResults, mSortedResults, mBestResult, mAvgResult
+    Private mPostNum, mPostUser, mPostMsg
 
     Private Sub Class_Initialize
         mPostNum = 0
-        mUserID = ""
-        mMsgStr = ""
-        ReDim Preserve mPureResults(4)
-        ReDim Preserve mSortedResults(4)
-        mBestResult = ""
-        mAvgResult = ""
+        mPostUser = ""
+        mPostMsg = ""
     End Sub
 
     Public Property Let PostNum(value)
         mPostNum = value
     End Property
 
-    Public Property Let UserID(value)
-        mUserID = value
+    Public Property Let PostUser(value)
+        mPostUser = value
     End Property
 
-    Public Property Let MsgStr(value)
-        mMsgStr = value
+    Public Property Let PostMsg(value)
+        mPostMsg = value
+    End Property
+
+    Public Property Get PostNum
+        PostNum = mPostNum
+    End Property
+
+    Public Property Get PostUser
+        PostUser = mPostUser
+    End Property
+
+    Public Property Get PostMsg
+        PostMsg = mPostMsg
+    End Property
+End Class
+
+
+
+Class ResultInfo
+    Private mResultOwner, mResultText, mResultOpt, mPureResults, mSortedResults, mBestResult, mAvgResult
+
+    Private Sub Class_Initialize
+        mResultOwner = ""
+        mResultText = ""
+        ReDim Preserve mPureResults(4)
+        ReDim Preserve mSortedResults(4)
+        mBestResult = ""
+        mAvgResult = ""
+    End Sub
+
+    Public Property Let ResultOwner(value)
+        mResultOwner = value
+    End Property
+
+    Public Property Let ResultText(value)
+        mResultText = value
+    End Property
+
+    Public Property Let ResultOpt(value)
+        mResultOpt = value
     End Property
 
     Public Property Let PureResults(seq, value)
@@ -39,16 +74,24 @@ Class PostInfo
         End If
     End Property
 
-    Public Property Get PostNum
-        PostNum = mPostNum
+    Public Property Let BestResult(value)
+        mBestResult = value
     End Property
 
-    Public Property Get UserID
-        UserID = mUserID
+    Public Property Let AvgResult(value)
+        mAvgResult = value
     End Property
 
-    Public Property Get MsgStr
-        MsgStr = mMsgStr
+    Public Property Get ResultOwner
+        ResultOwner = mResultOwner
+    End Property
+
+    Public Property Get ResultText
+        ResultText = mResultText
+    End Property
+
+    Public Property Get ResultOpt
+        ResultOpt = mResultOpt
     End Property
 
     Public Property Get PureResults(seq)
@@ -66,19 +109,27 @@ Class PostInfo
             MsgBox("Get SortedResults: seq is out of bound. seq = " & seq)
         End If
     End Property
+
+    Public Property Get BestResult
+        BestResult = mBestResult
+    End Property
+
+    Public Property Get AvgResult
+        AvgResult = mAvgResult
+    End Property
 End Class
 
 
 
 Class VariableArray
-    Private mLength, mArray()
+    Private mBound, mArray()
 
     Private Sub Class_Initialize
-        mLength = -1
+        mBound = -1
     End Sub
 
-    Public Property Get Length
-        Length = mLength
+    Public Property Get Bound
+        Bound = mBound
     End Property
 
     Public Property Get V(seq)
@@ -89,8 +140,8 @@ Class VariableArray
             seq = Cint(seq)
         End If
 
-        'MsgBox("seq="&seq&" mLength="&mLength)
-        If seq < 0 Or seq > mLength Then
+        'MsgBox("seq="&seq&" mBound="&mBound)
+        If seq < 0 Or seq > mBound Then
             MsgBox("Error: Get V(seq) seq out of bound")
             Exit Property
         End If
@@ -110,7 +161,7 @@ Class VariableArray
             seq = Cint(seq)
         End If
 
-        If seq < 0 Or seq > mLength Then
+        If seq < 0 Or seq > mBound Then
             MsgBox("Error: Let V(seq) seq out of bound")
             Exit Property
         End If
@@ -118,20 +169,20 @@ Class VariableArray
         mArray(seq) = sValue
     End Property
 
-    Public Function Append(value)
-        mLength = mLength + 1
-        ReDim Preserve mArray(mLength)
+    Public Sub Append(value)
+        mBound = mBound + 1
+        ReDim Preserve mArray(mBound)
 
         If isObject(value) Then
-            Set mArray(mLength) = value
+            Set mArray(mBound) = value
         ELse
-            mArray(mLength) = value
+            mArray(mBound) = value
         End If
-    End Function
+    End Sub
 
-    Public Function ResetArray()
-        mLength = -1
-    End Function
+    Public Sub ResetArray()
+        mBound = -1
+    End Sub
 
     Public Property Get InnerArray
         InnerArray = mArray
@@ -145,9 +196,9 @@ Class VariableArray
 
         Dim i
         For i = 0 To UBound(newArray)
-            mLength = mLength + 1
-            ReDim Preserve mArray(mLength)
-            mArray(mLength) = newArray(i)
+            mBound = mBound + 1
+            ReDim Preserve mArray(mBound)
+            mArray(mBound) = newArray(i)
         Next
     End Property
 
@@ -160,7 +211,7 @@ Class VariableArray
             seq2 = Cint(seq2)
         End If
 
-        If (seq1 < 0 Or seq1 > mLength) Or (seq2 < 0 Or seq2 > mLength) Then
+        If (seq1 < 0 Or seq1 > mBound) Or (seq2 < 0 Or seq2 > mBound) Then
             MsgBox("Error: SwapTwoValues(seq1, seq2) seq1 or seq2 out of bound")
             Exit Sub
         End If
@@ -183,44 +234,44 @@ Class VariableArray
         End If
     End Sub
 
-    Public Function PopBySeq(seq)
+    Public Sub PopBySeq(seq)
         If Not isNumeric(seq) Then
             MsgBox("Error: PopBySeq(seq) seq is not a number")
-            Exit Function
+            Exit Sub
         ELse
             seq = Cint(seq)
         End If
 
-        If seq < 0 Or seq > mLength Then
+        If seq < 0 Or seq > mBound Then
             MsgBox("Error: PopBySeq(seq) seq out of bound")
-            Exit Function
+            Exit Sub
         End If
 
-        If seq <> mLength Then
+        If seq <> mBound Then
             Dim i
-            For i = seq To mLength - 1
+            For i = seq To mBound - 1
                 mArray(i) = mArray(i + 1)
             Next
         End If
 
-        mLength = mLength - 1
-        ReDim Preserve mArray(mLength)
-    End Function
+        mBound = mBound - 1
+        ReDim Preserve mArray(mBound)
+    End Sub
 
-    Public Function MoveToTop(seq)
+    Public Sub MoveToTop(seq)
         If Not isNumeric(seq) Then
             MsgBox("Error: MoveToTop(seq) seq is not a number")
-            Exit Function
+            Exit Sub
         ELse
             seq = Cint(seq)
         End If
 
-        If seq < 0 Or seq > mLength Then
+        If seq < 0 Or seq > mBound Then
             MsgBox("Error: MoveToTop(seq) seq out of bound")
-            Exit Function
+            Exit Sub
         End If
 
-        If seq = 0 Then Exit Function
+        If seq = 0 Then Exit Sub
 
         Dim i, sValueToBeMove
         If isObject(mArray(seq)) Then
@@ -236,47 +287,47 @@ Class VariableArray
                 mArray(0) = sValueToBeMove
             Next
         End If
-    End Function
+    End Sub
 
-    Public Function MoveToEnd(seq)
+    Public Sub MoveToEnd(seq)
         If Not isNumeric(seq) Then
             MsgBox("Error: MoveToEnd(seq) seq is not a number")
-            Exit Function
+            Exit Sub
         ELse
             seq = Cint(seq)
         End If
 
-        If seq < 0 Or seq > mLength Then
+        If seq < 0 Or seq > mBound Then
             MsgBox("Error: MoveToEnd(seq) seq out of bound")
-            Exit Function
+            Exit Sub
         End If
 
-        If seq = 0 Then Exit Function
+        If seq = 0 Then Exit Sub
 
         Dim i, sValueToBeMove
         If isObject(mArray(seq)) Then
             Set sValueToBeMove = mArray(seq)
-            For i = seq To mLength - 1
+            For i = seq To mBound - 1
                 Set mArray(i) = mArray(i + 1)
             Next
-            Set mArray(mLength) = sValueToBeMove
+            Set mArray(mBound) = sValueToBeMove
         Else
             sValueToBeMove = mArray(seq)
-            For i = seq To mLength - 1
+            For i = seq To mBound - 1
                 mArray(i) = mArray(i + 1)
             Next
-            mArray(mLength) = sValueToBeMove
+            mArray(mBound) = sValueToBeMove
         End If
-    End Function
+    End Sub
 
     Public Function IsExistInArray(value)
-        If mLength = -1 Then
+        If mBound = -1 Then
             IsExistInArray = False
             Exit Function
         End If
 
         Dim i
-        For i = 0 To mLength
+        For i = 0 To mBound
             If StrComp(mArray(i), value) = 0 Then
                 IsExistInArray = True
                 Exit Function
@@ -286,13 +337,13 @@ Class VariableArray
     End Function
 
     Public Function IsExistInObject(value, seq)
-        If mLength = -1 Then
+        If mBound = -1 Then
             IsExistInObject = False
             Exit Function
         End If
 
         Dim i
-        For i = 0 To mLength
+        For i = 0 To mBound
             If StrComp(mArray(i).V(seq), value) = 0 Then
                 IsExistInObject = True
                 Exit Function
@@ -301,28 +352,28 @@ Class VariableArray
         IsExistInObject = False
     End Function
 
-    Public Function SortArray()
-        If mLength = -1 Then
-            'MsgBox("Error: SortArray() mLength <= 0, no need to sort")
-            Exit Function
+    Public Sub SortArray()
+        If mBound = -1 Then
+            'MsgBox("Error: SortArray() mBound <= 0, no need to sort")
+            Exit Sub
         End If
 
         Dim i, j
-        For i = 0 To mLength - 1
-            For j = i + 1 To mLength
+        For i = 0 To mBound - 1
+            For j = i + 1 To mBound
                 If StrComp(mArray(i), mArray(j)) > 0 Then
                     Dim sTmp : sTmp = mArray(i) : mArray(i) = mArray(j) : mArray(j) = sTmp
                 End If
             Next
         Next
-    End Function
+    End Sub
 
     Public Function ToString()
-        If mLength <> -1 Then
+        If mBound <> -1 Then
             Dim i, sTmp
             sTmp = "v(0) = " & mArray(0)
-            If mLength > 0 Then
-                For i = 1 To mLength
+            If mBound > 0 Then
+                For i = 1 To mBound
                     If isArray(mArray(i)) Then
                         sTmp = sTmp & Vblf & "v(" & i & ") = " & join(mArray(i))
                     ElseIf isObject(mArray(i)) Then

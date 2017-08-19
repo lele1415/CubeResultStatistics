@@ -113,6 +113,31 @@ Sub removeElement(sOrigin, sElement)
     Loop
 End Sub
 
+Sub replaceCharForOptName(str)
+    Dim sTmp, sChar, i
+    sTmp = ""
+    For i = 1 To Len(str)
+        sChar = Mid(str, i, 1)
+        Select Case sChar
+            Case "二"
+                sTmp = sTmp & "2"
+            Case "三"
+                sTmp = sTmp & "3"
+            Case "四"
+                sTmp = sTmp & "4"
+            Case "五"
+                sTmp = sTmp & "5"
+            Case "六"
+                sTmp = sTmp & "6"
+            Case "七"
+                sTmp = sTmp & "7"
+            Case Else
+                sTmp = sTmp & sChar
+        End Select
+    Next
+    str = LCase(sTmp)
+End Sub
+
 Function isEvenNum(iNum)
     Dim numTmp
     numTmp = iNum / 2

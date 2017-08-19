@@ -7,8 +7,12 @@ Dim aEndStr : aEndStr = Array(",", "</a>", "</div><br></cc>")
 
 Dim iSeq : iSeq = 0
 Dim oTmp
+Dim aExceptPostNum
 
-Sub getDetailFromCode()
+Sub getAllPostInfo()
+    Call vaAllPostInfo.ResetArray()
+    aExceptPostNum = Split(getElementValue("exceptPostNum_id"), " ")
+
     Dim oTxt, sReadLine
     Set oTxt = Fso.OpenTextFile(uPagesCodeFile, 1, False, True)
 
@@ -28,14 +32,15 @@ Sub getDetailFromCode()
 
     Call saveOriginMsgTxt()
 
-    MsgBox("getDetailFromCode done!")
-    'spiltStrAndGetOptInfo()
+    MsgBox("getAllPostInfo done!")
+    Call getAllResultInfo()
 End Sub
 
         Sub searchInfo(sOrigin)
             Dim sGet
             If iSeq = 0 Then
                 sGet = cutStrWithHeadEndStr(sOrigin, aHeadStr(0), aEndStr(0))
+                If Not checkIsNeedPostNum(sGet) Then Exit Sub
             Else
                 sGet = cutStrWithElement(sOrigin, aHeadStr(iSeq), aEndStr(iSeq))
             End If
@@ -55,6 +60,17 @@ End Sub
             End If
         End Sub
 
+        Function checkIsNeedPostNum(num)
+            Dim i
+            For i = 0 To UBound(aExceptPostNum)
+                If num = aExceptPostNum(i) Then
+                    checkIsNeedPostNum = False
+                    Exit Function
+                End If
+            Next
+            checkIsNeedPostNum = True
+        End Function
+
         Sub seqPlus()
             iSeq = iSeq + 1
             If iSeq = 3 Then iSeq = 0
@@ -65,12 +81,12 @@ End Sub
                 Case 0
                     object.PostNum = str
                 Case 1
-                    object.UserID = str
+                    object.PostUser = str
                 Case 2
-                    str = Mid(str, 13)
+                    str = LTrim(str)
                     Call checkArrayForBubble(str)
                     Call removeHtmlStr(str)
-                    object.MsgStr = str
+                    object.PostMsg = str
             End Select
         End Sub
 
@@ -87,10 +103,10 @@ End Sub
             Dim oTxt, i
             Set oTxt = Fso.OpenTextFile(uOriginMsgTxtPath, 8, False, True)
 
-            For i = 0 To vaAllPostInfo.Length
+            For i = 0 To vaAllPostInfo.Bound
                 oTxt.WriteLine(vaAllPostInfo.V(i).PostNum)
-                oTxt.WriteLine(vaAllPostInfo.V(i).UserID)
-                oTxt.WriteLine(vaAllPostInfo.V(i).MsgStr)
+                oTxt.WriteLine(vaAllPostInfo.V(i).PostUser)
+                oTxt.WriteLine(vaAllPostInfo.V(i).PostMsg)
                 oTxt.WriteLine()
             Next
 
