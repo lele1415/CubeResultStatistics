@@ -6,35 +6,24 @@ function createXmlHttp() {
     } 
 } 
 
-function getUrl() {
-    var url = document.getElementById("url").value;
-    return url;
-}
-
-function getSource(url) { 
+function getSourceJs(url) { 
     createXmlHttp();
     xmlHttp.onreadystatechange = writeSource;
     xmlHttp.open("GET", url, true); 
     xmlHttp.send(null); 
 } 
 
+function getNextSourceJs(url) {
+    xmlHttp.onreadystatechange = writeSource;
+    xmlHttp.open("GET", url, true); 
+    xmlHttp.send(null);
+}
+
 function writeSource() { 
     if (xmlHttp.readyState == 4) { 
-        writePageCodeToTxt(xmlHttp.responseText);
+        receiveCode(xmlHttp.responseText);
     } 
 } 
-
-function getValueById(id) {
-    return document.getElementById(id).value;
-}
-
-function setInnerHtmlById(id, text) {
-	document.getElementById(id).innerHTML = text;
-}
-
-function setValueById(id, value) {
-    document.getElementById(id).value = value;
-}
 
 function option_creat(optionValue, optionInnerHTML)
 {

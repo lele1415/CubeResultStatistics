@@ -2,56 +2,70 @@
 '*************************************************
 '****get code from Pages, and write into text file.
 '*************************************************
-Function getPagesCode()
-    initTxtFile(uCodeTxtPath)
-    'getCode(getUrl())
-    getSource(getUrl())
-    setInnerHtmlById "PageNum_id", 1
-    Sleep(1000)
+Sub getPagesCode()
+    rootUrl = getElementValue(ID_URL)
 
-    Dim iMaxPageNum, sUrl, i
-    iMaxPageNum = getStrInTextFile(uCodeTxtPath, "total_page", "total_page"":", "};")
-    If IsNumeric(iMaxPageNum) Then
-        For i = 2 To iMaxPageNum
-            sUrl = getUrl() & "?pn=" & i
-            'getCode(sUrl)
-            getSource(sUrl)
-            setInnerHtmlById "PageNum_id", i
-            Sleep(1000)
-        Next
-        'Sleep(1000)
-        'getMsgArrayFromCode(0)
-        Msgbox("Done!")
-    Else
-        Msgbox("Fail! iMaxPageNum=" & iMaxPageNum)
-    End If
-End Function
+    Call initTxtFile(uPagesCodeFile)
+    Set oTxtPagesCode = Fso.OpenTextFile(uPagesCodeFile, 8, False, True)
 
-        Sub Sleep(MSecs)  
-            Dim fso
-            Dim objOutputFile
+    '//get first page code
+    Call getSourceJs(rootUrl)
+    Call waitForGetCode()
 
-            Set fso = CreateObject("Scripting.FileSystemObject") 
-            If Fso.FileExists(uSleepVbsPath)=False Then 
-                Set objOutputFile = fso.CreateTextFile(uSleepVbsPath, True) 
-                objOutputFile.Write "wscript.sleep WScript.Arguments(0)" 
-                objOutputFile.Close 
-            End If 
-             CreateObject("WScript.Shell").Run uSleepVbsPath & " " & MSecs, 1 , True 
+    If Not checkMaxPageNum() Then Exit Sub
+
+    '//get other pages code
+    Dim i
+    For i = 2 To iMaxPageNum
+        Call getNextPageCode()
+        Call waitForGetCode()
+    Next
+    
+    Call oTxtPagesCode.Close
+    Set oTxtPagesCode = Nothing
+    Msgbox("Done!")
+End Sub
+
+        Sub receiveCode(sCode)
+            Call oTxtPagesCode.Write(sCode)
+            Call setInnerHtml("PageNum_id", iCrtPageNum)
+
+            If iMaxPageNum = 0 Then
+                iMaxPageNum = cutStrWithHeadEndStr(sCode, "total_page"":", "};")
+            End If
+
+            bGetCodeDone = True
         End Sub
 
-        Function getCode(url)
-            Dim xmlHTTP
-            Set xmlHTTP = CreateObject("MSXML2.ServerXMLHTTP")
-            xmlHTTP.open "GET", url
-            xmlHttp.send
-            writePageCodeToTxt(xmlHttp.responseText)
-            Set xmlHTTP = Nothing
-        End Function
+        Sub getNextPageCode()
+            bGetCodeDone = False
+            iCrtPageNum = iCrtPageNum + 1
 
-        Function writePageCodeToTxt(responseText)
-            Set oTxt = Fso.OpenTextFile(uCodeTxtPath, 8, False, True)
-            oTxt.Write(responseText)
-            oTxt.Close
-            Set oTxt = Nothing
+            Call getNextSourceJs(rootUrl & "?pn=" & iCrtPageNum)
+        End Sub
+
+        Sub waitForGetCode()
+            Do While True
+                If bGetCodeDone Then
+                    Exit Do
+                Else
+                    Sleep(100)
+                End If
+            Loop
+        End Sub
+
+        Function checkMaxPageNum()
+            If Not (IsNumeric(iMaxPageNum)) Then
+                Msgbox("iMaxPageNum is not number! iMaxPageNum=" & iMaxPageNum)
+                checkMaxPageNum = False
+                Exit Function
+            End If
+
+            If iMaxPageNum < 2 Then
+                Msgbox("iMaxPageNum < 2 iMaxPageNum=" & iMaxPageNum)
+                checkMaxPageNum = False
+                Exit Function
+            End If
+
+            checkMaxPageNum = True
         End Function

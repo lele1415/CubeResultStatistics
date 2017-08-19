@@ -6,7 +6,7 @@ Function getMsgArrayFromCode()
     aPostNum = getArrayFromTxt("post_no&quot", "post_no&quot", 14, ",", -1)
     aUserText = getArrayFromTxt("alog-group=""p_author""", "_blank", 8, "</a>", -1)
     aMessageText = getArrayFromTxt("j_d_post_content", "j_d_post_content", 40, "user-hide-post-down", -32)
-    iCompNum = getStrInTextFile(uCodeTxtPath, "<title>", "第", "期")
+    iCompNum = getStrInTextFile(uPagesCodeFile, "<title>", "第", "期")
     bContinue = True
 
     checkArrayForBubble()
@@ -42,7 +42,7 @@ End Function
 
         Function getArrayFromTxt(sSearch, sCutBegin, iPlusNumToBegin, sCutEnd, iPlusNumToEnd)
             Dim oTxt, sReadLine, aGet(), iCount
-            Set oTxt = Fso.OpenTextFile(uCodeTxtPath, 1, False, True)
+            Set oTxt = Fso.OpenTextFile(uPagesCodeFile, 1, False, True)
             iCount = 0
 
             Do Until oTxt.AtEndOfStream

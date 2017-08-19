@@ -54,11 +54,11 @@ Function showResult(slistId)
     seqOfShowingResult = document.getElementById(slistId).value
     listOfShowingResult = slistId
 
-    setInnerHtmlById "showResult_post_id", aAllPostName(seqOfShowingResult)
-    setInnerHtmlById "showResult_user_id", aAllUserText(seqOfShowingResult)
-    setValueById "showResult_opt_id", aAllOptName(seqOfShowingResult)
-    setInnerHtmlById "showResult_msg_id", aAllMessageText(seqOfShowingResult)
-    setInnerHtmlById "showResult_rst_id", aAllPureResults(seqOfShowingResult)
+    Call setInnerHtml("showResult_post_id", aAllPostName(seqOfShowingResult))
+    Call setInnerHtml("showResult_user_id", aAllUserText(seqOfShowingResult))
+    Call setElementValue("showResult_opt_id", aAllOptName(seqOfShowingResult))
+    Call setInnerHtml("showResult_msg_id", aAllMessageText(seqOfShowingResult))
+    Call setInnerHtml("showResult_rst_id", aAllPureResults(seqOfShowingResult))
 End Function
 
 Function submitNewMessageText()

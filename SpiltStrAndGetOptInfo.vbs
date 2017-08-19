@@ -12,7 +12,7 @@ Function spiltStrAndGetOptInfo()
     ReDim aOptInfo(1,0)
     For i = 0 To iOriginDataArrayLength
         If checkPostNumIsNeed(aPostNum(i)) And checkUserIsNeed(aUserText(i)) Then
-            setInnerHtmlById "postNum_id", aPostNum(i)
+            Call setInnerHtml("postNum_id", aPostNum(i))
             
             Dim iOptCount, aSplitMessageText, bGetOptName
             iOptCount = 0
@@ -110,7 +110,7 @@ End Function
 
         Function checkPostNumIsNeed(iPostNum)
             Dim exceptPostNumList, flag
-            exceptPostNumList = Split(getValueById("exceptPostNum_id"), " ")
+            exceptPostNumList = Split(getElementValue("exceptPostNum_id"), " ")
             flag = True
             For i = 0 To safeUBound(exceptPostNumList, "checkPostNumIsNeed", 1)
                 If iPostNum = exceptPostNumList(i) Then
@@ -123,7 +123,7 @@ End Function
 
         Function checkUserIsNeed(name)
             Dim exceptNameList, flag
-            exceptNameList = Split(getValueById("except_name_id"), " ")
+            exceptNameList = Split(getElementValue("except_name_id"), " ")
             flag = True
             For i = 0 To safeUBound(exceptNameList, "checkUserIsNeed", 1)
                 If name = exceptNameList(i) Then

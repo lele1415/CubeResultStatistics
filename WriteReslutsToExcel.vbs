@@ -2,10 +2,9 @@
 '****write final result into excel file.
 '*************************************************
 Function writeReslutsToExcel()
-    Dim folderPath, oldFilePath, newFilePath
-    folderPath = ws.CurrentDirectory & "\allResults\"
-    oldFilePath = folderPath & (iCompNum - 1) & ".xlsx"
-    newFilePath = folderPath & iCompNum & ".xlsx"
+    Dim oldFilePath, newFilePath
+    oldFilePath = uAllResultFolder & (iCompNum - 1) & ".xlsx"
+    newFilePath = uAllResultFolder & iCompNum & ".xlsx"
     If Fso.FileExists(oldFilePath) And Not Fso.FileExists(newFilePath) Then
         Fso.CopyFile oldFilePath, newFilePath, False
 

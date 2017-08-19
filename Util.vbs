@@ -7,13 +7,24 @@ Dim ws, Fso
 Set ws=CreateObject("wscript.shell")
 Set Fso=CreateObject("Scripting.FileSystemObject")
 
-Dim uSleepVbsPath, uCodeTxtPath, uOriginMsgTxtPath, uRecordTxt, uValidResultTxt
-uSleepVbsPath = ws.CurrentDirectory&"\sleep.vbs"
-uCodeTxtPath = ws.CurrentDirectory&"\tmpFiles\code.txt"
-uOriginMsgTxtPath = ws.CurrentDirectory&"\tmpFiles\OriginMsg.txt"
-uRecordTxt = ws.CurrentDirectory&"\tmpFiles\record.txt"
-uValidResultTxt = ws.CurrentDirectory&"\tmpFiles\validResult.txt"
-uInvalidResultTxt = ws.CurrentDirectory&"\tmpFiles\invalidResult.txt"
+Dim CrtPath : CrtPath = ws.CurrentDirectory
+
+Dim uSleepVbsPath, uPagesCodeFile, uOriginMsgTxtPath, uRecordTxt, uValidResultTxt
+uSleepVbsPath = CrtPath & "\sleep.vbs"
+uPagesCodeFile = CrtPath & "\tmpFiles\code.txt"
+uOriginMsgTxtPath = CrtPath & "\tmpFiles\OriginMsg.txt"
+uRecordTxt = CrtPath & "\tmpFiles\record.txt"
+uValidResultTxt = CrtPath & "\tmpFiles\validResult.txt"
+uInvalidResultTxt = CrtPath & "\tmpFiles\invalidResult.txt"
+uAllResultFolder = CrtPath & "\allResults\"
+
+Const ID_URL = "url"
+
+Dim iCrtPageNum : iCrtPageNum = 1
+Dim iMaxPageNum : iMaxPageNum = 0
+DIm oTxtPagesCode
+Dim bGetCodeDone : bGetCodeDone = False
+Dim rootUrl
 
 Dim countResultData, countNoResultData, brResultCount, iCompNum, countExcelRow, seqOfShowingResult, listOfShowingResult
 countResultData = 0
@@ -143,7 +154,18 @@ Function getOptCheckStrArray(OptName)
     End Select
 End Function
 
+Sub Sleep(MSecs)  
+            Dim fso
+            Dim objOutputFile
 
+            Set fso = CreateObject("Scripting.FileSystemObject") 
+            If Fso.FileExists(uSleepVbsPath)=False Then 
+                Set objOutputFile = fso.CreateTextFile(uSleepVbsPath, True) 
+                objOutputFile.Write "wscript.sleep WScript.Arguments(0)" 
+                objOutputFile.Close 
+            End If 
+             CreateObject("WScript.Shell").Run uSleepVbsPath & " " & MSecs, 1 , True 
+        End Sub
 
 Function initTxtFile(FilePath)
     If Fso.FileExists(FilePath) Then
@@ -154,3 +176,15 @@ Function initTxtFile(FilePath)
     End If    
     Fso.CreateTextFile FilePath, True
 End Function
+
+Function getElementValue(elementId)
+    getElementValue = document.getElementById(elementId).value
+End Function
+
+Sub setElementValue(value)
+    document.getElementById(elementId).value = value
+End Sub
+
+Sub setInnerHtml(elementId, text)
+    document.getElementById(elementId).innerHTML = text
+End Sub
