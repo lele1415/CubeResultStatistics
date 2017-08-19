@@ -101,6 +101,7 @@ Set Fso=CreateObject("Scripting.FileSystemObject")
 codeTxtPath = ws.CurrentDirectory&"\temp.txt"
 resultTxtPath = ws.CurrentDirectory&"\result.txt"
 noResultTxtPath = ws.CurrentDirectory&"\noResult.txt"
+recordTxtPath = ws.CurrentDirectory&"\record.txt"
 countResultData = 0
 Dim floorDataNoResult(), userNameDataNoResult(), projectDataNoResult(), countNoResultData
 countNoResultData = 0
@@ -1007,7 +1008,7 @@ End Function
         End Function
 
         Function writeAllProjectResult(ExcelSheet, userNameArray, resultArray, projectName)
-            Dim strResultArray, rankNum
+            Dim strResultArray, rankNum, avgRecordFlag, bestRecordFlag
             rankNum = 0
             countExcelRow = countExcelRow + 1
             For i = 1 To 9
@@ -1022,7 +1023,7 @@ End Function
                 ExcelSheet.Cells(countExcelRow, i).Font.Color = RGB(255,255,255)
             Next
 
-            ExcelSheet.Cells(countExcelRow, 1).Value = projectName
+            ExcelSheet.Cells(countExcelRow, 1).Value = getFinalProjectName(projectName)
             ExcelSheet.Cells(countExcelRow, 2).Value = "ID"
             ExcelSheet.Cells(countExcelRow, 3).Value = "最好成绩"
             ExcelSheet.Cells(countExcelRow, 4).Value = "平均成绩"
@@ -1037,6 +1038,8 @@ End Function
                 rankNum = rankNum + 1
                 If resultArray(i) <> "" Then
                     strResultArray = Split(resultArray(i), " ")
+                    bestRecordFlag = compareToRecord(projectName, strResultArray(1), False)
+                    avgRecordFlag = compareToRecord(projectName, strResultArray(0), True)
                 Else
                     ReDim strResultArray(4)
                 End If
@@ -1065,6 +1068,13 @@ End Function
                         ExcelSheet.Cells(countExcelRow, j).Interior.Color = RGB(230,230,230)
                     End If
                 Next
+
+                If bestRecordFlag Then
+                    ExcelSheet.Cells(countExcelRow, 3).Interior.Color = RGB(255,192,0)
+                End If
+                If avgRecordFlag Then
+                    ExcelSheet.Cells(countExcelRow, 4).Interior.Color = RGB(255,192,0)
+                End If
 
                 ExcelSheet.Cells(countExcelRow, 1).Value = rankNum
                 ExcelSheet.Cells(countExcelRow, 2).Value = userNameArray(i)
@@ -1141,6 +1151,21 @@ Function getAllProjectName()
     getAllProjectName = tmpArray
 End Function
 
+Function getFinalProjectName(projectName)
+    Dim oldProjectNameArray, newProjectNameArray, finalProjectName
+    oldProjectNameArray = getAllProjectName()
+    newProjectNameArray = Array("三阶","四阶","五阶","二阶","三盲","三单","最少步","五魔","金字塔","SQ-1","魔表","斜转","六阶","七阶")
+
+    For i = 0 To UBound(oldProjectNameArray)
+        If projectName = oldProjectNameArray(i) Then
+            finalProjectName = newProjectNameArray(i)
+            Exit For
+        End If
+    Next
+
+    getFinalProjectName = finalProjectName
+End Function
+
 Function getProjectCheckStrArray(projectName)
     checkStrArray_333 = Array("beginFlag333 "," 333 ","三阶","3阶","三速","3速")
     checkStrArray_444 = Array("beginFlag444"," 444","四阶","4阶","四速","4速")
@@ -1187,6 +1212,42 @@ Function getProjectCheckStrArray(projectName)
         Case "sk"
             getProjectCheckStrArray = checkStrArray_sk
     End Select
+End Function
+
+Function compareToRecord(projectName, result, isAvg)
+    Dim projectNameArray, count, oTxt, recordStrLine, recordStrArray, recordFloat
+    projectNameArray = getAllProjectName()
+    Set oTxt = Fso.OpenTextFile(recordTxtPath, 1)
+
+    For i = 0 To UBound(projectNameArray)
+        If projectName = projectNameArray(i) Then
+            count = i
+            Exit For
+        End If
+    Next
+
+    i = 0
+    Do Until oTxt.AtEndOfStream
+        recordStrLine = oTxt.ReadLine
+        If i = count Then
+            Exit Do
+        End If
+        i = i + 1
+    Loop
+
+    recordStrArray = Split(recordStrLine, " ")
+
+    If isAvg Then
+        recordFloat = changeResult(recordStrArray(2)) + 0
+    Else
+        recordFloat = changeResult(recordStrArray(1)) + 0
+    End If
+
+    If (changeResult(result) + 0) <= recordFloat Then
+        compareToRecord = True
+    Else
+        compareToRecord = False
+    End If
 End Function
 
 Function sortIntArray(intString)
