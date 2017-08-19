@@ -5,6 +5,15 @@
 '//      1. 解决成绩间隔不同时可能产生顺序错乱的问题
 '//          checkCloseNum中的Else部分缺少"Exit For"
 '//  
+'//  20170102
+'//      1. 增加去重功能（ID和项目相同）
+'//      2. 按项目排序后的成绩写入txt文件
+'//  
+'//  遗留问题    
+'//      1. 有DNF的时候，不同长度的成绩获取错乱
+'//      2. 缺少实时保存已处理成绩的功能
+'//      3. 缺少手动删除错误成绩的功能
+'//  
 '//-->
 
 <Html>
@@ -109,6 +118,7 @@ codeTxtPath = ws.CurrentDirectory&"\temp.txt"
 resultTxtPath = ws.CurrentDirectory&"\result.txt"
 noResultTxtPath = ws.CurrentDirectory&"\noResult.txt"
 recordTxtPath = ws.CurrentDirectory&"\record.txt"
+sortedResultPath = ws.CurrentDirectory&"\sortedResult.txt"
 countResultData = 0
 Dim floorDataNoResult(), userNameDataNoResult(), projectDataNoResult(), countNoResultData
 countNoResultData = 0
@@ -186,6 +196,7 @@ End Function
 '*************************************************
 Function getPagesCode()
     checkTxtFile(codeTxtPath)
+    'getCode(getUrl())
     getSource(getUrl())
     setInnerHtmlById "PageNum_id", 1
     Sleep(1000)
@@ -195,6 +206,7 @@ Function getPagesCode()
     If IsNumeric(MaxPage) Then
         For i = 2 To MaxPage
             url = getUrl() & "?pn=" & i
+            'getCode(url)
             getSource(url)
             setInnerHtmlById "PageNum_id", i
             Sleep(1000)
@@ -248,6 +260,15 @@ End Function
             Else
                 Msgbox("Not found """ & strSearch & """")
                 getInfoFromTxt = ""
+            End If
+        End Function
+
+        Function getCode(url)
+            If url&"a"<>"a" then
+                set xhp=createobject("microsoft.xmlhttp")
+                xhp.open "get",url,false
+                xhp.send
+                writeToTxt(xhp.responseText)
             End If
         End Function
 
@@ -997,6 +1018,7 @@ Function sortAllResults()
 End Function
 
         Function sortByProject()
+            checkTxtFile(sortedResultPath)
             Dim allProjectArray, tmpUserNameData(), tmpResultData()
             allProjectArray = getAllProjectName()
             count = 0
@@ -1064,10 +1086,37 @@ End Function
                         resultData_777 = tmpResultData
                 End Select
             Next
+
+            writeSortedResult userNameData_333, resultData_333
+            writeSortedResult userNameData_444, resultData_444
+            writeSortedResult userNameData_555, resultData_555
+            writeSortedResult userNameData_222, resultData_222
+            writeSortedResult userNameData_333bf, resultData_333bf
+            writeSortedResult userNameData_333oh, resultData_333oh
+            writeSortedResult userNameData_333fm, resultData_333fm
+            writeSortedResult userNameData_py, resultData_py
+            writeSortedResult userNameData_mega, resultData_mega
+            writeSortedResult userNameData_sq, resultData_sq
+            writeSortedResult userNameData_clock, resultData_clock
+            writeSortedResult userNameData_666, resultData_666
+            writeSortedResult userNameData_777, resultData_333
         End Function
+
+            Function writeSortedResult(userNameDataSorted, resultDataSorted)
+                Set oTxt = Fso.OpenTextFile(sortedResultPath, 8)
+                oTxt.WriteLine()
+                For i = 0 To UBound(userNameDataSorted)
+                    oTxt.WriteLine(userNameDataSorted(i))
+                    oTxt.WriteLine(resultDataSorted(i))
+                    oTxt.WriteLine()
+                Next
+                Set oTxt = Nothing
+            End Function
 
         Function sortByAvgResult(userNameArray, resultArray, flag)
             If UBound(resultArray) > 0 Then
+	            checkAndPopSameResult userNameArray, resultArray
+
                 For i = 0 To UBound(resultArray)-1
                     For j = i+1 To UBound(resultArray)
                         If resultArray(i) <> "" And resultArray(j) <> "" Then
@@ -1099,6 +1148,27 @@ End Function
                 Next
             End If
         End Function
+
+            Function checkAndPopSameResult(userNameArray, resultArray)
+                Dim sameResultCount, arrayLen
+                sameResultCount = 0
+                For currentCount = 1 To UBound(userNameArray)
+                    For pastCount = 0 To currentCount-1
+                        If userNameArray(currentCount) = userNameArray(pastCount) Then
+                            MsgBox("[pop]: "&userNameArray(currentCount)&" "&resultArray(currentCount)&vbLf&"[keep]: "&userNameArray(pastCount)&" "&resultArray(pastCount))
+                            coverInArray userNameArray, currentCount
+                            coverInArray resultArray, currentCount
+                            sameResultCount = sameResultCount + 1
+                        End If
+                    Next
+                Next
+
+                If sameResultCount > 0 Then
+                    arrayLen = UBound(userNameArray)
+                    ReDim Preserve userNameArray(arrayLen-sameResultCount)
+                    ReDim Preserve resultArray(arrayLen-sameResultCount)
+                End If
+            End Function
 
 
 
@@ -1587,6 +1657,14 @@ Function sortMultiArray(mulitArray, ub1, ub2, keyNum)
             End If
         Next
     Next
+End Function
+
+Function coverInArray(strArray, count)
+	If count < UBound(strArray) Then
+		For i = count To UBound(strArray)-1
+			strArray(i) = strArray(i+1)
+		Next
+	End If
 End Function
 
 
