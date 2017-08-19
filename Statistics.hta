@@ -27,6 +27,11 @@
 '//  20170402
 '//      1. 解决最少步成绩中有DNF时显示9999.99的问题
 '//  
+'//  20170521
+'//      1. 改为JavaScript方法获取网页源码
+'//      2. 解决网页含有特殊字符时写入txt文件报错的问题
+'//           改为以Unicode格式打开文件
+'//  
 -->
 
 <Html>
@@ -44,7 +49,7 @@
 <br>
 <fieldset>
     <div>排除楼层: <input type="text" id="exceptPostNum_id" value="1 2 3 4" /></div>
-    <div>排除ID: <input type="text" id="except_name_id" value="菜姨惠" /></div>
+    <div>排除ID: <input type="text" id="except_name_id" value="菜姨惠 Destroy绝影" /></div>
     <br>
     <div><input type="button" id="getCode_id" onclick="getMsgArrayFromCode()" value="Get results" /></div>
 </fieldset>

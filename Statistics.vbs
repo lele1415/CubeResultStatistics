@@ -463,7 +463,7 @@ Function initTxtFile(FilePath)
 End Function
 
 Function writePageCodeToTxt(responseText)
-    Set oTxt = Fso.OpenTextFile(uCodeTxtPath,8)
+    Set oTxt = Fso.OpenTextFile(uCodeTxtPath, 8, False, True)
     oTxt.Write(responseText)
     oTxt.Close
     Set oTxt = Nothing
@@ -471,7 +471,7 @@ End Function
 
 Function getInfoFromTxt(strSearch, strStart, numStart, strEnd)
     Dim oTxt, getStrLine, Flag
-    Set oTxt = Fso.OpenTextFile(uCodeTxtPath,1)
+    Set oTxt = Fso.OpenTextFile(uCodeTxtPath, 1, False, True)
     Flag = False
 
     Do Until oTxt.AtEndOfStream
@@ -544,8 +544,8 @@ End Function
 '*************************************************
 Function getPagesCode()
     initTxtFile(uCodeTxtPath)
-    getCode(getUrl())
-    'getSource(getUrl())
+    'getCode(getUrl())
+    getSource(getUrl())
     setInnerHtmlById "PageNum_id", 1
     Sleep(1000)
 
@@ -554,8 +554,8 @@ Function getPagesCode()
     If IsNumeric(iMaxPageNum) Then
         For i = 2 To iMaxPageNum
             sUrl = getUrl() & "?pn=" & i
-            getCode(sUrl)
-            'getSource(sUrl)
+            'getCode(sUrl)
+            getSource(sUrl)
             setInnerHtmlById "PageNum_id", i
             Sleep(1000)
         Next
@@ -635,7 +635,7 @@ End Function
 
         Function getArrayFromTxt(sSearch, sCutBegin, iPlusNumToBegin, sCutEnd, iPlusNumToEnd)
             Dim oTxt, sReadLine, aGet(), iCount
-            Set oTxt = Fso.OpenTextFile(uCodeTxtPath, 1)
+            Set oTxt = Fso.OpenTextFile(uCodeTxtPath, 1, False, True)
             iCount = 0
 
             Do Until oTxt.AtEndOfStream
@@ -668,7 +668,7 @@ End Function
 
         Function saveOriginMsgTxt()
             Dim oTxt
-            Set oTxt = Fso.OpenTextFile(uOriginMsgTxtPath, 8)
+            Set oTxt = Fso.OpenTextFile(uOriginMsgTxtPath, 8, False, True)
 
             For i = 0 To iOriginDataArrayLength
                 oTxt.WriteLine(aPostNum(i))
@@ -935,7 +935,7 @@ Function saveResultToArray(sMessageText, sPureResult, sUserText, iPostNum, sOptN
     iTmpResultCount = iTmpResultCount + 1
 
     Dim oTxt
-    Set oTxt = Fso.OpenTextFile(sTxtPath, 8)
+    Set oTxt = Fso.OpenTextFile(sTxtPath, 8, False, True)
 
     oTxt.WriteLine(iPostNum)
     oTxt.WriteLine(sUserText)

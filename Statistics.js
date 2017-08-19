@@ -20,7 +20,7 @@ function getSource(url) {
 
 function writeSource() { 
     if (xmlHttp.readyState == 4) { 
-        writeToTxt(xmlHttp.responseText);
+        writePageCodeToTxt(xmlHttp.responseText);
     } 
 } 
 
