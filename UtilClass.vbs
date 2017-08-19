@@ -34,17 +34,23 @@ End Class
 
 
 
-Class ResultInfo
-    Private mResultOwner, mResultText, mResultOpt, mPureResults(), mSortedResults(), mBestResult, mAvgResult
+Class ValidResultInfo
+    Private mPostNum, mResultOwner, mResultText, mResultOpt, mPureResults, mSortedResults, mBestResult, mAvgResult
 
     Private Sub Class_Initialize
+        mPostNum = ""
         mResultOwner = ""
         mResultText = ""
-        ReDim Preserve mPureResults(4)
-        ReDim Preserve mSortedResults(4)
+        mResultOpt = ""
+        mPureResults = ""
+        mSortedResults = ""
         mBestResult = ""
         mAvgResult = ""
     End Sub
+
+    Public Property Let PostNum(value)
+        mPostNum = value
+    End Property
 
     Public Property Let ResultOwner(value)
         mResultOwner = value
@@ -58,44 +64,12 @@ Class ResultInfo
         mResultOpt = value
     End Property
 
-    Public Property Let PureResults(newArray)
-        If Not isArray(newArray) Then
-            MsgBox("Error: Let PureResults(newArray) newArray is not array")
-            Exit Property
-        End If
-        Dim i
-        For i = 0 To UBound(newArray)
-            ReDim Preserve mPureResults(i)
-            mPureResults(i) = newArray(i)
-        Next
+    Public Property Let PureResults(value)
+        mPureResults = value
     End Property
 
-    Public Property Let PureResults(seq, value)
-        If seq >= 0 And seq <= 4 Then
-            mPureResults(seq) = value
-        Else
-            MsgBox("Let PureResults: seq is out of bound. seq = " & seq)
-        End If
-    End Property
-
-    Public Property Let SortedResults(newArray)
-        If Not isArray(newArray) Then
-            MsgBox("Error: Let SortedResults(newArray) newArray is not array")
-            Exit Property
-        End If
-        Dim i
-        For i = 0 To UBound(newArray)
-            ReDim Preserve mSortedResults(i)
-            mSortedResults(i) = newArray(i)
-        Next
-    End Property
-
-    Public Property Let SortedResults(seq, value)
-        If seq >= 0 And seq <= 4 Then
-            mSortedResults(seq) = value
-        Else
-            MsgBox("Let SortedResults: seq is out of bound. seq = " & seq)
-        End If
+    Public Property Let SortedResults(value)
+        mSortedResults = value
     End Property
 
     Public Property Let BestResult(value)
@@ -104,6 +78,10 @@ Class ResultInfo
 
     Public Property Let AvgResult(value)
         mAvgResult = value
+    End Property
+
+    Public Property Get PostNum
+        PostNum = mPostNum
     End Property
 
     Public Property Get ResultOwner
@@ -122,24 +100,8 @@ Class ResultInfo
         PureResults = mPureResults
     End Property
 
-    Public Property Get PureResults(seq)
-        If seq >= 0 And seq <= 4 Then
-            PureResults = mPureResults(seq)
-        Else
-            MsgBox("Get PureResults: seq is out of bound. seq = " & seq)
-        End If
-    End Property
-
     Public Property Get SortedResults
         SortedResults = mSortedResults
-    End Property
-
-    Public Property Get SortedResults(seq)
-        If seq >= 0 And seq <= 4 Then
-            SortedResults = mSortedResults(seq)
-        Else
-            MsgBox("Get SortedResults: seq is out of bound. seq = " & seq)
-        End If
     End Property
 
     Public Property Get BestResult
@@ -150,6 +112,90 @@ Class ResultInfo
         AvgResult = mAvgResult
     End Property
 End Class
+
+
+
+Class InvalidResultInfo
+    Private mPostNum, mResultOwner, mResultText, mResultOpt, mPureResults
+
+    Private Sub Class_Initialize
+        mPostNum = ""
+        mResultOwner = ""
+        mResultText = ""
+        mResultOpt = ""
+        mPureResults = ""
+    End Sub
+
+    Public Property Let PostNum(value)
+        mPostNum = value
+    End Property
+
+    Public Property Let ResultOwner(value)
+        mResultOwner = value
+    End Property
+
+    Public Property Let ResultText(value)
+        mResultText = value
+    End Property
+
+    Public Property Let ResultOpt(value)
+        mResultOpt = value
+    End Property
+
+    Public Property Let PureResults(value)
+        mPureResults = value
+    End Property
+
+    Public Property Get PostNum
+        PostNum = mPostNum
+    End Property
+
+    Public Property Get ResultOwner
+        ResultOwner = mResultOwner
+    End Property
+
+    Public Property Get ResultText
+        ResultText = mResultText
+    End Property
+
+    Public Property Get ResultOpt
+        ResultOpt = mResultOpt
+    End Property
+
+    Public Property Get PureResults
+        PureResults = mPureResults
+    End Property
+End Class
+
+
+
+'Class OptName
+'    Private mOfficialName, mOtherNames()
+'
+'    Public Property Let OfficialName(value)
+'        mOfficialName = value
+'    End Property
+'
+'    Public Property Let OtherNames(newArray)
+'        If Not isArray(newArray) Then
+'            MsgBox("Error: Let PureResults(newArray) newArray is not array")
+'            Exit Property
+'        End If
+'        Dim i
+'        For i = 0 To UBound(newArray)
+'            ReDim Preserve mOtherNames(i)
+'            mOtherNames(i) = newArray(i)
+'        Next
+'    End Property
+'
+'    Public Property Get OfficialName
+'        OfficialName = mOfficialName
+'    End Property
+'
+'    Public Property Get OtherNames
+'        OtherNames = mOtherNames
+'    End Property
+'End Class
 
 
 
