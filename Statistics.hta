@@ -49,12 +49,31 @@ width=CreateObject("HtmlFile").ParentWindow.Screen.AvailWidth
 Window.MoveTo width-400,300
 Window.ResizeTo 400,240
 
-Dim ws, Fso, codeTxtPath, resultData(), userNameData(), countData
+Dim ws, Fso, codeTxtPath, floorData(), userNameData(), projectData(), resultData(), countResultData
 Set ws=CreateObject("wscript.shell")
 Set Fso=CreateObject("Scripting.FileSystemObject")
 codeTxtPath = ws.CurrentDirectory&"\temp.txt"
-resultTxtPath = ws.CurrentDirectory&"\Test.txt"
-countData = 0
+resultTxtPath = ws.CurrentDirectory&"\result.txt"
+noResultTxtPath = ws.CurrentDirectory&"\noResult.txt"
+countResultData = 0
+Dim floorDataNoResult(), userNameDataNoResult(), projectDataNoResult(), countNoResultData
+countNoResultData = 0
+Dim userNameData_333, resultData_333
+Dim userNameData_444, resultData_444
+Dim userNameData_555, resultData_555
+Dim userNameData_222, resultData_222
+Dim userNameData_333bf, resultData_333bf
+Dim userNameData_333oh, resultData_333oh
+Dim userNameData_333fm, resultData_333fm
+Dim userNameData_py, resultData_py
+Dim userNameData_mega, resultData_mega
+Dim userNameData_sq, resultData_sq
+Dim userNameData_clock, resultData_clock
+Dim userNameData_sk, resultData_sk
+Dim userNameData_666, resultData_666
+Dim userNameData_777, resultData_777
+Dim countExcelRow
+countExcelRow = 0
 
 Sub Sleep(MSecs)  
     Dim fso
@@ -557,12 +576,12 @@ Function getProjectCheckStrArray(projectName)
     checkStrArray_666 = Array("beginFlag666"," 666","<br>666","六阶","六速")
     checkStrArray_777 = Array("beginFlag777"," 777","<br>777","七阶","七速")
     checkStrArray_333bf = Array("三盲","3bf","3BLD")
-    checkStrArray_333oh = Array("三单","3oh","3OH","<br>oh","<br>OH"," oh"," OH")
+    checkStrArray_333oh = Array("三单","3oh","3OH","oh<br>","OH<br>","Oh<br>","oh ","OH ","Oh ")
     checkStrArray_333fm = Array("最少步","最小步","3fm","<br>fm","<br>FM"," fm"," FM")
     checkStrArray_mega = Array("五魔","mega","Mega","七阶","七速")
     checkStrArray_py = Array("塔","py","PY","yramid")
     checkStrArray_sq = Array("SQ","sq","Mega","七阶","七速")
-    checkStrArray_clock = Array("表","clock","clk")
+    checkStrArray_clock = Array(" 表","<br>表","魔表","clock","clk")
     checkStrArray_sk = Array("斜转","sk","SK")
 
     Select Case projectName
@@ -622,6 +641,115 @@ Function getSeqOfProjectInStr(str, projectName)
     getSeqOfProjectInStr = seqFinal
 End Function
 
+Function sortByProject()
+    Dim allProjectArray, tmpUserNameData(), tmpResultData()
+    allProjectArray = getAllProjectName()
+    count = 0
+    
+
+    For i = 0 To UBound(allProjectArray)
+        ReDim Preserve tmpUserNameData(0)
+        ReDim Preserve tmpResultData(0)
+        tmpUserNameData(0) = ""
+        tmpResultData(0) = ""
+        count = 0
+
+        For j = 0 To UBound(userNameData)
+            If projectData(j) = allProjectArray(i) Then
+                ReDim Preserve tmpUserNameData(count)
+                ReDim Preserve tmpResultData(count)
+                tmpUserNameData(count) = userNameData(j)
+                tmpResultData(count) = resultData(j)
+                count = count + 1
+            End If
+        Next
+
+        Select Case allProjectArray(i)
+            Case "333"
+                userNameData_333 = tmpUserNameData
+                resultData_333 = tmpResultData
+            Case "444"
+                userNameData_444 = tmpUserNameData
+                resultData_444 = tmpResultData
+            Case "555"
+                userNameData_555 = tmpUserNameData
+                resultData_555 = tmpResultData
+            Case "222"
+                userNameData_222 = tmpUserNameData
+                resultData_222 = tmpResultData
+            Case "333bf"
+                userNameData_333bf = tmpUserNameData
+                resultData_333bf = tmpResultData
+            Case "333oh"
+                userNameData_333oh = tmpUserNameData
+                resultData_333oh = tmpResultData
+            Case "333fm"
+                userNameData_333fm = tmpUserNameData
+                resultData_333fm = tmpResultData
+            Case "py"
+                userNameData_py = tmpUserNameData
+                resultData_py = tmpResultData
+            Case "mega"
+                userNameData_mega = tmpUserNameData
+                resultData_mega = tmpResultData
+            Case "sq"
+                userNameData_sq = tmpUserNameData
+                resultData_sq = tmpResultData
+            Case "clock"
+                userNameData_clock = tmpUserNameData
+                resultData_clock = tmpResultData
+            Case "sk"
+                userNameData_sk = tmpUserNameData
+                resultData_sk = tmpResultData
+            Case "666"
+                userNameData_666 = tmpUserNameData
+                resultData_666 = tmpResultData
+            Case "777"
+                userNameData_777 = tmpUserNameData
+                resultData_777 = tmpResultData
+        End Select
+    Next
+End Function
+
+Function sortIntArray(intString)
+    Dim i, j, length, tmpStr, tmpArray
+    tmpArray = intString
+    length = UBound(tmpArray)
+    For i=0 to length-1
+        For j=i+1 to length
+            If (tmpArray(i) > tmpArray(j)) Then
+                tmpStr = tmpArray(i)
+                tmpArray(i) = tmpArray(j)
+                tmpArray(j) = tmpStr
+            End If
+        Next
+    Next
+    sortIntArray = tmpArray
+End Function
+
+Function getAvgAndBestResult(strResult)
+    Dim tmpArray,avgAndBestResult(1)
+    tmpArray = split(strResult, " ")
+
+    For i = 0 To UBound(tmpArray)
+        colonInStr = InStr(tmpArray(i), ":")
+        If colonInStr > 0 Then
+            tmpArray(i) = Mid(tmpArray(i), 1, colonInStr-1) * 60 + Mid(tmpArray(i), colonInStr+1)
+        End If
+    Next
+
+    tmpArray = sortIntArray(tmpArray)
+    If UBound(tmpArray) = 5 Then
+        avgAndBestResult(0) = tmpArray(0)
+        avgAndBestResult(1) = Int((tmpArray(1) + tmpArray(2) + tmpArray(3)) *100 / 3) / 100
+    Else
+        avgAndBestResult(0) = tmpArray(0)
+        avgAndBestResult(1) = Int((tmpArray(0) + tmpArray(1) + tmpArray(2)) *100 / 3) / 100
+    End If
+
+    getAvgAndBestResult = avgAndBestResult
+End Function
+
 ''''''''''''''''''''''''''''''''''''''
 
 Function WritePagesCode()
@@ -635,8 +763,8 @@ Function WritePagesCode()
         url = getUrl() & "?pn=" & i
         getSource(url)
     Next
-    'Sleep(1000)
-    'getTextFromCode()
+    Sleep(1000)
+    getTextFromCode()
     Msgbox("Done!")
 End Function
 
@@ -659,27 +787,33 @@ End Function
 
 Function getCleanResult(strResultArray, strUserNameArray, countStart)
     checkTxtFile(resultTxtPath)
+    checkTxtFile(noResultTxtPath)
     'addProjectName("333")
-    Dim allProjectArray, seqProjectInStr
+    Dim allProjectArray, seqProjectInStr, flag
 
     For i = countStart+1 To UBound(strResultArray)
         allProjectArray = getAllProjectName()
+        flag = True
         For j = 0 To UBound(allProjectArray)
             seqProjectInStr = getSeqOfProjectInStr(strResultArray(i), allProjectArray(j))
             If seqProjectInStr <> "" Then
-                getStrResult strResultArray(i), strUserNameArray(i), seqProjectInStr, allProjectArray(j)
+                getStrResult strResultArray(i), strUserNameArray(i), seqProjectInStr, allProjectArray(j), i
+                flag = False
             End If
         Next
+        If flag Then
+            getStrResult strResultArray(i), strUserNameArray(i), "", "", i
+        End If
     Next
 
-    writeResultToExcel resultData, userNameData
+    writeToExcel()
     Msgbox("OK")
 End Function
 
-Function getStrResult(str, strUserName, countCheck, projectName)
+Function getStrResult(str, strUserName, countCheck, projectName, floorNum)
     If countCheck <> "" Then
         Dim finalResultArray, strResult, j, numResult
-        strResult = projectName
+        strResult = ""
         numResult = 5
 
         If (projectName = "333bf") Or (projectName = "333fm") Then
@@ -692,59 +826,90 @@ Function getStrResult(str, strUserName, countCheck, projectName)
             strResult = strResult & " " & finalResultArray(j)
         Next
 
-        saveResult str, strResult, strUserName
+        strResult = Trim(strResult)
+
+        saveResult str, strResult, strUserName, floorNum, projectName
+    Else
+        saveResult str, "", strUserName, floorNum, ""
     End If
 End Function
 
-Function saveResult(str, strResult, strUserName)
+Function saveResult(str, strResult, strUserName, floorNum, projectName)
     Dim oTxt
-    Set oTxt = Fso.OpenTextFile(resultTxtPath, 8)
+    If strResult <> "" Then
+        Set oTxt = Fso.OpenTextFile(resultTxtPath, 8)
 
-    ReDim Preserve userNameData(countData)
-    ReDim Preserve resultData(countData)
-    userNameData(countData) = strUserName
-    resultData(countData) = strResult
-    countData = countData + 1
+        ReDim Preserve floorData(countResultData)
+        ReDim Preserve userNameData(countResultData)
+        ReDim Preserve projectData(countResultData)
+        ReDim Preserve resultData(countResultData)
+        floorData(countResultData) = floorNum & "楼"
+        userNameData(countResultData) = strUserName
+        projectData(countResultData) = projectName
+        resultData(countResultData) = strResult
 
-    oTxt.WriteLine(str)
-    oTxt.WriteLine(strResult)
-    oTxt.WriteLine()
-    oTxt.WriteLine()
+        oTxt.WriteLine(floorData(countResultData))
+        oTxt.WriteLine(str)
+        oTxt.WriteLine(userNameData(countResultData))
+        oTxt.WriteLine(projectData(countResultData))
+        oTxt.WriteLine(resultData(countResultData))
+        oTxt.WriteLine()
+        oTxt.WriteLine()
 
+        countResultData = countResultData + 1
+    Else
+        Set oTxt = Fso.OpenTextFile(noResultTxtPath, 8)
+        ReDim Preserve floorDataNoResult(countNoResultData)
+        ReDim Preserve userNameDataNoResult(countNoResultData)
+        ReDim Preserve projectDataNoResult(countNoResultData)
+        floorDataNoResult(countNoResultData) = floorNum & "楼"
+        userNameDataNoResult(countNoResultData) = strUserName
+        projectDataNoResult(countNoResultData) = projectName
+
+        oTxt.WriteLine(floorDataNoResult(countNoResultData))
+        oTxt.WriteLine(str)
+        oTxt.WriteLine(userNameDataNoResult(countNoResultData))
+        oTxt.WriteLine(projectDataNoResult(countNoResultData))
+        oTxt.WriteLine()
+        oTxt.WriteLine()
+    End If
     Set oTxt = Nothing
 End Function
 
 Function addProjectName(projectName)
-    countData = countData + 1
-    ReDim Preserve userNameData(countData)
-    ReDim Preserve resultData(countData)
-    userNameData(countData-1) = ""
-    resultData(countData-1) = ""
-    userNameData(countData) = projectName
-    resultData(countData) = ""
-    countData = countData + 1
+    countResultData = countResultData + 1
+    ReDim Preserve userNameData(countResultData)
+    ReDim Preserve resultData(countResultData)
+    userNameData(countResultData-1) = ""
+    resultData(countResultData-1) = ""
+    userNameData(countResultData) = projectName
+    resultData(countResultData) = ""
+    countResultData = countResultData + 1
 End Function
 
-Function writeResultToExcel(strResult, strUserName)
-    Dim ExcelApp, ExcelBook, ExcelSheet, strResultArray
+Function writeToExcel()
+    sortByProject()
+    Dim ExcelApp, ExcelBook, ExcelSheet
     Set ExcelApp = CreateObject("Excel.Application")
     Set ExcelBook= ExcelApp.Workbooks.Open(ws.CurrentDirectory&"\result.xlsx")
     Set ExcelSheet = ExcelBook.Sheets("Sheet1")
 
     ExcelSheet.Columns("A:G").NumberFormatLocal = "@"
 
-    For i = 0 To UBound(strResult)
-        If strResult(i) <> "" Then
-            strResultArray = Split(strResult(i), " ")
-        Else
-            ReDim strResultArray(4)
-        End If
-
-        ExcelSheet.Cells(i+2,1).Value = strUserName(i)
-        For j = 0 To UBound(strResultArray)
-            ExcelSheet.Cells(i+2,j+2).Value = strResultArray(j)
-        Next
-    Next
+    writeAllProjectResult ExcelSheet, userNameData_333, resultData_333, "333"
+    writeAllProjectResult ExcelSheet, userNameData_444, resultData_444, "444"
+    writeAllProjectResult ExcelSheet, userNameData_555, resultData_555, "555"
+    writeAllProjectResult ExcelSheet, userNameData_222, resultData_222, "222"
+    writeAllProjectResult ExcelSheet, userNameData_333bf, resultData_333bf, "333bf"
+    writeAllProjectResult ExcelSheet, userNameData_333oh, resultData_333oh, "333oh"
+    writeAllProjectResult ExcelSheet, userNameData_333fm, resultData_333fm, "333fm"
+    writeAllProjectResult ExcelSheet, userNameData_py, resultData_py, "py"
+    writeAllProjectResult ExcelSheet, userNameData_mega, resultData_mega, "mega"
+    writeAllProjectResult ExcelSheet, userNameData_sq, resultData_sq, "sq"
+    writeAllProjectResult ExcelSheet, userNameData_clock, resultData_clock, "clock"
+    writeAllProjectResult ExcelSheet, userNameData_sk, resultData_sk, "sk"
+    writeAllProjectResult ExcelSheet, userNameData_666, resultData_666, "666"
+    writeAllProjectResult ExcelSheet, userNameData_777, resultData_777, "777"
 
     ExcelBook.Save
     ExcelBook.Close
@@ -752,6 +917,29 @@ Function writeResultToExcel(strResult, strUserName)
     Set ExcelSheet = Nothing
     Set ExcelBook = Nothing
     Set ExcelApp = Nothing
+End Function
+
+Function writeAllProjectResult(ExcelSheet, userNameArray, resultArray, projectName)
+    Dim strResultArray
+    ExcelSheet.Cells(countExcelRow+1, 1).Value = projectName
+    countExcelRow = countExcelRow + 1
+
+    For i = 0 To UBound(resultArray)
+        If resultArray(i) <> "" Then
+            strResultArray = Split(resultArray(i), " ")
+        Else
+            ReDim strResultArray(4)
+        End If
+
+        ExcelSheet.Cells(countExcelRow+1, 1).Value = userNameArray(i)
+        For j = 0 To UBound(strResultArray)
+            ExcelSheet.Cells(countExcelRow+1,j+2).Value = strResultArray(j)
+        Next
+
+        countExcelRow = countExcelRow + 1
+    Next
+
+    countExcelRow = countExcelRow + 1
 End Function
 
 </Script>
