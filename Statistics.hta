@@ -58,20 +58,20 @@ noResultTxtPath = ws.CurrentDirectory&"\noResult.txt"
 countResultData = 0
 Dim floorDataNoResult(), userNameDataNoResult(), projectDataNoResult(), countNoResultData
 countNoResultData = 0
-Dim userNameData_333, avgResultData_333, bestResultData_333, resultData_333
-Dim userNameData_444, avgResultData_444, bestResultData_444, resultData_444
-Dim userNameData_555, avgResultData_555, bestResultData_555, resultData_555
-Dim userNameData_222, avgResultData_222, bestResultData_222, resultData_222
-Dim userNameData_333bf, avgResultData_333bf, bestResultData_333bf, resultData_333bf
-Dim userNameData_333oh, avgResultData_333oh, bestResultData_333oh, resultData_333oh
-Dim userNameData_333fm, avgResultData_333fm, bestResultData_333fm, resultData_333fm
-Dim userNameData_py, avgResultData_py, bestResultData_py, resultData_py
-Dim userNameData_mega, avgResultData_mega, bestResultData_mega, resultData_mega
-Dim userNameData_sq, avgResultData_sq, bestResultData_sq, resultData_sq
-Dim userNameData_clock, avgResultData_clock, bestResultData_clock, ResultData_clock
-Dim userNameData_sk, avgResultData_sk, bestResultData_sk, resultData_sk
-Dim userNameData_666, avgResultData_666, bestResultData_666, resultData_666
-Dim userNameData_777, avgResultData_777, bestResultData_777, resultData_777
+Dim userNameData_333, resultData_333
+Dim userNameData_444, resultData_444
+Dim userNameData_555, resultData_555
+Dim userNameData_222, resultData_222
+Dim userNameData_333bf, resultData_333bf
+Dim userNameData_333oh, resultData_333oh
+Dim userNameData_333fm, resultData_333fm
+Dim userNameData_py, resultData_py
+Dim userNameData_mega, resultData_mega
+Dim userNameData_sq, resultData_sq
+Dim userNameData_clock, ResultData_clock
+Dim userNameData_sk, resultData_sk
+Dim userNameData_666, resultData_666
+Dim userNameData_777, resultData_777
 Dim countExcelRow
 countExcelRow = 0
 
@@ -104,6 +104,7 @@ Function getPagesCode()
     For i = 2 To MaxPage
         url = getUrl() & "?pn=" & i
         getSource(url)
+        Sleep(1000)
     Next
     Sleep(1000)
     getTextFromCode()
@@ -154,7 +155,7 @@ Function getTextFromCode()
     tmpStrResult = getArrayFromTxt("j_d_post_content", "j_d_post_content", 40, "user-hide-post-down", -31)
     strResult = checkStrArrayForBubble(tmpStrResult)
     strUserName = getArrayFromTxt("p_author_name", "_blank", 8, "</a>", 0)
-    strFloorNum = getShortStrFromTxt("post_no", "post_no", 14, 4, ",")
+    strFloorNum = getShortStrFromTxt("post_no&quot", "post_no&quot", 14, 4, ",")
     For i = 0 to UBound(strUserName)
         If (strUserName(i) = "魔方英语会计学") AND (Instr(strResult(i),"--完--") > 0) Then
             countStart = i
@@ -199,10 +200,6 @@ End Function
                     tmpStr = cutStrWithKey(tmpStr, "png", 6, "</div>", 0)
                 End If
 
-                If InStr(tmpStr,"<img class=") > 0 Then
-                    tmpStr = cutStrWithKey(tmpStr, "", 0, "<img class=", 0)
-                End If
-
                 ReDim Preserve tmpArray(i)
                 tmpArray(i) = tmpStr
             Next
@@ -241,7 +238,7 @@ Function dealOriginStr(strResultArray, strUserNameArray, strFloorNum, countStart
     checkTxtFile(noResultTxtPath)
     Dim allProjectArray, seqProjectInStr, flag
 
-    For i = countStart+1 To UBound(strResultArray)
+    For i = 0 To UBound(strResultArray)
         allProjectArray = getAllProjectName()
         flag = True
         For j = 0 To UBound(allProjectArray)
@@ -252,11 +249,11 @@ Function dealOriginStr(strResultArray, strUserNameArray, strFloorNum, countStart
             End If
         Next
         If flag Then
-            getAndDealResult strResultArray(i), strUserNameArray(i), "", "", i
+            getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), "", ""
         End If
     Next
 
-    writeToExcel()
+    'writeToExcel()
     Msgbox("OK")
 End Function
 
@@ -296,45 +293,88 @@ Function getAndDealResult(str, strUserName, floorNum, countCheck, projectName)
         strResult = ""
         numResult = 5
 
-        If (projectName = "333bf") Or (projectName = "333fm") Then
+        If (projectName = "333bf") Or (projectName = "333fm") Or (projectName = "666") Or (projectName = "777") Then
             numResult = 3
         End If
 
         finalResultArray = getArrayResult(str, countCheck, numResult, projectName)
 
-        avgAndBestResult = getAvgAndBestResult(finalResultArray)
-        avgResult = avgAndBestResult(0)
-        bestResult = avgAndBestResult(1)
+        If UBound(finalResultArray) > 0 Then
+            avgAndBestResult = getAvgAndBestResult(finalResultArray)
+            avgResult = avgAndBestResult(0)
+            bestResult = avgAndBestResult(1)
 
-        For j = 0 To numResult-1
-            strResult = strResult & " " & finalResultArray(j)
-        Next
+            If projectName = "333fm" Then
+                avgResult = FormatNumber(avgResult, 0, , , 0)
+                bestResult = FormatNumber(bestResult, 0, , , 0)
+            End If
 
-        strResult = Trim(strResult)
+            strResult = avgResult & " " & bestResult
 
-        saveResult str, avgResult, bestResult, strResult, strUserName, floorNum, projectName
+            For j = 0 To UBound(finalResultArray)
+                strResult = strResult & " " & finalResultArray(j)
+            Next
+
+            strResult = Trim(strResult)
+        Else
+            avgResult = ""
+            bestResult = ""
+            strResult = ""
+        End If
+
+        saveResult str, strResult, strUserName, floorNum, projectName
     Else
-        saveResult str, "", "", "", strUserName, floorNum, ""
+        saveResult str, "", strUserName, floorNum, ""
     End If
 End Function
 
         Function getArrayResult(str, countCheck, numResult, projectName)
-            Dim tmpResultArray, resultArray
+            Dim resultArray
             If projectName <> "333fm" Then
-                tmpResultArray = getFiveResult(str, countCheck, numResult)
-                If (numResult = 5) And (tmpResultArray(5) <> "") Then
-                    resultArray = getFiveResult(tmpResultArray(5), countCheck, 5)
-                Else
-                    resultArray = tmpResultArray
-                End If
+                resultArray = getFiveResult(str, countCheck, numResult)
             Else
                 resultArray = getFmResult(str, countCheck)
             End If
             getArrayResult = resultArray
         End Function
 
+        Function getAvgAndBestResult(strArray)
+            Dim tmpArray,avgAndBestResult(1)
+            tmpArray = strArray
+
+            For i = 0 To UBound(tmpArray)
+                tmpArray(i) = changeResult(tmpArray(i))
+            Next
+
+            tmpArray = sortIntArray(tmpArray)
+            If UBound(tmpArray) = 4 Then
+                If tmpArray(3) <> 9999.99 Then
+                    avgAndBestResult(0) = Round(((0 + tmpArray(1) + tmpArray(2) + tmpArray(3)) / 3), 2)
+                Else
+                    avgAndBestResult(0) = 9999.99
+                End If
+                avgAndBestResult(1) = tmpArray(0)
+            Else
+                If tmpArray(2) <> 9999.99 Then
+                    avgAndBestResult(0) = Round(((0 + tmpArray(0) + tmpArray(1) + tmpArray(2)) / 3), 2)
+                Else
+                    avgAndBestResult(0) = 9999.99
+                End If
+                avgAndBestResult(1) = tmpArray(0)
+            End If
+
+            avgAndBestResult(0) = FormatNumber(avgAndBestResult(0), 2, , , 0)
+
+            For i = 0 To UBound(avgAndBestResult)
+                avgAndBestResult(i) = revertResult(avgAndBestResult(i))
+            Next
+
+            getAvgAndBestResult = avgAndBestResult
+        End Function
+
         Function getFiveResult(str, countStart, numResult)
-            Dim tmpStr, resultArray(5), countGetedResult, result(4,3), tmpStep, tmpStepResult, stepResult(4)
+            Dim tmpStr, resultArray(), countGetedResult, result(4,3), tmpStep, tmpStepResult, stepResult(4)
+            ReDim Preserve resultArray(0)
             countGetedResult = 0
             tmpStepResult = 0
             tmpStr = changeStrToSimple(Mid(str, countStart))
@@ -358,6 +398,7 @@ End Function
 
                     '//'get result with tmpStep
                     For i = 0 To UBound(tmpStep)
+                        ReDim Preserve resultArray(i)
                         tmpStep(i) = tmpStep(i) + countStart - 1
                         resultArray(i) = Mid(str, tmpStep(i), 4)
                         If isCharacter(Mid(str, tmpStep(i), 1), "Dd") Then
@@ -434,12 +475,10 @@ End Function
             'intArray = Array(1,5,8,15,16,17,25,34,54,55,56,57)
             'diffNum = 1
             'numResult = 5
-            Dim i, j, diffStepArray1, diffStepArray2, newArray(), tmpArray, finalArray, flagNew, flagTmp
+            Dim i, j, diffStepArray1, diffStepArray2, newArray(), finalArray
             j = 2
             diffStepArray1 = getDiffStepArray(intArray)
             diffStepArray2 = getDiffStepArray(diffStepArray1)
-            flagNew = False
-            flagTmp = False
             Redim Preserve newArray(1)
             newArray(0) = intArray(0)
             newArray(1) = intArray(1)
@@ -452,25 +491,14 @@ End Function
                     Redim Preserve newArray(j)
                     newArray(j) = intArray(i+2)
                     j = j + 1
-                    flagNew = True
                 Else
-                    If flagNew Then
-                        tmpArray = newArray
-                        newArray(0) = intArray(i)
-                        newArray(1) = intArray(i+1)
-                        j = 2
-                        flagTmp = True
-                    End If
+                    j = 2
+                    newArray(0) = intArray(i+1)
+                    newArray(1) = intArray(i+2)
                 End If
             Next
-            If flagTmp Then
-                If UBound(tmpArray) >= UBound(newArray) Then
-                    finalArray = tmpArray
-                Else
+            If j = numResult Then
                     finalArray = newArray
-                End If
-            ElseIf flagNew Then
-                finalArray = newArray
             Else
                 Redim Preserve newArray(0)
                 finalArray = newArray
@@ -534,7 +562,7 @@ End Function
 
         Function getFmResultSpecial(str, countStart)
             Dim countFm, strTmp1, strTmp2, fmResult(2), countGetedResult, searchStep
-            countFm = ""
+            countFm = 0
             countGetedResult = 0
             searchStep = 0
 
@@ -562,7 +590,7 @@ End Function
 '*************************************************
 '****save result into text file.
 '*************************************************
-Function saveResult(str, avgResult, bestResult, strResult, strUserName, floorNum, projectName)
+Function saveResult(str, strResult, strUserName, floorNum, projectName)
     Dim oTxt
     If strResult <> "" Then
         Set oTxt = Fso.OpenTextFile(resultTxtPath, 8)
@@ -571,21 +599,16 @@ Function saveResult(str, avgResult, bestResult, strResult, strUserName, floorNum
         ReDim Preserve userNameData(countResultData)
         ReDim Preserve projectData(countResultData)
         ReDim Preserve resultData(countResultData)
-        ReDim Preserve avgResultData(countResultData)
-        ReDim Preserve bestResultData(countResultData)
         floorData(countResultData) = floorNum & "楼"
         userNameData(countResultData) = strUserName
         projectData(countResultData) = projectName
         resultData(countResultData) = strResult
-        avgResultData(countResultData) = avgResult
-        bestResultData(countResultData) = bestResult
 
         oTxt.WriteLine(floorData(countResultData))
         oTxt.WriteLine(str)
         oTxt.WriteLine(userNameData(countResultData))
         oTxt.WriteLine(projectData(countResultData))
         oTxt.WriteLine(resultData(countResultData))
-        oTxt.WriteLine(avgResultData("avg: " & countResultData) & "best: " & bestResultData(countResultData))
         oTxt.WriteLine()
         oTxt.WriteLine()
 
@@ -616,6 +639,22 @@ End Function
 '*************************************************
 Function writeToExcel()
     sortByProject()
+
+    sortByAvgResult userNameData_333, resultData_333, 0
+    sortByAvgResult userNameData_444, resultData_444, 0
+    sortByAvgResult userNameData_555, resultData_555, 0
+    sortByAvgResult userNameData_222, resultData_222, 0
+    sortByAvgResult userNameData_333bf, resultData_333bf, 1
+    sortByAvgResult userNameData_333oh, resultData_333oh, 0
+    sortByAvgResult userNameData_333fm, resultData_333fm, 0
+    sortByAvgResult userNameData_py, resultData_py, 0
+    sortByAvgResult userNameData_mega, resultData_mega, 0
+    sortByAvgResult userNameData_sq, resultData_sq, 0
+    sortByAvgResult userNameData_clock, resultData_clock, 0
+    sortByAvgResult userNameData_sk, resultData_sk, 0
+    sortByAvgResult userNameData_666, resultData_666, 0
+    sortByAvgResult userNameData_777, resultData_777, 0
+
     Dim ExcelApp, ExcelBook, ExcelSheet
     Set ExcelApp = CreateObject("Excel.Application")
     Set ExcelBook= ExcelApp.Workbooks.Open(ws.CurrentDirectory&"\result.xlsx")
@@ -623,20 +662,20 @@ Function writeToExcel()
 
     ExcelSheet.Columns("A:H").NumberFormatLocal = "@"
 
-    writeAllProjectResult ExcelSheet, userNameData_333, avgResultData_333, bestResultData_333, resultData_333, "333"
-    writeAllProjectResult ExcelSheet, userNameData_444, avgResultData_444, bestResultData_444, resultData_444, "444"
-    writeAllProjectResult ExcelSheet, userNameData_555, avgResultData_555, bestResultData_555, resultData_555, "555"
-    writeAllProjectResult ExcelSheet, userNameData_222, avgResultData_222, bestResultData_222, resultData_222, "222"
-    writeAllProjectResult ExcelSheet, userNameData_333bf, avgResultData_333bf, bestResultData_333bf, resultData_333bf, "333bf"
-    writeAllProjectResult ExcelSheet, userNameData_333oh, avgResultData_333oh, bestResultData_333oh, resultData_333oh, "333oh"
-    writeAllProjectResult ExcelSheet, userNameData_333fm, avgResultData_333fm, bestResultData_333fm, resultData_333fm, "333fm"
-    writeAllProjectResult ExcelSheet, userNameData_py, avgResultData_py, bestResultData_py, resultData_py, "py"
-    writeAllProjectResult ExcelSheet, userNameData_mega, avgResultData_mega, bestResultData_mega, resultData_mega, "mega"
-    writeAllProjectResult ExcelSheet, userNameData_sq, avgResultData_sq, bestResultData_sq, resultData_sq, "sq"
-    writeAllProjectResult ExcelSheet, userNameData_clock, avgResultData_clock, bestResultData_clock, resultData_clock, "clock"
-    writeAllProjectResult ExcelSheet, userNameData_sk, avgResultData_sk, bestResultData_sk, resultData_sk, "sk"
-    writeAllProjectResult ExcelSheet, userNameData_666, avgResultData_666, bestResultData_666, resultData_666, "666"
-    writeAllProjectResult ExcelSheet, userNameData_777, avgResultData_777, bestResultData_777, resultData_777, "777"
+    writeAllProjectResult ExcelSheet, userNameData_333, resultData_333, "333"
+    writeAllProjectResult ExcelSheet, userNameData_444, resultData_444, "444"
+    writeAllProjectResult ExcelSheet, userNameData_555, resultData_555, "555"
+    writeAllProjectResult ExcelSheet, userNameData_222, resultData_222, "222"
+    writeAllProjectResult ExcelSheet, userNameData_333bf, resultData_333bf, "333bf"
+    writeAllProjectResult ExcelSheet, userNameData_333oh, resultData_333oh, "333oh"
+    writeAllProjectResult ExcelSheet, userNameData_333fm, resultData_333fm, "333fm"
+    writeAllProjectResult ExcelSheet, userNameData_py, resultData_py, "py"
+    writeAllProjectResult ExcelSheet, userNameData_mega, resultData_mega, "mega"
+    writeAllProjectResult ExcelSheet, userNameData_sq, resultData_sq, "sq"
+    writeAllProjectResult ExcelSheet, userNameData_clock, resultData_clock, "clock"
+    writeAllProjectResult ExcelSheet, userNameData_sk, resultData_sk, "sk"
+    writeAllProjectResult ExcelSheet, userNameData_666, resultData_666, "666"
+    writeAllProjectResult ExcelSheet, userNameData_777, resultData_777, "777"
 
     ExcelBook.Save
     ExcelBook.Close
@@ -647,31 +686,23 @@ Function writeToExcel()
 End Function
 
         Function sortByProject()
-            Dim allProjectArray, tmpUserNameData(), tmpAvgResultData(), tmpBestResultData(), tmpResultData()
+            Dim allProjectArray, tmpUserNameData(), tmpResultData()
             allProjectArray = getAllProjectName()
             count = 0
             
 
             For i = 0 To UBound(allProjectArray)
                 ReDim Preserve tmpUserNameData(0)
-                ReDim Preserve tmpAvgResultData(0)
-                ReDim Preserve tmpBestResultData(0)
                 ReDim Preserve tmpResultData(0)
                 tmpUserNameData(0) = ""
-                tmpAvgResultData(0) = ""
-                tmpBestResultData(0) = ""
                 tmpResultData(0) = ""
                 count = 0
 
                 For j = 0 To UBound(userNameData)
                     If projectData(j) = allProjectArray(i) Then
                         ReDim Preserve tmpUserNameData(count)
-                        ReDim Preserve tmpAvgResultData(count)
-                        ReDim Preserve tmpBestResultData(count)
                         ReDim Preserve tmpResultData(count)
                         tmpUserNameData(count) = userNameData(j)
-                        tmpAvgResultData(count) = avgResultData(j)
-                        tmpBestResultData(count) = bestResultData(j)
                         tmpResultData(count) = resultData(j)
                         count = count + 1
                     End If
@@ -680,80 +711,86 @@ End Function
                 Select Case allProjectArray(i)
                     Case "333"
                         userNameData_333 = tmpUserNameData
-                        avgResultData_333 = tmpAvgResultData
-                        bestResultData_333 = tmpBestResultData
                         resultData_333 = tmpResultData
                     Case "444"
                         userNameData_444 = tmpUserNameData
-                        avgResultData_444 = tmpAvgResultData
-                        bestResultData_444 = tmpBestResultData
                         resultData_444 = tmpResultData
                     Case "555"
                         userNameData_555 = tmpUserNameData
-                        avgResultData_555 = tmpAvgResultData
-                        bestResultData_555 = tmpBestResultData
                         resultData_555 = tmpResultData
                     Case "222"
                         userNameData_222 = tmpUserNameData
-                        avgResultData_222 = tmpAvgResultData
-                        bestResultData_222 = tmpBestResultData
                         resultData_222 = tmpResultData
                     Case "333bf"
                         userNameData_333bf = tmpUserNameData
-                        avgResultData_333bf = tmpAvgResultData
-                        bestResultData_333bf = tmpBestResultData
                         resultData_333bf = tmpResultData
                     Case "333oh"
                         userNameData_333oh = tmpUserNameData
-                        avgResultData_333oh = tmpAvgResultData
-                        bestResultData_333oh = tmpBestResultData
                         resultData_333oh = tmpResultData
                     Case "333fm"
                         userNameData_333fm = tmpUserNameData
-                        avgResultData_333fm = tmpAvgResultData
-                        bestResultData_333fm = tmpBestResultData
                         resultData_333fm = tmpResultData
                     Case "py"
                         userNameData_py = tmpUserNameData
-                        avgResultData_py = tmpAvgResultData
-                        bestResultData_py = tmpBestResultData
                         resultData_py = tmpResultData
                     Case "mega"
                         userNameData_mega = tmpUserNameData
-                        avgResultData_mega = tmpAvgResultData
-                        bestResultData_mega = tmpBestResultData
                         resultData_mega = tmpResultData
                     Case "sq"
                         userNameData_sq = tmpUserNameData
-                        avgResultData_sq = tmpAvgResultData
-                        bestResultData_sq = tmpBestResultData
                         resultData_sq = tmpResultData
                     Case "clock"
                         userNameData_clock = tmpUserNameData
-                        avgResultData_clock = tmpAvgResultData
-                        bestResultData_clock = tmpBestResultData
                         resultData_clock = tmpResultData
                     Case "sk"
                         userNameData_sk = tmpUserNameData
-                        avgResultData_sk = tmpAvgResultData
-                        bestResultData_sk = tmpBestResultData
                         resultData_sk = tmpResultData
                     Case "666"
                         userNameData_666 = tmpUserNameData
-                        avgResultData_666 = tmpAvgResultData
-                        bestResultData_666 = tmpBestResultData
                         resultData_666 = tmpResultData
                     Case "777"
                         userNameData_777 = tmpUserNameData
-                        avgResultData_777 = tmpAvgResultData
-                        bestResultData_777 = tmpBestResultData
                         resultData_777 = tmpResultData
                 End Select
             Next
         End Function
 
-        Function writeAllProjectResult(ExcelSheet, userNameArray, avgResultArray, bestResultArray, resultArray, projectName)
-            Dim strResultArray, avgAndBestResult
+        Function sortByAvgResult(userNameArray, resultArray, flag)
+            If UBound(resultArray) > 0 Then
+                For i = 0 To UBound(resultArray)-1
+                    For j = i+1 To UBound(resultArray)
+                        If resultArray(i) <> "" And resultArray(j) <> "" Then
+                            tmpResultArray1 = Split(resultArray(i), " ")
+                            tmpResultArray2 = Split(resultArray(j), " ")
+
+                            tmpResultArray1(flag) = changeResult(tmpResultArray1(flag))
+                            tmpResultArray2(flag) = changeResult(tmpResultArray2(flag))
+
+                            If tmpResultArray1(flag) - tmpResultArray2(flag) > 0 Then
+                                tmpStr = resultArray(i)
+                                resultArray(i) = resultArray(j)
+                                resultArray(j) = tmpStr
+
+                                tmpStr = userNameArray(i)
+                                userNameArray(i) = userNameArray(j)
+                                userNameArray(j) = tmpStr
+                            End If
+                        Else
+                            If resultArray(i) = "" Then
+                                resultArray(i) = resultArray(j)
+                                resultArray(j) = ""
+
+                                userNameArray(i) = userNameArray(j)
+                                userNameArray(j) = ""
+                            End If
+                        End If
+                    Next
+                Next
+            End If
+        End Function
+
+        Function writeAllProjectResult(ExcelSheet, userNameArray, resultArray, projectName)
+            Dim strResultArray
             ExcelSheet.Cells(countExcelRow+1, 1).Value = projectName
             countExcelRow = countExcelRow + 1
 
@@ -765,10 +802,10 @@ End Function
                 End If
 
                 ExcelSheet.Cells(countExcelRow+1, 1).Value = userNameArray(i)
-                ExcelSheet.Cells(countExcelRow+1, 2).Value = avgResultArray(i)
-                ExcelSheet.Cells(countExcelRow+1, 3).Value = bestResultArray(i)
-                For j = 0 To UBound(strResultArray)
-                    ExcelSheet.Cells(countExcelRow+1, j+4).Value = strResultArray(j)
+                ExcelSheet.Cells(countExcelRow+1, 2).Value = strResultArray(0)
+                ExcelSheet.Cells(countExcelRow+1, 3).Value = strResultArray(1)
+                For j = 2 To UBound(strResultArray)
+                    ExcelSheet.Cells(countExcelRow+1, j+2).Value = strResultArray(j)
                 Next
 
                 countExcelRow = countExcelRow + 1
@@ -831,12 +868,12 @@ Function getAllProjectName()
 End Function
 
 Function getProjectCheckStrArray(projectName)
-    checkStrArray_333 = Array("beginFlag333 ","beginFlag333<br>"," 333 "," 333<br>","<br>333 ","<br>333<br>","三阶","三速")
-    checkStrArray_444 = Array("beginFlag444"," 444","<br>444","四阶","四速")
-    checkStrArray_555 = Array("beginFlag555"," 555","<br>555","五阶","五速")
-    checkStrArray_222 = Array("beginFlag222"," 222","<br>222","二阶","二速")
-    checkStrArray_666 = Array("beginFlag666"," 666","<br>666","六阶","六速")
-    checkStrArray_777 = Array("beginFlag777"," 777","<br>777","七阶","七速")
+    checkStrArray_333 = Array("beginFlag333 ","beginFlag333<br>"," 333 "," 333<",">333 ",">333<","三阶","三速")
+    checkStrArray_444 = Array("beginFlag444"," 444",">444","四阶","四速")
+    checkStrArray_555 = Array("beginFlag555"," 555",">555","五阶","五速")
+    checkStrArray_222 = Array("beginFlag222"," 222",">222","二阶","二速")
+    checkStrArray_666 = Array("beginFlag666"," 666",">666","六阶","六速")
+    checkStrArray_777 = Array("beginFlag777"," 777",">777","七阶","七速")
     checkStrArray_333bf = Array("三盲","3bf","3bld")
     checkStrArray_333oh = Array("三单","3oh","oh<br>","oh ")
     checkStrArray_333fm = Array("最少步","最小步","3fm","<br>fm"," fm")
@@ -884,7 +921,7 @@ Function sortIntArray(intString)
     length = UBound(tmpArray)
     For i=0 to length-1
         For j=i+1 to length
-            If (tmpArray(i) > tmpArray(j)) Then
+            If (tmpArray(i) - tmpArray(j)) > 0 Then
                 tmpStr = tmpArray(i)
                 tmpArray(i) = tmpArray(j)
                 tmpArray(j) = tmpStr
@@ -894,75 +931,43 @@ Function sortIntArray(intString)
     sortIntArray = tmpArray
 End Function
 
-Function sortMultiIntArray(intArray1, intArray2, intArray3, intArray4)
-    Dim i, j, length, tmpStr, tmpArray
-    tmpArray = intString
-    length = UBound(tmpArray)
-    For i=0 to length-1
-        For j=i+1 to length
-            If (tmpArray(i) > tmpArray(j)) Then
-                tmpStr = tmpArray(i)
-                tmpArray(i) = tmpArray(j)
-                tmpArray(j) = tmpStr
-            End If
-        Next
-    Next
-    sortIntArray = tmpArray
-End Function
-
-Function getAvgAndBestResult(strArray)
-    Dim tmpArray,avgAndBestResult(1)
-    tmpArray = strArray
-
-    For i = 0 To UBound(tmpArray)
-        If tmpArray(i) <> "DNF" Then
-            colonInStr = InStr(tmpArray(i), ":")
-            If colonInStr > 1 Then
-                tmpArray(i) = Mid(tmpArray(i), 1, colonInStr-1) * 60 + Mid(tmpArray(i), colonInStr+1)
-            ElseIf colonInStr = 1 Then
-                tmpArray(i) = RePlace(tmpArray(i), ":", "")
-            End If
-            tmpArray(i) = FormatNumber(tmpArray(i), 2, , , 0)
-        Else
-            tmpArray(i) = 9999.99
+Function changeResult(result)
+    Dim tmpStr
+    tmpStr = result
+    If tmpStr <> "DNF" And tmpStr <> "" Then
+        colonInStr = InStr(tmpStr, ":")
+        If colonInStr > 1 Then
+            tmpStr = Mid(tmpStr, 1, colonInStr-1) * 60 + Mid(tmpStr, colonInStr+1)
+        ElseIf colonInStr = 1 Then
+            tmpStr = RePlace(tmpStr, ":", "")
         End If
-    Next
-
-    tmpArray = sortIntArray(tmpArray)
-    If UBound(tmpArray) = 4 Then
-        If tmpArray(3) <> 9999.99 Then
-            avgAndBestResult(0) = Round(((0 + tmpArray(1) + tmpArray(2) + tmpArray(3)) / 3), 2)
-        Else
-            avgAndBestResult(0) = 9999.99
-        End If
-        avgAndBestResult(1) = tmpArray(0)
-    Else
-        If tmpArray(2) <> 9999.99 Then
-            avgAndBestResult(0) = Round(((0 + tmpArray(0) + tmpArray(1) + tmpArray(2)) / 3), 2)
-        Else
-            avgAndBestResult(0) = 9999.99
-        End If
-        avgAndBestResult(1) = tmpArray(0)
+        tmpStr = FormatNumber(tmpStr, 2, , , 0)
+    ElseIf tmpStr = "DNF" Then
+        tmpStr = 9999.99
     End If
 
-    avgAndBestResult(0) = FormatNumber(avgAndBestResult(0), 2, , , 0)
-
-    For i = 0 To UBound(avgAndBestResult)
-        Dim minNum, secNum
-        If avgAndBestResult(i) = 9999.99 Then
-            avgAndBestResult(i) = "DNF"
-        ElseIf avgAndBestResult(i) > 59.99 Then
-            minNum = int(avgAndBestResult(i) / 60)
-            secNum = FormatNumber(avgAndBestResult(i) - minNum * 60, 2, , , 0)
-            If secNum < 10.00 Then
-                secNum = "0" & secNum
-            End If
-            avgAndBestResult(i) = minNum & ":" & secNum
-        End If
-    Next
-
-    getAvgAndBestResult = avgAndBestResult
+    changeResult = tmpStr
 End Function
+
+Function revertResult(result)
+    Dim tmpStr, minNum, secNum
+    tmpStr = result
+    If tmpStr = 9999.99 Then
+        tmpStr = "DNF"
+    ElseIf tmpStr > 59.99 Then
+        minNum = int(tmpStr / 60)
+        secNum = FormatNumber(tmpStr - minNum * 60, 2, , , 0)
+        If secNum < 10.00 Then
+            secNum = "0" & secNum
+        End If
+        tmpStr = minNum & ":" & secNum
+    End If
+    
+    revertResult = tmpStr
+End Function
+
+
+
 
 ''''''''''''''''''''''''''''''''''''''
 
