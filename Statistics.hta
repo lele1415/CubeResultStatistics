@@ -7,11 +7,12 @@
 
 url:<input type="text" id="url">
 <input type="button" id="getCode_id" onclick="getPagesCode()" value="Get code" />
+已获取<b id="PageNum_id">0</b>页
 <br>
 <input type="button" id="getCode_id" onclick="getTextFromCode(0)" value="Get results" />
 <br>
 floor: <input type="input" id="floorNumInput_id" size=1 />
-<select id="inputProjectName_id">"333","444","555","222","333bf","333oh","333fm","mega","py","sq","clock","sk","666","777"
+<select id="inputProjectName_id">
     <option value="333">333</option>
     <option value="444">444</option>
     <option value="555">555</option>
@@ -36,7 +37,13 @@ floor: <input type="input" id="floorNumInput_id" size=1 />
 <br>
 楼层: <b id="floorNum_id"></b>
 <br> 
-<input type="button" id="getCodeTest_id" onclick="writeReslutsToExcel()" value="Write results" />
+<input type="button" onclick="sortAllResults()" value="Sort results" />
+<br> 
+<input type="button" onclick="writeReslutsToExcel()" value="Write results" />
+<!-- <br>
+<br>
+<input type="input" id="compNum_id" />
+<input type="button" id="writeBr_id" onclick="writeBrTest()" value="write BR Test" /> -->
 
 <Script Language="JavaScript"> 
 
@@ -87,6 +94,10 @@ function getInputProjectName() {
 function getInputResultText() {
     return document.getElementById("inputResultText_id").innerHTML;
 }
+
+function setPageNumForShow(pageNum) {
+    document.getElementById("PageNum_id").innerHTML = pageNum;
+}
 </Script>
 <Script Language="VBScript">
 
@@ -105,6 +116,10 @@ recordTxtPath = ws.CurrentDirectory&"\record.txt"
 countResultData = 0
 Dim floorDataNoResult(), userNameDataNoResult(), projectDataNoResult(), countNoResultData
 countNoResultData = 0
+Dim brResultDate(), brResultCount, strCompNum
+ReDim brResultDate(3,0)
+brResultCount = 0
+strCompNum = 0
 Dim userNameData_333, resultData_333
 Dim userNameData_444, resultData_444
 Dim userNameData_555, resultData_555
@@ -149,6 +164,24 @@ Function inputResult()
     getTextFromCode(1)
 End Function
 
+Function writeBrTest()
+	strCompNum = document.getElementById("compNum_id").value
+	folderPath = ws.CurrentDirectory & "\allResults\"
+	oldFilePath = folderPath & (document.getElementById("compNum_id").value - 1) & ".xlsx"
+	newFilePath = folderPath & document.getElementById("compNum_id").value & ".xlsx"
+	If Fso.FileExists(oldFilePath) And Not Fso.FileExists(newFilePath) Then
+	    Fso.CopyFile oldFilePath, newFilePath, False
+	    brResultDate(0,0) = "444"
+	    brResultDate(1,0) = "QAZZ海盗"
+	    brResultDate(2,0) = True
+	    brResultDate(3,0) = "21.00 19.23 20.11 20.22 20.33 20.44 20.55"
+	    writeBrToExcel(newFilePath)
+        Msgbox("write BR done!")
+	Else
+	    Msgbox(oldFilePath & Vblf & "not exist" & Vblf & " or" & Vblf & newFilePath & Vblf & "already exist")
+	End If
+End Function
+
 
 
 
@@ -158,14 +191,16 @@ End Function
 Function getPagesCode()
     checkTxtFile(codeTxtPath)
     getSource(getUrl())
+    setPageNumForShow(1)
     Sleep(1000)
 
     Dim MaxPage, url, i
-    MaxPage = getInfoFromTxt("total_page", "total_page", 12, "};", -2)
+    MaxPage = getInfoFromTxt("total_page", "total_page", 12, "};")
     If IsNumeric(MaxPage) Then
         For i = 2 To MaxPage
             url = getUrl() & "?pn=" & i
             getSource(url)
+            setPageNumForShow(i)
             Sleep(1000)
         Next
         'Sleep(1000)
@@ -193,7 +228,7 @@ End Function
             Set oTxt = Nothing
         End Function
 
-        Function getInfoFromTxt(strSearch, strStart, numStart, strEnd, numEnd)
+        Function getInfoFromTxt(strSearch, strStart, numStart, strEnd)
             Dim oTxt, getStrLine, MaxPage, Flag
             Set oTxt = Fso.OpenTextFile(codeTxtPath,1)
             Flag = False
@@ -229,7 +264,8 @@ Function getTextFromCode(testFlag)
     tmpStrResult = getArrayFromTxt("j_d_post_content", "j_d_post_content", 40, "user-hide-post-down", -31)
     strResult = checkStrArrayForBubble(tmpStrResult)
     strUserName = getArrayFromTxt("p_author_name", "_blank", 8, "</a>", 0)
-    strFloorNum = getShortStrFromTxt("post_no&quot", "post_no&quot", 14, 4, ",")
+    strFloorNum = getShortStrArrayFromTxt("post_no&quot", "post_no&quot", 14, 4, ",")
+    strCompNum = getInfoFromTxt("<title>", "第", 1, "期")
     If testFlag = 0 Then
         countStart = 0
         'For i = 0 to UBound(strUserName)
@@ -294,7 +330,7 @@ End Function
             checkStrArrayForBubble = tmpArray
         End Function
 
-        Function getShortStrFromTxt(strSearch, strStart, numStart, strLen, strEnd)
+        Function getShortStrArrayFromTxt(strSearch, strStart, numStart, strLen, strEnd)
             Dim oTxt, getStrLine, MaxPage, strArray(), count
             Set oTxt = Fso.OpenTextFile(codeTxtPath,1)
             count = 0
@@ -313,7 +349,7 @@ End Function
                 End If
             Loop
             Set oTxt = Nothing
-            getShortStrFromTxt = strArray
+            getShortStrArrayFromTxt = strArray
         End Function
 
 
@@ -375,7 +411,9 @@ Function dealOriginStr(strResultArray, strUserNameArray, strFloorNum, countStart
     End If
 
     'writeReslutsToExcel()
-    Msgbox("OK")
+    If Not inputFlag Then
+        Msgbox("OK")
+    End If
 End Function
 
         Function getSeqOfProjectInStr(str, projectName)
@@ -451,7 +489,13 @@ Function getAndDealResult(str, strUserName, floorNum, countCheck, projectName)
             strResult = ""
         End If
 
-        saveResult str, strResult, strUserName, floorNum, projectName
+        If Not inputFlag Then
+            saveResult str, strResult, strUserName, floorNum, projectName
+        Else
+            if Msgbox(floorNum & "楼" & Vblf & strUserName & Vblf & str & Vblf & projectName & Vblf & strResult, 1) = 1 Then
+                saveResult str, strResult, strUserName, floorNum, projectName
+            End If
+        End If
     Else
         saveResult str, "", strUserName, floorNum, ""
     End If
@@ -854,7 +898,7 @@ End Function
 '*************************************************
 '****write final result into excel file.
 '*************************************************
-Function writeReslutsToExcel()
+Function sortAllResults()
     sortByProject()
 
     sortByAvgResult userNameData_333, resultData_333, 0
@@ -872,35 +916,7 @@ Function writeReslutsToExcel()
     sortByAvgResult userNameData_666, resultData_666, 0
     sortByAvgResult userNameData_777, resultData_777, 0
 
-    Dim ExcelApp, ExcelBook, ExcelSheet
-    Set ExcelApp = CreateObject("Excel.Application")
-    Set ExcelBook= ExcelApp.Workbooks.Open(ws.CurrentDirectory&"\result.xlsx")
-    Set ExcelSheet = ExcelBook.Sheets("Sheet1")
-
-    ExcelSheet.Columns("B").ColumnWidth = 15
-
-    writeAllProjectResult ExcelSheet, userNameData_333, resultData_333, "333"
-    writeAllProjectResult ExcelSheet, userNameData_444, resultData_444, "444"
-    writeAllProjectResult ExcelSheet, userNameData_555, resultData_555, "555"
-    writeAllProjectResult ExcelSheet, userNameData_222, resultData_222, "222"
-    writeAllProjectResult ExcelSheet, userNameData_333bf, resultData_333bf, "333bf"
-    writeAllProjectResult ExcelSheet, userNameData_333oh, resultData_333oh, "333oh"
-    writeAllProjectResult ExcelSheet, userNameData_333fm, resultData_333fm, "333fm"
-    writeAllProjectResult ExcelSheet, userNameData_py, resultData_py, "py"
-    writeAllProjectResult ExcelSheet, userNameData_mega, resultData_mega, "mega"
-    writeAllProjectResult ExcelSheet, userNameData_sq, resultData_sq, "sq"
-    writeAllProjectResult ExcelSheet, userNameData_clock, resultData_clock, "clock"
-    writeAllProjectResult ExcelSheet, userNameData_sk, resultData_sk, "sk"
-    writeAllProjectResult ExcelSheet, userNameData_666, resultData_666, "666"
-    writeAllProjectResult ExcelSheet, userNameData_777, resultData_777, "777"
-
-    ExcelBook.Save
-    ExcelBook.Close
-    ExcelApp.Quit
-    Set ExcelSheet = Nothing
-    Set ExcelBook = Nothing
-    Set ExcelApp = Nothing
-    Msgbox("Write done!")
+    Msgbox("Sort done!")
 End Function
 
         Function sortByProject()
@@ -1007,6 +1023,68 @@ End Function
             End If
         End Function
 
+
+
+'*************************************************
+'****write final result into excel file.
+'*************************************************
+Function writeReslutsToExcel()
+    Dim folderPath, oldFilePath, newFilePath
+    folderPath = ws.CurrentDirectory & "\allResults\"
+	oldFilePath = folderPath & (strCompNum - 1) & ".xlsx"
+	newFilePath = folderPath & strCompNum & ".xlsx"
+	If Fso.FileExists(oldFilePath) And Not Fso.FileExists(newFilePath) Then
+	    Fso.CopyFile oldFilePath, newFilePath, False
+
+	    Dim ExcelApp, ExcelBook, ExcelSheet
+	    Set ExcelApp = CreateObject("Excel.Application")
+	    Set ExcelBook= ExcelApp.Workbooks.Open(newFilePath)
+
+	    For i=1 To ExcelBook.Sheets.Count
+	    	If ExcelBook.Sheets(i).Name = "Sheet1" Then
+	    		ExcelApp.DisplayAlerts = False
+	    		ExcelBook.Sheets(i).Delete
+	    		ExcelApp.DisplayAlerts = True
+	    		Exit For
+	    	End If
+	    Next
+	    'Set ExcelSheet = ExcelBook.Sheets("Sheet1")
+	    Set ExcelSheet = ExcelBook.Sheets.Add
+
+	    ExcelSheet.Columns("B").ColumnWidth = 15
+
+	    writeAllProjectResult ExcelSheet, userNameData_333, resultData_333, "333"
+	    writeAllProjectResult ExcelSheet, userNameData_444, resultData_444, "444"
+	    writeAllProjectResult ExcelSheet, userNameData_555, resultData_555, "555"
+	    writeAllProjectResult ExcelSheet, userNameData_222, resultData_222, "222"
+	    writeAllProjectResult ExcelSheet, userNameData_333bf, resultData_333bf, "333bf"
+	    writeAllProjectResult ExcelSheet, userNameData_333oh, resultData_333oh, "333oh"
+	    writeAllProjectResult ExcelSheet, userNameData_333fm, resultData_333fm, "333fm"
+	    writeAllProjectResult ExcelSheet, userNameData_py, resultData_py, "py"
+	    writeAllProjectResult ExcelSheet, userNameData_mega, resultData_mega, "mega"
+	    writeAllProjectResult ExcelSheet, userNameData_sq, resultData_sq, "sq"
+	    writeAllProjectResult ExcelSheet, userNameData_clock, resultData_clock, "clock"
+	    writeAllProjectResult ExcelSheet, userNameData_sk, resultData_sk, "sk"
+	    writeAllProjectResult ExcelSheet, userNameData_666, resultData_666, "666"
+	    writeAllProjectResult ExcelSheet, userNameData_777, resultData_777, "777"
+
+	    ExcelBook.Save
+	    ExcelBook.Close
+	    ExcelApp.Quit
+	    Set ExcelSheet = Nothing
+	    Set ExcelBook = Nothing
+	    Set ExcelApp = Nothing
+
+	    If brResultCount > 0 Then
+	        writeBrToExcel(newFilePath)
+	    End If
+	Else
+	    Msgbox(oldFilePath & Vblf & "not exist" & Vblf & " or" & Vblf & newFilePath & Vblf & "already exist")
+	End If
+
+    Msgbox("Write done!")
+End Function
+
         Function writeAllProjectResult(ExcelSheet, userNameArray, resultArray, projectName)
             Dim strResultArray, rankNum, avgRecordFlag, bestRecordFlag
             rankNum = 0
@@ -1071,9 +1149,11 @@ End Function
 
                 If bestRecordFlag Then
                     ExcelSheet.Cells(countExcelRow, 3).Interior.Color = RGB(255,192,0)
+                    saveBrResult projectName, userNameArray(i), False, resultArray(i)
                 End If
                 If avgRecordFlag Then
                     ExcelSheet.Cells(countExcelRow, 4).Interior.Color = RGB(255,192,0)
+                    saveBrResult projectName, userNameArray(i), True, resultArray(i)
                 End If
 
                 ExcelSheet.Cells(countExcelRow, 1).Value = rankNum
@@ -1087,6 +1167,83 @@ End Function
 
             countExcelRow = countExcelRow + 1
         End Function
+
+                Function saveBrResult(projectName, userName, isAvg, result)
+                    ReDim Preserve brResultDate(3,brResultCount)
+                    brResultDate(0,brResultCount) = projectName
+                    brResultDate(1,brResultCount) = userName
+                    brResultDate(2,brResultCount) = isAvg
+                    brResultDate(3,brResultCount) = result
+                    brResultCount = brResultCount + 1
+                End Function
+
+
+
+'*************************************************
+'****write BR into excel file.
+'*************************************************
+Function writeBrToExcel(newFilePath)
+    Dim ExcelApp, ExcelBook, ExcelSheet, brLine, resultArray
+    Set ExcelApp = CreateObject("Excel.Application")
+    Set ExcelBook= ExcelApp.Workbooks.Open(newFilePath)
+    Set ExcelSheet = ExcelBook.Sheets("Sheet2")
+
+    For i = 1 To 57
+        For j = 1 To 10
+            If i mod 4 = 0 Then
+                ExcelSheet.Cells(i, j).Interior.Color = RGB(230,230,230)
+            Else
+                ExcelSheet.Cells(i, j).Interior.Color = RGB(250,250,250)
+            End If
+        Next
+    Next
+            
+    For i = 0 To brResultCount-1
+        resultArray = Split(brResultDate(3,i))
+        brLine = getBrLine(brResultDate(0,i), brResultDate(2,i))
+
+    	For j = 1 To 10
+	        ExcelSheet.Cells(brLine, j).Interior.Color = RGB(255,218,101)
+	    Next
+
+        ExcelSheet.Cells(brLine, 4).Value = brResultDate(1,i)
+        ExcelSheet.Cells(brLine, 5).Value = strCompNum & "期"
+
+        If brResultDate(2,i) Then
+            ExcelSheet.Cells(brLine, 2).Value = resultArray(0)
+            For j = 2 To UBound(resultArray)
+                ExcelSheet.Cells(brLine, 4+j).Value = resultArray(j)
+            Next
+        Else
+            ExcelSheet.Cells(brLine, 2).Value = resultArray(1)
+        End If
+    Next
+
+    ExcelBook.Save
+    ExcelBook.Close
+    ExcelApp.Quit
+    Set ExcelSheet = Nothing
+    Set ExcelBook = Nothing
+    Set ExcelApp = Nothing
+End Function
+
+        Function getBrLine(projectName, isAvg)
+            Dim allProjectArray, tmpLine
+            allProjectArray = getAllProjectName()
+            For i = 0 To UBound(allProjectArray)
+                If allProjectArray(i) = projectName Then
+                    tmpLine = i
+                    Exit For
+                End If
+            Next
+            tmpLine = (tmpLine + 1) * 4
+            If isAvg Then
+            	tmpLine = tmpLine + 1
+            End If
+            getBrLine = tmpLine
+        End Function
+
+
 
 
 
