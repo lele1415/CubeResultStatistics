@@ -49,10 +49,12 @@ width=CreateObject("HtmlFile").ParentWindow.Screen.AvailWidth
 Window.MoveTo width-400,300
 Window.ResizeTo 400,240
 
-Dim ws, Fso, TxtPath
+Dim ws, Fso, codeTxtPath, resultData(), userNameData(), countData
 Set ws=CreateObject("wscript.shell")
 Set Fso=CreateObject("Scripting.FileSystemObject")
-TxtPath = ws.CurrentDirectory&"\"&"temp.txt"
+codeTxtPath = ws.CurrentDirectory&"\"&"temp.txt"
+resultTxtPath = "D:\vbs\vbs_20160924\vbs\getPageCode\Test.txt"
+countData = 0
 
 Sub Sleep(MSecs)  
     Dim fso
@@ -67,18 +69,18 @@ Sub Sleep(MSecs)
      CreateObject("WScript.Shell").Run "sleeper.vbs " & MSecs,1 , True 
 End Sub
 
-Function checkTxtFile()
-    If Fso.FileExists(TxtPath) Then
+Function checkTxtFile(FilePath)
+    If Fso.FileExists(FilePath) Then
         Dim TxtFile
-    	Set TxtFile = Fso.getFile(TxtPath)
-    	TxtFile.Delete
-    	Set TxtFile = Nothing
+        Set TxtFile = Fso.getFile(FilePath)
+        TxtFile.Delete
+        Set TxtFile = Nothing
     End If    
-    Fso.CreateTextFile TxtPath, True
+    Fso.CreateTextFile FilePath, True
 End Function
 
 Function writeToTxt(responseText)
-    Set oTxt = Fso.OpenTextFile(TxtPath,8)
+    Set oTxt = Fso.OpenTextFile(codeTxtPath,8)
     oTxt.Write(responseText)
     oTxt.Close
     Set oTxt = Nothing
@@ -86,16 +88,16 @@ End Function
 
 Function getInfoFromTxt(strSearch, strStart, numStart, strEnd, numEnd)
     Dim oTxt, getStrLine, MaxPage
-    Set oTxt = Fso.OpenTextFile(TxtPath,1)
+    Set oTxt = Fso.OpenTextFile(codeTxtPath,1)
 
     Do Until oTxt.AtEndOfStream
         getStrLine = oTxt.ReadLine
         If InStr(getStrLine,strSearch) > 0 Then
-        	Exit Do
+            Exit Do
         End If
     Loop
     Set oTxt = Nothing
-	countStart = InStr(getStrLine,strStart) + numStart
+    countStart = InStr(getStrLine,strStart) + numStart
     countEnd = InStr(getStrLine,strEnd) + numEnd
     'Msgbox(countStart & " " & countEnd)
     getInfoFromTxt = Mid(getStrLine, countStart, countEnd-countStart)
@@ -103,17 +105,17 @@ End Function
 
 Function getArrayFromTxt(strSearch, strStart, numStart, strEnd, numEnd)
     Dim oTxt, getStrLine, MaxPage, strArray(), count
-    Set oTxt = Fso.OpenTextFile(TxtPath,1)
+    Set oTxt = Fso.OpenTextFile(codeTxtPath,1)
     count = 0
     Do Until oTxt.AtEndOfStream
         getStrLine = oTxt.ReadLine
         If InStr(getStrLine,strSearch) > 0 Then
-        	ReDim Preserve strArray(count)
-        	countStart = InStr(getStrLine,strStart) + numStart
-		    countEnd = InStr(getStrLine,strEnd) + numEnd
-		    'Msgbox(countStart & " " & countEnd)
-		    strArray(count) = Mid(getStrLine, countStart, countEnd-countStart)
-		    count = count + 1
+            ReDim Preserve strArray(count)
+            countStart = InStr(getStrLine,strStart) + numStart
+            countEnd = InStr(getStrLine,strEnd) + numEnd
+            'Msgbox(countStart & " " & countEnd)
+            strArray(count) = Mid(getStrLine, countStart, countEnd-countStart)
+            count = count + 1
         End If
     Loop
     Set oTxt = Nothing
@@ -124,25 +126,335 @@ Function getTimesOfStrAppeared(str1, str2)
     Dim count
     count = 0
     Do Until (Not InStr(str1, str2) > 0)
-    	count = count + 1
-    	str1 = RePlace(str1, str2, StrReverse(str2), 1, 1)
+        count = count + 1
+        str1 = RePlace(str1, str2, "", 1, 1)
     Loop
     getTimesOfStrAppeared = count
 End Function
 
+Function isNumber(str)
+    Dim flag
+    flag = False
+    Select Case str
+        Case "0"
+            flag = True
+        Case "1"
+            flag = True
+        Case "2"
+            flag = True
+        Case "3"
+            flag = True
+        Case "4"
+            flag = True
+        Case "5"
+            flag = True
+        Case "6"
+            flag = True
+        Case "7"
+            flag = True
+        Case "8"
+            flag = True
+        Case "9"
+            flag = True
+    End Select
+    isNumber = flag
+End Function
 
+Function getFiveResult(str, countStart)
+    Dim resultArray(5), i, result(4,3)
+    i = 0
+    countPoint = Instr(1, str, ".")
+    Do Until ((Not countPoint > 2) Or (i = 5))
+        result(i,0) = Mid(str, countPoint-2, 1)
+        result(i,1) = Mid(str, countPoint-1, 1)
+        result(i,2) = Mid(str, countPoint+1, 1)
+        result(i,3) = Mid(str, countPoint+2, 1)
+
+        If countPoint > 4 Then
+            If Mid(str, countPoint-3, 1) = ":" Or Mid(str, countPoint-3, 1) = "：" Then
+                If isNumber(Mid(str, countPoint-4, 1)) Then
+                    resultColon = Mid(str, countPoint-4, 1)
+                End If
+            End If
+        End If
+
+        If isNumber(result(i,0)) Then
+            str1 = result(i,0)
+        End If
+        If isNumber(result(i,1)) Then
+            str2 = result(i,1)
+        End If
+        If isNumber(result(i,2)) Then
+            str3 = result(i,2)
+        End If
+        If isNumber(result(i,3)) Then
+            str4 = result(i,3)
+        End If
+
+        If resultColon <> "" Then
+            resultTmp = resultColon & ":" & str1 & str2 & "." & str3 & str4
+        Else
+            resultTmp = str1 & str2 & "." & str3 & str4
+        End If
+
+        If (resultTmp <> ".") And (str1 & str2 <> "") And (str3 & str4 <> "") Then
+            resultArray(i) = resultTmp
+            i = i + 1
+        End If
+        countPoint = Instr(countPoint+1, str, ".")
+    Loop
+
+    'Case:"1. 2. 3. 4. 5."
+    If (result(0,1) = "1") And (result(2,1) = "2") And (result(4,1) = "3") Then
+        str = RePlace(str, ".", " ", 1, 1)
+        str = RePlace(str, ".", "point", 1, 1)
+        str = RePlace(str, ".", " ", 1, 1)
+        str = RePlace(str, ".", "point", 1, 1)
+        str = RePlace(str, ".", " ", 1, 1)
+        str = RePlace(str, ".", "point", 1, 1)
+        str = RePlace(str, ".", " ", 1, 1)
+        str = RePlace(str, ".", "point", 1, 1)
+        str = RePlace(str, ".", " ", 1, 1)
+        str = RePlace(str, ".", "point", 1, 1)
+        str = RePlace(str, "point", ".", 1, 5)
+
+        'Msgbox(str)
+
+        resultArray(5) = str
+    End If
+    getFiveResult = resultArray
+End Function
+
+Function getResult(str, count)
+    Dim tmpResultArray, resultArray
+    tmpResultArray = getFiveResult(str, count)
+    If tmpResultArray(5) <> "" Then
+        resultArray = getFiveResult(tmpResultArray(5), count)
+    Else
+        resultArray = tmpResultArray
+    End If
+    getResult = resultArray
+End Function
+
+Function check333Result(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "333<br>") > 0
+            count = InStr(str, "333<br>") + 7
+        Case InStr(str, "333 ") > 0
+            count = InStr(str, "333 ") + 4
+        Case  InStr(str, "三阶") > 0
+            count = InStr(str, "三阶") + 2
+        Case  InStr(str, "三速") > 0
+            count = InStr(str, "三速") + 2
+    End Select
+    check333Result = count
+End Function
+
+Function check444Result(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "444") > 0
+            count = InStr(str, "444") + 3
+        Case  InStr(str, "四阶") > 0
+            count = InStr(str, "四阶") + 2
+        Case  InStr(str, "四速") > 0
+            count = InStr(str, "四速") + 2
+    End Select
+    check444Result = count
+End Function
+
+Function check555Result(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "555") > 0
+            count = InStr(str, "555") + 3
+        Case  InStr(str, "五阶") > 0
+            count = InStr(str, "五阶") + 2
+        Case  InStr(str, "五速") > 0
+            count = InStr(str, "五速") + 2
+    End Select
+    check555Result = count
+End Function
+
+Function check222Result(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "222") > 0
+            count = InStr(str, "222") + 3
+        Case  InStr(str, "二阶") > 0
+            count = InStr(str, "二阶") + 2
+        Case  InStr(str, "二速") > 0
+            count = InStr(str, "二速") + 2
+    End Select
+    check222Result = count
+End Function
+
+Function check666Result(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "666") > 0
+            count = InStr(str, "666") + 3
+        Case  InStr(str, "六阶") > 0
+            count = InStr(str, "六阶") + 2
+        Case  InStr(str, "六速") > 0
+            count = InStr(str, "六速") + 2
+    End Select
+    check666Result = count
+End Function
+
+Function check777Result(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "777") > 0
+            count = InStr(str, "777") + 3
+        Case  InStr(str, "七阶") > 0
+            count = InStr(str, "七阶") + 2
+        Case  InStr(str, "七速") > 0
+            count = InStr(str, "七速") + 2
+    End Select
+    check777Result = count
+End Function
+
+Function check333bfResult(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "三盲") > 0
+            count = InStr(str, "三盲") + 2
+        Case InStr(str, "333bf") > 0
+            count = InStr(str, "333bf") + 5
+        Case  InStr(str, "3bf") > 0
+            count = InStr(str, "3bf") + 3
+    End Select
+    check333bfResult = count
+End Function
+
+Function check333ohResult(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "三单") > 0
+            count = InStr(str, "三单") + 2
+        Case InStr(str, "3oh") > 0
+            count = InStr(str, "3oh") + 3
+        Case InStr(str, "333oh") > 0
+            count = InStr(str, "333oh") + 5
+        Case  InStr(str, "333OH") > 0
+            count = InStr(str, "333OH") + 5
+    End Select
+    check333ohResult = count
+End Function
+
+Function check333fmResult(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "最少步") > 0
+            count = InStr(str, "最少步") + 3
+        Case InStr(str, "最小步") > 0
+            count = InStr(str, "最小步") + 3
+        Case InStr(str, "333fm") > 0
+            count = InStr(str, "333fm") + 5
+        Case  InStr(str, "333FM") > 0
+            count = InStr(str, "333FM") + 5
+        Case  InStr(str, "3fm") > 0
+            count = InStr(str, "3fm") + 3
+    End Select
+    check333fmResult = count
+End Function
+
+Function checkMegaResult(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "五魔") > 0
+            count = InStr(str, "五魔") + 2
+        Case InStr(str, "mega") > 0
+            count = InStr(str, "mega") + 4
+        Case InStr(str, "Mega") > 0
+            count = InStr(str, "Mega") + 4
+    End Select
+    checkMegaResult = count
+End Function
+
+Function checkPyResult(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "金字塔") > 0
+            count = InStr(str, "金字塔") + 3
+        Case InStr(str, "塔") > 0
+            count = InStr(str, "塔") + 1
+        Case  InStr(str, "py") > 0
+            count = InStr(str, "py") + 2
+        Case  InStr(str, "PY") > 0
+            count = InStr(str, "PY") + 2
+        Case  InStr(str, "yramid") > 0
+            count = InStr(str, "yramid") + 6
+    End Select
+    checkPyResult = count
+End Function
+
+Function checkSQResult(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "SQ") > 0
+            count = InStr(str, "SQ") + 2
+        Case InStr(str, "sq") > 0
+            count = InStr(str, "sq") + 1
+    End Select
+    checkSQResult = count
+End Function
+
+Function checkClockResult(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "表 ") > 0
+            count = InStr(str, "表 ") + 2
+        Case InStr(str, "表<br>") > 0
+            count = InStr(str, "表<br>") + 5
+        Case InStr(str, "clock") > 0
+            count = InStr(str, "clock") + 5
+    End Select
+    checkClockResult = count
+End Function
+
+Function checkSkResult(str)
+    Dim count
+    count = ""
+    Select Case True
+        Case InStr(str, "斜转") > 0
+            count = InStr(str, "斜转") + 2
+        Case InStr(str, "sk") > 0
+            count = InStr(str, "sk") + 5
+        Case InStr(str, "skewb") > 0
+            count = InStr(str, "skewb") + 5
+    End Select
+    checkSkResult = count
+End Function
+
+''''''''''''''''''''''''''''''''''''''
 
 Function WritePagesCode()
-    checkTxtFile()
+    checkTxtFile(codeTxtPath)
     getSource(getUrl())
     Sleep(1000)
 
     Dim MaxPage, url, i
     MaxPage = getInfoFromTxt("尾页", "pn=", 3, "尾页", -2)
     For i = 2 To MaxPage
-	    url = getUrl() & "?pn=" & i
-	    getSource(url)
-	Next
+        url = getUrl() & "?pn=" & i
+        getSource(url)
+    Next
 
     Msgbox("Done!")
 End Function
@@ -152,7 +464,7 @@ Function getTextFromCode()
     strResult = getArrayFromTxt("j_d_post_content", "j_d_post_content", 40, "user-hide-post-down", -31)
     strUserName = getArrayFromTxt("img username", "username", 10, "src=", -11)
     For i = 0 to UBound(strUserName)
-    	If (strUserName(i) = "魔方英语会计学") AND (Instr(strResult(i),"--完--") > 0) Then
+        If (strUserName(i) = "魔方英语会计学") AND (Instr(strResult(i),"--完--") > 0) Then
             countStart = i
             Exit For
         End If
@@ -161,16 +473,142 @@ Function getTextFromCode()
     'For i = countStart+1 To UBound(strUserName)
         'msgbox(strUserName(i) & vbLf & strResult(i))
     'Next
-    getCleanResult strResult, countStart
+    getCleanResult strResult, strUserName, countStart
 End Function
 
-Function getCleanResult(strArray, countStart)
-    For i = countStart+1 To UBound(strArray)
-        'count333 = InStr(strArray(i), "333")
-        'countBr = InStr(strArray(i), "<br>")
-        Msgbox(getTimesOfStrAppeared(strArray(i), "<br>"))
+Function getCleanResult(strResultArray, strUserNameArray, countStart)
+    Dim finalResultArray
+    'For i = countStart+1 To UBound(strResultArray)
+    '    getStrResult strResultArray(i), strUserNameArray(i), check333Result(strResultArray(i))
+    'Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)
+    '    getStrResult strResultArray(i), strUserNameArray(i), check444Result(strResultArray(i))
+    'Next
+    'addSkip()
+    For i = countStart+1 To UBound(strResultArray)    
+        getStrResult strResultArray(i), strUserNameArray(i), check555Result(strResultArray(i))
     Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)    
+    '    getStrResult strResultArray(i), strUserNameArray(i), check222Result(strResultArray(i))
+    'Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)    
+    '    getStrResult strResultArray(i), strUserNameArray(i), check333bfResult(strResultArray(i))
+    'Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)    
+    '    getStrResult strResultArray(i), strUserNameArray(i), check333ohResult(strResultArray(i))
+    'Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)    
+    '    getStrResult strResultArray(i), strUserNameArray(i), check333fmResult(strResultArray(i))
+    'Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)    
+    '    getStrResult strResultArray(i), strUserNameArray(i), checkMegaResult(strResultArray(i))
+    'Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)    
+    '    getStrResult strResultArray(i), strUserNameArray(i), checkPyResult(strResultArray(i))
+    'Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)    
+    '    getStrResult strResultArray(i), strUserNameArray(i), checkSQResult(strResultArray(i))
+    'Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)    
+    '    getStrResult strResultArray(i), strUserNameArray(i), checkClockResult(strResultArray(i))
+    'Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)    
+    '    getStrResult strResultArray(i), strUserNameArray(i), checkSkResult(strResultArray(i))
+    'Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)    
+    '    getStrResult strResultArray(i), strUserNameArray(i), check666Result(strResultArray(i))
+    'Next
+    'addSkip()
+    'For i = countStart+1 To UBound(strResultArray)    
+    '    getStrResult strResultArray(i), strUserNameArray(i), check777Result(strResultArray(i))
+    'Next
+
+    writeResultToExcel resultData, userNameData
+    Msgbox("OK")
 End Function
+
+Function getStrResult(str, strUserName, count)
+    If count <> "" Then
+        Dim finalResultArray, strResult, j
+        finalResultArray = getResult(str, count)
+        strResult = ""
+        For j = 0 To 4
+            strResult = strResult & finalResultArray(j) & " "
+        Next
+        strResult = Trim(strResult)
+        saveResult str, strResult, strUserName
+    End If
+End Function
+
+Function saveResult(str, strResult, strUserName)
+    Dim oTxt
+    checkTxtFile(resultTxtPath)
+    Set oTxt = Fso.OpenTextFile(resultTxtPath, 8)
+
+    ReDim Preserve resultData(countData)
+    ReDim Preserve userNameData(countData)
+    resultData(countData) = strResult
+    userNameData(countData) = strUserName
+    countData = countData + 1
+
+    oTxt.WriteLine(str)
+    oTxt.WriteLine(strResult)
+    oTxt.WriteLine()
+    oTxt.WriteLine()
+
+    Set oTxt = Nothing
+End Function
+
+Function addSkip()
+    countData = countData + 1
+    ReDim Preserve resultData(countData)
+    ReDim Preserve userNameData(countData)
+    resultData(countData) = ""
+    userNameData(countData) = ""
+End Function
+
+Function writeResultToExcel(strResult, strUserName)
+    Dim ExcelApp, ExcelBook, ExcelSheet, strResultArray
+    Set ExcelApp = CreateObject("Excel.Application")
+    Set ExcelBook= ExcelApp.Workbooks.Open("D:\vbs\vbs_20160924\vbs\getPageCode\result.xlsx")
+    Set ExcelSheet = ExcelBook.Sheets("Sheet1")
+
+    ExcelSheet.Columns("B:F").NumberFormatLocal = "@"
+
+    For i = 0 To UBound(strResult)
+        If strResult(i) <> "" Then
+            strResultArray = Split(strResult(i), " ")
+        Else
+            ReDim strResultArray(4)
+        End If
+
+        ExcelSheet.Cells(i+2,1).Value = strUserName(i)
+        ExcelSheet.Cells(i+2,2).Value = strResultArray(0)
+        ExcelSheet.Cells(i+2,3).Value = strResultArray(1)
+        ExcelSheet.Cells(i+2,4).Value = strResultArray(2)
+        ExcelSheet.Cells(i+2,5).Value = strResultArray(3)
+        ExcelSheet.Cells(i+2,6).Value = strResultArray(4)
+    Next
+
+    ExcelBook.Save
+    ExcelBook.Close
+    ExcelApp.Quit
+    Set ExcelSheet = Nothing
+    Set ExcelBook = Nothing
+    Set ExcelApp = Nothing
+End Function
+
 </Script>
 </Body>
 </Html>
