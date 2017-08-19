@@ -49,7 +49,7 @@ width=CreateObject("HtmlFile").ParentWindow.Screen.AvailWidth
 Window.MoveTo width-400,300
 Window.ResizeTo 400,240
 
-Dim ws, Fso, codeTxtPath, floorData(), userNameData(), projectData(), resultData(), countResultData
+Dim ws, Fso, codeTxtPath, floorData(), userNameData(), projectData(), resultData(), countResultData, avgResultData(), bestResultData()
 Set ws=CreateObject("wscript.shell")
 Set Fso=CreateObject("Scripting.FileSystemObject")
 codeTxtPath = ws.CurrentDirectory&"\temp.txt"
@@ -58,20 +58,20 @@ noResultTxtPath = ws.CurrentDirectory&"\noResult.txt"
 countResultData = 0
 Dim floorDataNoResult(), userNameDataNoResult(), projectDataNoResult(), countNoResultData
 countNoResultData = 0
-Dim userNameData_333, resultData_333
-Dim userNameData_444, resultData_444
-Dim userNameData_555, resultData_555
-Dim userNameData_222, resultData_222
-Dim userNameData_333bf, resultData_333bf
-Dim userNameData_333oh, resultData_333oh
-Dim userNameData_333fm, resultData_333fm
-Dim userNameData_py, resultData_py
-Dim userNameData_mega, resultData_mega
-Dim userNameData_sq, resultData_sq
-Dim userNameData_clock, resultData_clock
-Dim userNameData_sk, resultData_sk
-Dim userNameData_666, resultData_666
-Dim userNameData_777, resultData_777
+Dim userNameData_333, avgResultData_333, bestResultData_333, resultData_333
+Dim userNameData_444, avgResultData_444, bestResultData_444, resultData_444
+Dim userNameData_555, avgResultData_555, bestResultData_555, resultData_555
+Dim userNameData_222, avgResultData_222, bestResultData_222, resultData_222
+Dim userNameData_333bf, avgResultData_333bf, bestResultData_333bf, resultData_333bf
+Dim userNameData_333oh, avgResultData_333oh, bestResultData_333oh, resultData_333oh
+Dim userNameData_333fm, avgResultData_333fm, bestResultData_333fm, resultData_333fm
+Dim userNameData_py, avgResultData_py, bestResultData_py, resultData_py
+Dim userNameData_mega, avgResultData_mega, bestResultData_mega, resultData_mega
+Dim userNameData_sq, avgResultData_sq, bestResultData_sq, resultData_sq
+Dim userNameData_clock, avgResultData_clock, bestResultData_clock, ResultData_clock
+Dim userNameData_sk, avgResultData_sk, bestResultData_sk, resultData_sk
+Dim userNameData_666, avgResultData_666, bestResultData_666, resultData_666
+Dim userNameData_777, avgResultData_777, bestResultData_777, resultData_777
 Dim countExcelRow
 countExcelRow = 0
 
@@ -88,90 +88,711 @@ Sub Sleep(MSecs)
      CreateObject("WScript.Shell").Run "sleeper.vbs " & MSecs,1 , True 
 End Sub
 
-Function checkTxtFile(FilePath)
-    If Fso.FileExists(FilePath) Then
-        Dim TxtFile
-        Set TxtFile = Fso.getFile(FilePath)
-        TxtFile.Delete
-        Set TxtFile = Nothing
-    End If    
-    Fso.CreateTextFile FilePath, True
+
+
+
+'*************************************************
+'****get code from Pages, and write into text file.
+'*************************************************
+Function getPagesCode()
+    checkTxtFile(codeTxtPath)
+    getSource(getUrl())
+    Sleep(1000)
+
+    Dim MaxPage, url, i
+    MaxPage = getInfoFromTxt("尾页", "pn=", 3, "尾页", -2)
+    For i = 2 To MaxPage
+        url = getUrl() & "?pn=" & i
+        getSource(url)
+    Next
+    Sleep(1000)
+    getTextFromCode()
+    Msgbox("Done!")
 End Function
 
-Function writeToTxt(responseText)
-    Set oTxt = Fso.OpenTextFile(codeTxtPath,8)
-    oTxt.Write(responseText)
-    oTxt.Close
-    Set oTxt = Nothing
-End Function
+        Function checkTxtFile(FilePath)
+            If Fso.FileExists(FilePath) Then
+                Dim TxtFile
+                Set TxtFile = Fso.getFile(FilePath)
+                TxtFile.Delete
+                Set TxtFile = Nothing
+            End If    
+            Fso.CreateTextFile FilePath, True
+        End Function
 
-Function getInfoFromTxt(strSearch, strStart, numStart, strEnd, numEnd)
-    Dim oTxt, getStrLine, MaxPage
-    Set oTxt = Fso.OpenTextFile(codeTxtPath,1)
+        Function writeToTxt(responseText)
+            Set oTxt = Fso.OpenTextFile(codeTxtPath,8)
+            oTxt.Write(responseText)
+            oTxt.Close
+            Set oTxt = Nothing
+        End Function
 
-    Do Until oTxt.AtEndOfStream
-        getStrLine = oTxt.ReadLine
-        If InStr(getStrLine,strSearch) > 0 Then
-            Exit Do
-        End If
-    Loop
-    Set oTxt = Nothing
-    countStart = InStr(getStrLine,strStart) + numStart
-    countEnd = InStr(getStrLine,strEnd) + numEnd
-    'Msgbox(countStart & " " & countEnd)
-    getInfoFromTxt = Mid(getStrLine, countStart, countEnd-countStart)
-End Function
+        Function getInfoFromTxt(strSearch, strStart, numStart, strEnd, numEnd)
+            Dim oTxt, getStrLine, MaxPage
+            Set oTxt = Fso.OpenTextFile(codeTxtPath,1)
 
-Function getArrayFromTxt(strSearch, strStart, numStart, strEnd, numEnd)
-    Dim oTxt, getStrLine, MaxPage, strArray(), count
-    Set oTxt = Fso.OpenTextFile(codeTxtPath,1)
-    count = 0
-    Do Until oTxt.AtEndOfStream
-        getStrLine = oTxt.ReadLine
-        If InStr(getStrLine,strSearch) > 0 Then
-            ReDim Preserve strArray(count)
+            Do Until oTxt.AtEndOfStream
+                getStrLine = oTxt.ReadLine
+                If InStr(getStrLine,strSearch) > 0 Then
+                    Exit Do
+                End If
+            Loop
+            Set oTxt = Nothing
             countStart = InStr(getStrLine,strStart) + numStart
             countEnd = InStr(getStrLine,strEnd) + numEnd
             'Msgbox(countStart & " " & countEnd)
-            strArray(count) = Mid(getStrLine, countStart, countEnd-countStart)
-            count = count + 1
+            getInfoFromTxt = Mid(getStrLine, countStart, countEnd-countStart)
+        End Function
+
+
+
+'*************************************************
+'****get origin Str from Code for deal.
+'*************************************************
+Function getTextFromCode()
+    Dim tmpStrResult, strResult, strUserName, countStart
+    tmpStrResult = getArrayFromTxt("j_d_post_content", "j_d_post_content", 40, "user-hide-post-down", -31)
+    strResult = checkStrArrayForBubble(tmpStrResult)
+    strUserName = getArrayFromTxt("p_author_name", "_blank", 8, "</a>", 0)
+    strFloorNum = getShortStrFromTxt("post_no", "post_no", 14, 4, ",")
+    For i = 0 to UBound(strUserName)
+        If (strUserName(i) = "魔方英语会计学") AND (Instr(strResult(i),"--完--") > 0) Then
+            countStart = i
+            Exit For
         End If
-    Loop
-    Set oTxt = Nothing
-    getArrayFromTxt = strArray
+    Next
+
+    'For i = countStart+1 To UBound(strUserName)
+        'msgbox(strUserName(i) & vbLf & strResult(i))
+    'Next
+    dealOriginStr strResult, strUserName, strFloorNum, countStart
 End Function
 
-Function getTimesAppearInStr(str1, str2)
-    Dim count, tmpStr1, tmpStr2
-    count = 0
-    tmpStr1 = str1
-    tmpStr2 = str2
-    If InStr(tmpStr1, tmpStr2) > 0 Then
-	    Do Until Not (InStr(tmpStr1, tmpStr2) > 0)
-	        tmpStr1 = RePlace(tmpStr1, tmpStr2, "", 1, 1)
-	        count = count + 1
-	    Loop
-    End If
-    getTimesAppearInStr = count
+        Function getArrayFromTxt(strSearch, strStart, numStart, strEnd, numEnd)
+            Dim oTxt, getStrLine, MaxPage, strArray(), count
+            Set oTxt = Fso.OpenTextFile(codeTxtPath,1)
+            count = 0
+            Do Until oTxt.AtEndOfStream
+                getStrLine = oTxt.ReadLine
+                If InStr(getStrLine,strSearch) > 0 Then
+                    ReDim Preserve strArray(count)
+                    countStart = InStr(getStrLine,strStart) + numStart
+                    countEnd = InStr(getStrLine,strEnd) + numEnd
+                    If (countStart > 0 And countEnd > 0) Then
+                        strArray(count) = Mid(getStrLine, countStart, countEnd-countStart)
+                        count = count + 1
+                    'Else
+                        'Msgbox(countStart & " " & countEnd & vbLf & getStrLine)
+                    End If
+                End If
+            Loop
+            Set oTxt = Nothing
+            getArrayFromTxt = strArray
+        End Function
+
+        Function checkStrArrayForBubble(strArray)
+            Dim tmpArray(), tmpStr
+            For i = 0 To UBound(strArray)
+                tmpStr = strArray(i)
+                If InStr(tmpStr,"post_bubble_middle") > 0 Then
+                    tmpStr = cutStrWithKey(tmpStr, "post_bubble_middle", 18, "post_bubble_bottom", 0)
+                    tmpStr = cutStrWithKey(tmpStr, "png", 6, "</div>", 0)
+                End If
+
+                If InStr(tmpStr,"<img class=") > 0 Then
+                    tmpStr = cutStrWithKey(tmpStr, "", 0, "<img class=", 0)
+                End If
+
+                ReDim Preserve tmpArray(i)
+                tmpArray(i) = tmpStr
+            Next
+            checkStrArrayForBubble = tmpArray
+        End Function
+
+        Function getShortStrFromTxt(strSearch, strStart, numStart, strLen, strEnd)
+            Dim oTxt, getStrLine, MaxPage, strArray(), count
+            Set oTxt = Fso.OpenTextFile(codeTxtPath,1)
+            count = 0
+            Do Until oTxt.AtEndOfStream
+                getStrLine = oTxt.ReadLine
+                If InStr(getStrLine,strSearch) > 0 Then
+                    ReDim Preserve strArray(count)
+                    countStart = InStr(getStrLine,strStart) + numStart
+                    'Msgbox(countStart & " " & countEnd)
+                    tmpStr = Mid(getStrLine, countStart, strLen)
+                    countEnd = InStr(tmpStr, strEnd)
+                    if countEnd > 0 Then 
+                        strArray(count) = Mid(tmpStr, 1, countEnd-1)
+                        count = count + 1
+                    End If
+                End If
+            Loop
+            Set oTxt = Nothing
+            getShortStrFromTxt = strArray
+        End Function
+
+
+
+'*************************************************
+'****deal origin Str.
+'*************************************************
+Function dealOriginStr(strResultArray, strUserNameArray, strFloorNum, countStart)
+    checkTxtFile(resultTxtPath)
+    checkTxtFile(noResultTxtPath)
+    Dim allProjectArray, seqProjectInStr, flag
+
+    For i = countStart+1 To UBound(strResultArray)
+        allProjectArray = getAllProjectName()
+        flag = True
+        For j = 0 To UBound(allProjectArray)
+            seqProjectInStr = getSeqOfProjectInStr(strResultArray(i), allProjectArray(j))
+            If seqProjectInStr <> "" Then
+                getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), seqProjectInStr, allProjectArray(j)
+                flag = False
+            End If
+        Next
+        If flag Then
+            getAndDealResult strResultArray(i), strUserNameArray(i), "", "", i
+        End If
+    Next
+
+    writeToExcel()
+    Msgbox("OK")
 End Function
 
-Function getAllStepInStr(str1, str2)
-    Dim count, stepArray(), tmpStr1, tmpStr2
-    count = 0
-    tmpStr1 = str1
-    tmpStr2 = str2
-    If InStr(tmpStr1, tmpStr2) > 0 Then
-	    Do Until Not (InStr(tmpStr1, tmpStr2) > 0)
-	    	ReDim Preserve stepArray(count)
-	    	stepArray(count) = InStr(tmpStr1, tmpStr2) + count * Len(tmpStr2)
-	        tmpStr1 = RePlace(tmpStr1, tmpStr2, "", 1, 1)
-	        count = count + 1
-	    Loop
-        getAllStepInStr = stepArray
+        Function getSeqOfProjectInStr(str, projectName)
+            Dim seqFinal, tmpStr, checkStrArray, seqInStr
+            seqFinal = ""
+            tmpStr = LCase(str)
+            checkStrArray = getProjectCheckStrArray(projectName)
+
+            If IsNumeric(projectName) Then
+                tmpStr = "beginFlag" & tmpStr
+            End If
+            
+            For i = 0 To UBound(checkStrArray)
+                seqInStr = InStr(tmpStr, checkStrArray(i))
+                If seqInStr > 0 Then
+                    seqFinal = seqInStr + Len(checkStrArray(i))
+                    Exit For
+                End If
+            Next
+
+            If IsNumeric(projectName) And (seqFinal <> "") Then
+                seqFinal = seqFinal - 9
+            End If
+
+            getSeqOfProjectInStr = seqFinal
+        End Function
+
+
+
+'*************************************************
+'****get result.
+'*************************************************
+Function getAndDealResult(str, strUserName, floorNum, countCheck, projectName)
+    If countCheck <> "" Then
+        Dim finalResultArray, strResult, j, numResult, avgResult, bestResult
+        strResult = ""
+        numResult = 5
+
+        If (projectName = "333bf") Or (projectName = "333fm") Then
+            numResult = 3
+        End If
+
+        finalResultArray = getArrayResult(str, countCheck, numResult, projectName)
+
+        avgAndBestResult = getAvgAndBestResult(finalResultArray)
+        avgResult = avgAndBestResult(0)
+        bestResult = avgAndBestResult(1)
+
+        For j = 0 To numResult-1
+            strResult = strResult & " " & finalResultArray(j)
+        Next
+
+        strResult = Trim(strResult)
+
+        saveResult str, avgResult, bestResult, strResult, strUserName, floorNum, projectName
     Else
-        ReDim Preserve stepArray(0)
-        getAllStepInStr = stepArray
+        saveResult str, "", "", "", strUserName, floorNum, ""
     End If
+End Function
+
+        Function getArrayResult(str, countCheck, numResult, projectName)
+            Dim tmpResultArray, resultArray
+            If projectName <> "333fm" Then
+                tmpResultArray = getFiveResult(str, countCheck, numResult)
+                If (numResult = 5) And (tmpResultArray(5) <> "") Then
+                    resultArray = getFiveResult(tmpResultArray(5), countCheck, 5)
+                Else
+                    resultArray = tmpResultArray
+                End If
+            Else
+                resultArray = getFmResult(str, countCheck)
+            End If
+            getArrayResult = resultArray
+        End Function
+
+        Function getFiveResult(str, countStart, numResult)
+            Dim tmpStr, resultArray(5), countGetedResult, result(4,3), tmpStep, tmpStepResult, stepResult(4)
+            countGetedResult = 0
+            tmpStepResult = 0
+            tmpStr = changeStrToSimple(Mid(str, countStart))
+            dnfStep = getAllStepInStr(tmpStr, "D0.00")
+            tmpStep = getAllStepInStr(tmpStr, "0.00")
+            If UBound(tmpStep) >= numResult-1 Then
+                tmpStep = getCloseNumArray(tmpStep, numResult)
+                If UBound(tmpStep) > 0 Then
+                    '//'modified tmpStep For DNF
+                    If dnfStep(0) <> "" Then
+                        For k = UBound(dnfStep) To 0 Step -1
+                            For l = 0 To UBound(tmpStep)
+                                If tmpStep(l)-1 = dnfStep(k) Then
+                                    tmpStep(l) = dnfStep(k)
+                                ElseIf tmpStep(l)-2 > dnfStep(k) Then
+                                    tmpStep(l) = tmpStep(l) - 2
+                                End If
+                            Next
+                        Next
+                    End If
+
+                    '//'get result with tmpStep
+                    For i = 0 To UBound(tmpStep)
+                        tmpStep(i) = tmpStep(i) + countStart - 1
+                        resultArray(i) = Mid(str, tmpStep(i), 4)
+                        If isCharacter(Mid(str, tmpStep(i), 1), "Dd") Then
+                            resultArray(i) = "DNF"
+                        Else
+                            If tmpStep(i) > 3 Then
+                                num1 = Mid(str, tmpStep(i)-3, 1)
+                                num2 = Mid(str, tmpStep(i)-2, 1)
+                                num3 = Mid(str, tmpStep(i)-1, 1)
+                            ElseIf tmpStep(i) > 1 Then
+                                num3 = Mid(str, tmpStep(i)-1, 1)
+                            End If
+
+                            If IsNumeric(num3) Then
+                                resultArray(i) = num3 & resultArray(i)
+                                If isCharacter(num2, ":：") And IsNumeric(num1) Then
+                                    resultArray(i) = num1 & num2 & resultArray(i)
+                                End If
+                            End If
+                        End If
+                    Next
+                End If
+            End If
+            getFiveResult = resultArray
+        End Function
+
+        Function changeStrToSimple(str)
+            Dim tmpStr, simpleStr
+            tmpStr = str
+            simpleStr = ""
+            For searchStep = 1 To Len(tmpStr)
+                Select Case True
+                    Case IsNumeric(Mid(tmpStr, searchStep, 1))
+                        simpleStr = simpleStr & "0"
+                    Case isCharacter(Mid(tmpStr, searchStep, 1), "Dd")
+                        simpleStr = simpleStr & "D"
+                    Case isCharacter(Mid(tmpStr, searchStep, 1), "Nn")
+                        simpleStr = simpleStr & "N"
+                    Case isCharacter(Mid(tmpStr, searchStep, 1), "Ff")
+                        simpleStr = simpleStr & "F"
+                    Case isCharacter(Mid(tmpStr, searchStep, 1), ".。")
+                        simpleStr = simpleStr & "."
+                    Case isCharacter(Mid(tmpStr, searchStep, 1), ":：")
+                        simpleStr = simpleStr & ":"
+                    Case Else
+                        simpleStr = simpleStr & "_"
+                End Select
+            Next
+            simpleStr = RePlace(simpleStr, "DNF", "D0.00")
+            changeStrToSimple = simpleStr
+        End Function
+
+        Function getAllStepInStr(str1, str2)
+            Dim count, stepArray(), tmpStr1, tmpStr2
+            count = 0
+            tmpStr1 = str1
+            tmpStr2 = str2
+            If InStr(tmpStr1, tmpStr2) > 0 Then
+                Do Until Not (InStr(tmpStr1, tmpStr2) > 0)
+                    ReDim Preserve stepArray(count)
+                    stepArray(count) = InStr(tmpStr1, tmpStr2) + count * Len(tmpStr2)
+                    tmpStr1 = RePlace(tmpStr1, tmpStr2, "", 1, 1)
+                    count = count + 1
+                Loop
+                getAllStepInStr = stepArray
+            Else
+                ReDim Preserve stepArray(0)
+                getAllStepInStr = stepArray
+            End If
+        End Function
+
+        Function getCloseNumArray(intArray, numResult)
+            'Dim intArray, diffNum, numResult
+            'intArray = Array(1,5,8,15,16,17,25,34,54,55,56,57)
+            'diffNum = 1
+            'numResult = 5
+            Dim i, j, diffStepArray1, diffStepArray2, newArray(), tmpArray, finalArray, flagNew, flagTmp
+            j = 2
+            diffStepArray1 = getDiffStepArray(intArray)
+            diffStepArray2 = getDiffStepArray(diffStepArray1)
+            flagNew = False
+            flagTmp = False
+            Redim Preserve newArray(1)
+            newArray(0) = intArray(0)
+            newArray(1) = intArray(1)
+            For i = 0 To UBound(diffStepArray2)
+                If j = numResult Then
+                    Exit For
+                End If
+                
+                If Abs(diffStepArray2(i)) <= 2  Then
+                    Redim Preserve newArray(j)
+                    newArray(j) = intArray(i+2)
+                    j = j + 1
+                    flagNew = True
+                Else
+                    If flagNew Then
+                        tmpArray = newArray
+                        newArray(0) = intArray(i)
+                        newArray(1) = intArray(i+1)
+                        j = 2
+                        flagTmp = True
+                    End If
+                End If
+            Next
+            If flagTmp Then
+                If UBound(tmpArray) >= UBound(newArray) Then
+                    finalArray = tmpArray
+                Else
+                    finalArray = newArray
+                End If
+            ElseIf flagNew Then
+                finalArray = newArray
+            Else
+                Redim Preserve newArray(0)
+                finalArray = newArray
+            End If
+            getCloseNumArray = finalArray
+            'msgboxArray(finalArray)
+        End Function
+
+                Function getDiffStepArray(intArray)
+                    Dim tmpArray()
+                    For i = 0 To UBound(intArray)-1
+                        ReDim Preserve tmpArray(i)
+                        tmpArray(i) = intArray(i+1) - intArray(i)
+                    Next
+                    getDiffStepArray = tmpArray
+                End Function
+
+        Function getFmResult(str, countStart)
+            Dim countFm, strTmp1, strTmp2, fmResult(2), countGetedResult, searchStep, searchStepResult(2), tmpFmResult
+            countFm = ""
+            countGetedResult = 0
+            searchStep = 0
+            
+            Do Until (countGetedResult = 3) Or (searchStep > 20)
+                strTmp1 = Mid(str, countStart+searchStep+1, 1)
+                strTmp2 = Mid(str, countStart+searchStep+2, 1)
+                If IsNumeric(strTmp1) And IsNumeric(strTmp2) Then
+                    fmResult(countGetedResult) = strTmp1 & strTmp2
+                    searchStepResult(countGetedResult) = countStart + searchStep + 1
+                    searchStep = searchStep + 2
+                    If countGetedResult > 0 Then
+                        If searchStepResult(countGetedResult) - searchStepResult(countGetedResult-1) > 6 Then
+                            fmResult(countGetedResult) = ""
+                            Exit Do
+                        Else
+                            countGetedResult = countGetedResult + 1
+                        End If
+                    Else
+                        countGetedResult = countGetedResult + 1
+                    End If
+                Else
+                    searchStep = searchStep + 1
+                End If
+            Loop
+
+            If countGetedResult <> 3 Then
+                tmpFmResult = getFmResultSpecial(str, countStart)
+                If (tmpFmResult(2) <> "") Then
+                    getFmResult = tmpFmResult
+                ElseIf (tmpFmResult(1) <> "") And (countGetedResult < 2) Then
+                    getFmResult = tmpFmResult
+                ElseIf (tmpFmResult(0) <> "") And (countGetedResult < 1) Then
+                    getFmResult = tmpFmResult
+                Else
+                    getFmResult = fmResult
+                End If
+            Else
+                getFmResult = fmResult
+            End If
+        End Function
+
+        Function getFmResultSpecial(str, countStart)
+            Dim countFm, strTmp1, strTmp2, fmResult(2), countGetedResult, searchStep
+            countFm = ""
+            countGetedResult = 0
+            searchStep = 0
+
+            Select Case True
+                Case InStr(countStart, str, "Total steps") > 0
+                    countFm = InStr(countStart, str, "Total steps")
+            End Select
+
+            Do Until (Not countFm > 0) Or (countGetedResult = 3) Or (searchStep > Len(str)-countFm-2)
+                strTmp1 = Mid(str, countFm+searchStep+1, 1)
+                strTmp2 = Mid(str, countFm+searchStep+2, 1)
+                If IsNumeric(strTmp1) And IsNumeric(strTmp2) Then
+                    fmResult(countGetedResult) = strTmp1 & strTmp2
+                    countGetedResult = countGetedResult + 1
+                    countFm = InStr(countFm+11, str, "Total steps")
+                    searchStep = 0
+                End If
+                searchStep = searchStep + 1
+            Loop
+            getFmResultSpecial = fmResult
+        End Function
+
+
+
+'*************************************************
+'****save result into text file.
+'*************************************************
+Function saveResult(str, avgResult, bestResult, strResult, strUserName, floorNum, projectName)
+    Dim oTxt
+    If strResult <> "" Then
+        Set oTxt = Fso.OpenTextFile(resultTxtPath, 8)
+
+        ReDim Preserve floorData(countResultData)
+        ReDim Preserve userNameData(countResultData)
+        ReDim Preserve projectData(countResultData)
+        ReDim Preserve resultData(countResultData)
+        ReDim Preserve avgResultData(countResultData)
+        ReDim Preserve bestResultData(countResultData)
+        floorData(countResultData) = floorNum & "楼"
+        userNameData(countResultData) = strUserName
+        projectData(countResultData) = projectName
+        resultData(countResultData) = strResult
+        avgResultData(countResultData) = avgResult
+        bestResultData(countResultData) = bestResult
+
+        oTxt.WriteLine(floorData(countResultData))
+        oTxt.WriteLine(str)
+        oTxt.WriteLine(userNameData(countResultData))
+        oTxt.WriteLine(projectData(countResultData))
+        oTxt.WriteLine(resultData(countResultData))
+        oTxt.WriteLine(avgResultData("avg: " & countResultData) & "best: " & bestResultData(countResultData))
+        oTxt.WriteLine()
+        oTxt.WriteLine()
+
+        countResultData = countResultData + 1
+    Else
+        Set oTxt = Fso.OpenTextFile(noResultTxtPath, 8)
+        ReDim Preserve floorDataNoResult(countNoResultData)
+        ReDim Preserve userNameDataNoResult(countNoResultData)
+        ReDim Preserve projectDataNoResult(countNoResultData)
+        floorDataNoResult(countNoResultData) = floorNum & "楼"
+        userNameDataNoResult(countNoResultData) = strUserName
+        projectDataNoResult(countNoResultData) = projectName
+
+        oTxt.WriteLine(floorDataNoResult(countNoResultData))
+        oTxt.WriteLine(str)
+        oTxt.WriteLine(userNameDataNoResult(countNoResultData))
+        oTxt.WriteLine(projectDataNoResult(countNoResultData))
+        oTxt.WriteLine()
+        oTxt.WriteLine()
+    End If
+    Set oTxt = Nothing
+End Function
+
+
+
+'*************************************************
+'****write final result into excel file.
+'*************************************************
+Function writeToExcel()
+    sortByProject()
+    Dim ExcelApp, ExcelBook, ExcelSheet
+    Set ExcelApp = CreateObject("Excel.Application")
+    Set ExcelBook= ExcelApp.Workbooks.Open(ws.CurrentDirectory&"\result.xlsx")
+    Set ExcelSheet = ExcelBook.Sheets("Sheet1")
+
+    ExcelSheet.Columns("A:H").NumberFormatLocal = "@"
+
+    writeAllProjectResult ExcelSheet, userNameData_333, avgResultData_333, bestResultData_333, resultData_333, "333"
+    writeAllProjectResult ExcelSheet, userNameData_444, avgResultData_444, bestResultData_444, resultData_444, "444"
+    writeAllProjectResult ExcelSheet, userNameData_555, avgResultData_555, bestResultData_555, resultData_555, "555"
+    writeAllProjectResult ExcelSheet, userNameData_222, avgResultData_222, bestResultData_222, resultData_222, "222"
+    writeAllProjectResult ExcelSheet, userNameData_333bf, avgResultData_333bf, bestResultData_333bf, resultData_333bf, "333bf"
+    writeAllProjectResult ExcelSheet, userNameData_333oh, avgResultData_333oh, bestResultData_333oh, resultData_333oh, "333oh"
+    writeAllProjectResult ExcelSheet, userNameData_333fm, avgResultData_333fm, bestResultData_333fm, resultData_333fm, "333fm"
+    writeAllProjectResult ExcelSheet, userNameData_py, avgResultData_py, bestResultData_py, resultData_py, "py"
+    writeAllProjectResult ExcelSheet, userNameData_mega, avgResultData_mega, bestResultData_mega, resultData_mega, "mega"
+    writeAllProjectResult ExcelSheet, userNameData_sq, avgResultData_sq, bestResultData_sq, resultData_sq, "sq"
+    writeAllProjectResult ExcelSheet, userNameData_clock, avgResultData_clock, bestResultData_clock, resultData_clock, "clock"
+    writeAllProjectResult ExcelSheet, userNameData_sk, avgResultData_sk, bestResultData_sk, resultData_sk, "sk"
+    writeAllProjectResult ExcelSheet, userNameData_666, avgResultData_666, bestResultData_666, resultData_666, "666"
+    writeAllProjectResult ExcelSheet, userNameData_777, avgResultData_777, bestResultData_777, resultData_777, "777"
+
+    ExcelBook.Save
+    ExcelBook.Close
+    ExcelApp.Quit
+    Set ExcelSheet = Nothing
+    Set ExcelBook = Nothing
+    Set ExcelApp = Nothing
+End Function
+
+        Function sortByProject()
+            Dim allProjectArray, tmpUserNameData(), tmpAvgResultData(), tmpBestResultData(), tmpResultData()
+            allProjectArray = getAllProjectName()
+            count = 0
+            
+
+            For i = 0 To UBound(allProjectArray)
+                ReDim Preserve tmpUserNameData(0)
+                ReDim Preserve tmpAvgResultData(0)
+                ReDim Preserve tmpBestResultData(0)
+                ReDim Preserve tmpResultData(0)
+                tmpUserNameData(0) = ""
+                tmpAvgResultData(0) = ""
+                tmpBestResultData(0) = ""
+                tmpResultData(0) = ""
+                count = 0
+
+                For j = 0 To UBound(userNameData)
+                    If projectData(j) = allProjectArray(i) Then
+                        ReDim Preserve tmpUserNameData(count)
+                        ReDim Preserve tmpAvgResultData(count)
+                        ReDim Preserve tmpBestResultData(count)
+                        ReDim Preserve tmpResultData(count)
+                        tmpUserNameData(count) = userNameData(j)
+                        tmpAvgResultData(count) = avgResultData(j)
+                        tmpBestResultData(count) = bestResultData(j)
+                        tmpResultData(count) = resultData(j)
+                        count = count + 1
+                    End If
+                Next
+
+                Select Case allProjectArray(i)
+                    Case "333"
+                        userNameData_333 = tmpUserNameData
+                        avgResultData_333 = tmpAvgResultData
+                        bestResultData_333 = tmpBestResultData
+                        resultData_333 = tmpResultData
+                    Case "444"
+                        userNameData_444 = tmpUserNameData
+                        avgResultData_444 = tmpAvgResultData
+                        bestResultData_444 = tmpBestResultData
+                        resultData_444 = tmpResultData
+                    Case "555"
+                        userNameData_555 = tmpUserNameData
+                        avgResultData_555 = tmpAvgResultData
+                        bestResultData_555 = tmpBestResultData
+                        resultData_555 = tmpResultData
+                    Case "222"
+                        userNameData_222 = tmpUserNameData
+                        avgResultData_222 = tmpAvgResultData
+                        bestResultData_222 = tmpBestResultData
+                        resultData_222 = tmpResultData
+                    Case "333bf"
+                        userNameData_333bf = tmpUserNameData
+                        avgResultData_333bf = tmpAvgResultData
+                        bestResultData_333bf = tmpBestResultData
+                        resultData_333bf = tmpResultData
+                    Case "333oh"
+                        userNameData_333oh = tmpUserNameData
+                        avgResultData_333oh = tmpAvgResultData
+                        bestResultData_333oh = tmpBestResultData
+                        resultData_333oh = tmpResultData
+                    Case "333fm"
+                        userNameData_333fm = tmpUserNameData
+                        avgResultData_333fm = tmpAvgResultData
+                        bestResultData_333fm = tmpBestResultData
+                        resultData_333fm = tmpResultData
+                    Case "py"
+                        userNameData_py = tmpUserNameData
+                        avgResultData_py = tmpAvgResultData
+                        bestResultData_py = tmpBestResultData
+                        resultData_py = tmpResultData
+                    Case "mega"
+                        userNameData_mega = tmpUserNameData
+                        avgResultData_mega = tmpAvgResultData
+                        bestResultData_mega = tmpBestResultData
+                        resultData_mega = tmpResultData
+                    Case "sq"
+                        userNameData_sq = tmpUserNameData
+                        avgResultData_sq = tmpAvgResultData
+                        bestResultData_sq = tmpBestResultData
+                        resultData_sq = tmpResultData
+                    Case "clock"
+                        userNameData_clock = tmpUserNameData
+                        avgResultData_clock = tmpAvgResultData
+                        bestResultData_clock = tmpBestResultData
+                        resultData_clock = tmpResultData
+                    Case "sk"
+                        userNameData_sk = tmpUserNameData
+                        avgResultData_sk = tmpAvgResultData
+                        bestResultData_sk = tmpBestResultData
+                        resultData_sk = tmpResultData
+                    Case "666"
+                        userNameData_666 = tmpUserNameData
+                        avgResultData_666 = tmpAvgResultData
+                        bestResultData_666 = tmpBestResultData
+                        resultData_666 = tmpResultData
+                    Case "777"
+                        userNameData_777 = tmpUserNameData
+                        avgResultData_777 = tmpAvgResultData
+                        bestResultData_777 = tmpBestResultData
+                        resultData_777 = tmpResultData
+                End Select
+            Next
+        End Function
+
+        Function writeAllProjectResult(ExcelSheet, userNameArray, avgResultArray, bestResultArray, resultArray, projectName)
+            Dim strResultArray, avgAndBestResult
+            ExcelSheet.Cells(countExcelRow+1, 1).Value = projectName
+            countExcelRow = countExcelRow + 1
+
+            For i = 0 To UBound(resultArray)
+                If resultArray(i) <> "" Then
+                    strResultArray = Split(resultArray(i), " ")
+                Else
+                    ReDim strResultArray(4)
+                End If
+
+                ExcelSheet.Cells(countExcelRow+1, 1).Value = userNameArray(i)
+                ExcelSheet.Cells(countExcelRow+1, 2).Value = avgResultArray(i)
+                ExcelSheet.Cells(countExcelRow+1, 3).Value = bestResultArray(i)
+                For j = 0 To UBound(strResultArray)
+                    ExcelSheet.Cells(countExcelRow+1, j+4).Value = strResultArray(j)
+                Next
+
+                countExcelRow = countExcelRow + 1
+            Next
+
+            countExcelRow = countExcelRow + 1
+        End Function
+
+
+
+'*************************************************
+'*************************************************
+
+Function cutStrWithKey(str, keyBegin, numBegin, keyEnd, numEnd)
+    Dim tmpStr, countStart, countEnd
+    tmpStr = str
+    If keyBegin <> "" Then
+        countStart = InStr(tmpStr, keyBegin) + numBegin
+    Else
+        countStart = 1
+    End If
+    countEnd = InStr(tmpStr, keyEnd) + numEnd
+    tmpStr = Mid(tmpStr, countStart, countEnd-countStart)
+    cutStrWithKey = tmpStr
 End Function
 
 Function msgboxArray(strArray)
@@ -194,374 +815,15 @@ Function getExistInArray(strArray, str)
     getExistInArray = countFinded
 End Function
 
-Function isNumber(str)
-    Dim flag, tmpArray(9)
+Function isCharacter(character,characters)
+    Dim flag
     flag = False
-    For i = 0 To 9
-        If str = CStr(i) Then
-            flag = True
-            Exit For
-        End If 
-    Next
-    isNumber = flag
-End Function
-
-Function isD(str)
-    Dim flag, tmpArray(1)
-    flag = False
-    tmpArray(0) = "D"
-    tmpArray(1) = "d"
-    For i = 0 To UBound(tmpArray)
-        If str = tmpArray(i) Then
-            flag = True
-        End If
-    Next
-    isD = flag
-End Function
-
-Function isN(str)
-    Dim flag, tmpArray(1)
-    flag = False
-    tmpArray(0) = "N"
-    tmpArray(1) = "n"
-    For i = 0 To UBound(tmpArray)
-        If str = tmpArray(i) Then
-            flag = True
-        End If
-    Next
-    isN = flag
-End Function
-
-Function isF(str)
-    Dim flag, tmpArray(1)
-    flag = False
-    tmpArray(0) = "F"
-    tmpArray(1) = "f"
-    For i = 0 To UBound(tmpArray)
-        If str = tmpArray(i) Then
-            flag = True
-        End If
-    Next
-    isF = flag
-End Function
-
-Function isPoint(str)
-    Dim flag, tmpArray(1)
-    flag = False
-    tmpArray(0) = "."
-    tmpArray(1) = "。"
-    For i = 0 To UBound(tmpArray)
-        If str = tmpArray(i) Then
-            flag = True
-        End If
-    Next
-    isPoint = flag
-End Function
-
-Function isColon(str)
-    Dim flag, tmpArray(1)
-    flag = False
-    tmpArray(0) = ":"
-    tmpArray(1) = "："
-    For i = 0 To UBound(tmpArray)
-        If str = tmpArray(i) Then
-            flag = True
-        End If
-    Next
-    isColon = flag
-End Function
-
-Function changeStrToSimple(str)
-    Dim tmpStr, simpleStr
-    tmpStr = str
-    simpleStr = ""
-    For searchStep = 1 To Len(tmpStr)
-        Select Case True
-            Case IsNumeric(Mid(tmpStr, searchStep, 1))
-                simpleStr = simpleStr & "0"
-            Case isD(Mid(tmpStr, searchStep, 1))
-                simpleStr = simpleStr & "D"
-            Case isN(Mid(tmpStr, searchStep, 1))
-                simpleStr = simpleStr & "N"
-            Case isF(Mid(tmpStr, searchStep, 1))
-                simpleStr = simpleStr & "F"
-            Case isPoint(Mid(tmpStr, searchStep, 1))
-                simpleStr = simpleStr & "."
-            Case isColon(Mid(tmpStr, searchStep, 1))
-                simpleStr = simpleStr & ":"
-            Case Else
-                simpleStr = simpleStr & "_"
-        End Select
-    Next
-    simpleStr = RePlace(simpleStr, "DNF", "D0.00")
-    changeStrToSimple = simpleStr
-End Function
-
-Function getDiffStepArray(intArray)
-    Dim tmpArray()
-    For i = 0 To UBound(intArray)-1
-        ReDim Preserve tmpArray(i)
-        tmpArray(i) = intArray(i+1) - intArray(i)
-    Next
-    getDiffStepArray = tmpArray
-End Function
-
-Function getCloseNumArray(intArray, numResult)
-	'Dim intArray, diffNum, numResult
-	'intArray = Array(1,5,8,15,16,17,25,34,54,55,56,57)
-	'diffNum = 1
-	'numResult = 5
-	Dim i, j, diffStepArray1, diffStepArray2, newArray(), tmpArray, finalArray, flagNew, flagTmp
-	j = 2
-    diffStepArray1 = getDiffStepArray(intArray)
-    diffStepArray2 = getDiffStepArray(diffStepArray1)
-	flagNew = False
-	flagTmp = False
-    Redim Preserve newArray(1)
-    newArray(0) = intArray(0)
-    newArray(1) = intArray(1)
-	For i = 0 To UBound(diffStepArray2)
-        If j = numResult Then
-            Exit For
-        End If
-        
-        If Abs(diffStepArray2(i)) <= 2  Then
-            Redim Preserve newArray(j)
-            newArray(j) = intArray(i+2)
-            j = j + 1
-            flagNew = True
-        Else
-            If flagNew Then
-                tmpArray = newArray
-                newArray(0) = intArray(i)
-                newArray(1) = intArray(i+1)
-                j = 2
-                flagTmp = True
-            End If
-        End If
-    Next
-    If flagTmp Then
-        If UBound(tmpArray) >= UBound(newArray) Then
-    	    finalArray = tmpArray
-    	Else
-    	    finalArray = newArray
-    	End If
-    ElseIf flagNew Then
-        finalArray = newArray
-    Else
-        Redim Preserve newArray(0)
-        finalArray = newArray
+    If InStr(characters, character) > 0 Then
+        flag = True
     End If
-    getCloseNumArray = finalArray
-    'msgboxArray(finalArray)
+    isCharacter = flag
 End Function
 
-Function getFiveResult(str, countStart, numResult)
-	Dim tmpStr, resultArray(5), countGetedResult, result(4,3), tmpStep, tmpStepResult, stepResult(4)
-    countGetedResult = 0
-    tmpStepResult = 0
-    tmpStr = changeStrToSimple(Mid(str, countStart))
-    dnfStep = getAllStepInStr(tmpStr, "D0.00")
-    tmpStep = getAllStepInStr(tmpStr, "0.00")
-    If UBound(tmpStep) >= numResult-1 Then
-        tmpStep = getCloseNumArray(tmpStep, numResult)
-        If UBound(tmpStep) > 0 Then
-            '//'modified tmpStep For DNF
-            If dnfStep(0) <> "" Then
-                For k = UBound(dnfStep) To 0 Step -1
-                    For l = 0 To UBound(tmpStep)
-                        If tmpStep(l)-1 = dnfStep(k) Then
-                            tmpStep(l) = dnfStep(k)
-                        ElseIf tmpStep(l)-2 > dnfStep(k) Then
-                            tmpStep(l) = tmpStep(l) - 2
-                        End If
-                    Next
-                Next
-            End If
-
-            '//'get result with tmpStep
-	        For i = 0 To UBound(tmpStep)
-	        	tmpStep(i) = tmpStep(i) + countStart - 1
-	        	resultArray(i) = Mid(str, tmpStep(i), 4)
-	        	If isD(Mid(str, tmpStep(i), 1)) Then
-	        		resultArray(i) = "DNF"
-	        	Else
-		        	If tmpStep(i) > 3 Then
-		        		num1 = Mid(str, tmpStep(i)-3, 1)
-		        		num2 = Mid(str, tmpStep(i)-2, 1)
-		        		num3 = Mid(str, tmpStep(i)-1, 1)
-		        	ElseIf tmpStep(i) > 1 Then
-		        	    num3 = Mid(str, tmpStep(i)-1, 1)
-		        	End If
-
-		        	If IsNumeric(num3) Then
-		        		resultArray(i) = num3 & resultArray(i)
-		        	    If isColon(num2) And IsNumeric(num1) Then
-		        	    	resultArray(i) = num1 & num2 & resultArray(i)
-		        	    End If
-		        	End If
-		        End If
-	        Next
-	    End If
-	End If
-    getFiveResult = resultArray
-End Function
-
-
-'Function getFiveResult(str, countStart, numResult)
-'    Dim resultArray(5), countGetedResult, result(4,3), searchStepResult(4)
-'    countGetedResult = 0
-'    countPoint = Instr(countStart, str, ".")
-'    Do Until ((Not (countPoint-countStart)> 0) Or (countGetedResult = numResult))
-'    	If (countPoint-countStart) > 1 Then
-'            result(countGetedResult,0) = Mid(str, countPoint-2, 1)
-'        End If
-'        result(countGetedResult,1) = Mid(str, countPoint-1, 1)
-'        result(countGetedResult,2) = Mid(str, countPoint+1, 1)
-'        result(countGetedResult,3) = Mid(str, countPoint+2, 1)
-'
-'        If (countPoint-countStart) > 3 Then
-'            If Mid(str, countPoint-3, 1) = ":" Or Mid(str, countPoint-3, 1) = "：" Then
-'                If IsNumeric(Mid(str, countPoint-4, 1)) Then
-'                    strColon = Mid(str, countPoint-4, 1)
-'                End If
-'            End If
-'        End If
-'
-'        If IsNumeric(result(countGetedResult,0)) Then
-'            str1 = result(countGetedResult,0)
-'        End If
-'        If IsNumeric(result(countGetedResult,1)) Then
-'            str2 = result(countGetedResult,1)
-'        End If
-'        If IsNumeric(result(countGetedResult,2)) Then
-'            str3 = result(countGetedResult,2)
-'        End If
-'        If IsNumeric(result(countGetedResult,3)) Then
-'            str4 = result(countGetedResult,3)
-'        End If
-'
-'        If strColon <> "" Then
-'            resultTmp = strColon & ":" & str1 & str2 & "." & str3 & str4
-'        Else
-'            resultTmp = str1 & str2 & "." & str3 & str4
-'        End If
-'
-'        If (resultTmp <> ".") And (str1 & str2 <> "") And (str3 & str4 <> "") Then
-'            resultArray(countGetedResult) = resultTmp
-'            searchStepResult(countGetedResult) = countPoint
-'            If countGetedResult > 0 Then
-'            	If searchStepResult(countGetedResult) - searchStepResult(countGetedResult-1) > 12 Then
-'            		resultArray(countGetedResult) = ""
-'            		Exit Do
-'            	Else
-'                    countGetedResult = countGetedResult + 1
-'                End If
-'            Else
-'                countGetedResult = countGetedResult + 1
-'            End If
-'        End If
-'        countPoint = Instr(countPoint+1, str, ".")
-'    Loop
-'
-'    'Case:"1. 2. 3. 4. 5."
-'    If (numResult = 5) And (result(0,1) = "1") And (result(2,1) = "2") And (result(4,1) = "3") Then
-'    	For j = 0 To 4
-'            str = RePlace(str, ".", " ", 1, 1)
-'            str = RePlace(str, ".", "point", 1, 1)
-'        Next
-'        str = RePlace(str, "point", ".", 1, 5)
-'
-'        'Msgbox(str)
-'
-'        resultArray(5) = str
-'    End If
-'    getFiveResult = resultArray
-'End Function
-
-Function getFmResult(str, countStart)
-	Dim countFm, strTmp1, strTmp2, fmResult(2), countGetedResult, searchStep, searchStepResult(2), tmpFmResult
-	countFm = ""
-	countGetedResult = 0
-	searchStep = 0
-    
-    Do Until (countGetedResult = 3) Or (searchStep > 20)
-	    strTmp1 = Mid(str, countStart+searchStep+1, 1)
-		strTmp2 = Mid(str, countStart+searchStep+2, 1)
-		If IsNumeric(strTmp1) And IsNumeric(strTmp2) Then
-			fmResult(countGetedResult) = strTmp1 & strTmp2
-			searchStepResult(countGetedResult) = countStart + searchStep + 1
-		    searchStep = searchStep + 2
-		    If countGetedResult > 0 Then
-		    	If searchStepResult(countGetedResult) - searchStepResult(countGetedResult-1) > 6 Then
-		    		fmResult(countGetedResult) = ""
-		    		Exit Do
-		    	Else
-			        countGetedResult = countGetedResult + 1
-			    End If
-			Else
-			    countGetedResult = countGetedResult + 1
-			End If
-	    Else
-	        searchStep = searchStep + 1
-		End If
-	Loop
-
-	If countGetedResult <> 3 Then
-		tmpFmResult = getFmResultSpecial(str, countStart)
-		If (tmpFmResult(2) <> "") Then
-			getFmResult = tmpFmResult
-		ElseIf (tmpFmResult(1) <> "") And (countGetedResult < 2) Then
-		    getFmResult = tmpFmResult
-		ElseIf (tmpFmResult(0) <> "") And (countGetedResult < 1) Then
-		    getFmResult = tmpFmResult
-		Else
-		    getFmResult = fmResult
-		End If
-	Else
-	    getFmResult = fmResult
-	End If
-End Function
-
-Function getFmResultSpecial(str, countStart)
-    Dim countFm, strTmp1, strTmp2, fmResult(2), countGetedResult, searchStep
-	countFm = ""
-	countGetedResult = 0
-	searchStep = 0
-
-	Select Case True
-	    Case InStr(countStart, str, "Total steps") > 0
-	        countFm = InStr(countStart, str, "Total steps")
-	End Select
-
-	Do Until (Not countFm > 0) Or (countGetedResult = 3) Or (searchStep > Len(str)-countFm-2)
-		strTmp1 = Mid(str, countFm+searchStep+1, 1)
-		strTmp2 = Mid(str, countFm+searchStep+2, 1)
-		If IsNumeric(strTmp1) And IsNumeric(strTmp2) Then
-			fmResult(countGetedResult) = strTmp1 & strTmp2
-			countGetedResult = countGetedResult + 1
-			countFm = InStr(countFm+11, str, "Total steps")
-			searchStep = 0
-		End If
-		searchStep = searchStep + 1
-	Loop
-    getFmResultSpecial = fmResult
-End Function
-
-Function getArrayResult(str, countCheck, numResult, projectName)
-    Dim tmpResultArray, resultArray
-    If projectName <> "333fm" Then
-        tmpResultArray = getFiveResult(str, countCheck, numResult)
-        If (numResult = 5) And (tmpResultArray(5) <> "") Then
-            resultArray = getFiveResult(tmpResultArray(5), countCheck, 5)
-        Else
-            resultArray = tmpResultArray
-        End If
-    Else
-        resultArray = getFmResult(str, countCheck)
-    End If
-    getArrayResult = resultArray
-End Function
 
 Function getAllProjectName()
     tmpArray = Array("333","444","555","222","333bf","333oh","333fm","mega","py","sq","clock","sk","666","777")
@@ -575,14 +837,14 @@ Function getProjectCheckStrArray(projectName)
     checkStrArray_222 = Array("beginFlag222"," 222","<br>222","二阶","二速")
     checkStrArray_666 = Array("beginFlag666"," 666","<br>666","六阶","六速")
     checkStrArray_777 = Array("beginFlag777"," 777","<br>777","七阶","七速")
-    checkStrArray_333bf = Array("三盲","3bf","3BLD")
-    checkStrArray_333oh = Array("三单","3oh","3OH","oh<br>","OH<br>","Oh<br>","oh ","OH ","Oh ")
-    checkStrArray_333fm = Array("最少步","最小步","3fm","<br>fm","<br>FM"," fm"," FM")
-    checkStrArray_mega = Array("五魔","mega","Mega","七阶","七速")
-    checkStrArray_py = Array("塔","py","PY","yramid")
-    checkStrArray_sq = Array("SQ","sq","Mega","七阶","七速")
+    checkStrArray_333bf = Array("三盲","3bf","3bld")
+    checkStrArray_333oh = Array("三单","3oh","oh<br>","oh ")
+    checkStrArray_333fm = Array("最少步","最小步","3fm","<br>fm"," fm")
+    checkStrArray_mega = Array("五魔","mega","七阶","七速")
+    checkStrArray_py = Array("塔","py")
+    checkStrArray_sq = Array("sq")
     checkStrArray_clock = Array(" 表","<br>表","魔表","clock","clk")
-    checkStrArray_sk = Array("斜转","sk","SK")
+    checkStrArray_sk = Array("斜转","sk")
 
     Select Case projectName
         Case "333"
@@ -616,101 +878,6 @@ Function getProjectCheckStrArray(projectName)
     End Select
 End Function
 
-Function getSeqOfProjectInStr(str, projectName)
-    Dim seqFinal, tmpStr, checkStrArray, seqInStr
-    seqFinal = ""
-    tmpStr = str
-    checkStrArray = getProjectCheckStrArray(projectName)
-
-    If IsNumeric(projectName) Then
-        tmpStr = "beginFlag" & tmpStr
-    End If
-    
-    For i = 0 To UBound(checkStrArray)
-        seqInStr = InStr(tmpStr, checkStrArray(i))
-        If seqInStr > 0 Then
-            seqFinal = seqInStr + Len(checkStrArray(i))
-            Exit For
-        End If
-    Next
-
-    If IsNumeric(projectName) And (seqFinal <> "") Then
-    	seqFinal = seqFinal - 9
-    End If
-
-    getSeqOfProjectInStr = seqFinal
-End Function
-
-Function sortByProject()
-    Dim allProjectArray, tmpUserNameData(), tmpResultData()
-    allProjectArray = getAllProjectName()
-    count = 0
-    
-
-    For i = 0 To UBound(allProjectArray)
-        ReDim Preserve tmpUserNameData(0)
-        ReDim Preserve tmpResultData(0)
-        tmpUserNameData(0) = ""
-        tmpResultData(0) = ""
-        count = 0
-
-        For j = 0 To UBound(userNameData)
-            If projectData(j) = allProjectArray(i) Then
-                ReDim Preserve tmpUserNameData(count)
-                ReDim Preserve tmpResultData(count)
-                tmpUserNameData(count) = userNameData(j)
-                tmpResultData(count) = resultData(j)
-                count = count + 1
-            End If
-        Next
-
-        Select Case allProjectArray(i)
-            Case "333"
-                userNameData_333 = tmpUserNameData
-                resultData_333 = tmpResultData
-            Case "444"
-                userNameData_444 = tmpUserNameData
-                resultData_444 = tmpResultData
-            Case "555"
-                userNameData_555 = tmpUserNameData
-                resultData_555 = tmpResultData
-            Case "222"
-                userNameData_222 = tmpUserNameData
-                resultData_222 = tmpResultData
-            Case "333bf"
-                userNameData_333bf = tmpUserNameData
-                resultData_333bf = tmpResultData
-            Case "333oh"
-                userNameData_333oh = tmpUserNameData
-                resultData_333oh = tmpResultData
-            Case "333fm"
-                userNameData_333fm = tmpUserNameData
-                resultData_333fm = tmpResultData
-            Case "py"
-                userNameData_py = tmpUserNameData
-                resultData_py = tmpResultData
-            Case "mega"
-                userNameData_mega = tmpUserNameData
-                resultData_mega = tmpResultData
-            Case "sq"
-                userNameData_sq = tmpUserNameData
-                resultData_sq = tmpResultData
-            Case "clock"
-                userNameData_clock = tmpUserNameData
-                resultData_clock = tmpResultData
-            Case "sk"
-                userNameData_sk = tmpUserNameData
-                resultData_sk = tmpResultData
-            Case "666"
-                userNameData_666 = tmpUserNameData
-                resultData_666 = tmpResultData
-            Case "777"
-                userNameData_777 = tmpUserNameData
-                resultData_777 = tmpResultData
-        End Select
-    Next
-End Function
-
 Function sortIntArray(intString)
     Dim i, j, length, tmpStr, tmpArray
     tmpArray = intString
@@ -727,154 +894,87 @@ Function sortIntArray(intString)
     sortIntArray = tmpArray
 End Function
 
-Function getAvgAndBestResult(strResult)
+Function sortMultiIntArray(intArray1, intArray2, intArray3, intArray4)
+    Dim i, j, length, tmpStr, tmpArray
+    tmpArray = intString
+    length = UBound(tmpArray)
+    For i=0 to length-1
+        For j=i+1 to length
+            If (tmpArray(i) > tmpArray(j)) Then
+                tmpStr = tmpArray(i)
+                tmpArray(i) = tmpArray(j)
+                tmpArray(j) = tmpStr
+            End If
+        Next
+    Next
+    sortIntArray = tmpArray
+End Function
+
+Function getAvgAndBestResult(strArray)
     Dim tmpArray,avgAndBestResult(1)
-    tmpArray = split(strResult, " ")
+    tmpArray = strArray
 
     For i = 0 To UBound(tmpArray)
-        colonInStr = InStr(tmpArray(i), ":")
-        If colonInStr > 0 Then
-            tmpArray(i) = Mid(tmpArray(i), 1, colonInStr-1) * 60 + Mid(tmpArray(i), colonInStr+1)
+        If tmpArray(i) <> "DNF" Then
+            colonInStr = InStr(tmpArray(i), ":")
+            If colonInStr > 1 Then
+                tmpArray(i) = Mid(tmpArray(i), 1, colonInStr-1) * 60 + Mid(tmpArray(i), colonInStr+1)
+            ElseIf colonInStr = 1 Then
+                tmpArray(i) = RePlace(tmpArray(i), ":", "")
+            End If
+            tmpArray(i) = FormatNumber(tmpArray(i), 2, , , 0)
+        Else
+            tmpArray(i) = 9999.99
         End If
     Next
 
     tmpArray = sortIntArray(tmpArray)
-    If UBound(tmpArray) = 5 Then
-        avgAndBestResult(0) = tmpArray(0)
-        avgAndBestResult(1) = Int((tmpArray(1) + tmpArray(2) + tmpArray(3)) *100 / 3) / 100
+    If UBound(tmpArray) = 4 Then
+        If tmpArray(3) <> 9999.99 Then
+            avgAndBestResult(0) = Round(((0 + tmpArray(1) + tmpArray(2) + tmpArray(3)) / 3), 2)
+        Else
+            avgAndBestResult(0) = 9999.99
+        End If
+        avgAndBestResult(1) = tmpArray(0)
     Else
-        avgAndBestResult(0) = tmpArray(0)
-        avgAndBestResult(1) = Int((tmpArray(0) + tmpArray(1) + tmpArray(2)) *100 / 3) / 100
+        If tmpArray(2) <> 9999.99 Then
+            avgAndBestResult(0) = Round(((0 + tmpArray(0) + tmpArray(1) + tmpArray(2)) / 3), 2)
+        Else
+            avgAndBestResult(0) = 9999.99
+        End If
+        avgAndBestResult(1) = tmpArray(0)
     End If
+
+    avgAndBestResult(0) = FormatNumber(avgAndBestResult(0), 2, , , 0)
+
+    For i = 0 To UBound(avgAndBestResult)
+        Dim minNum, secNum
+        If avgAndBestResult(i) = 9999.99 Then
+            avgAndBestResult(i) = "DNF"
+        ElseIf avgAndBestResult(i) > 59.99 Then
+            minNum = int(avgAndBestResult(i) / 60)
+            secNum = FormatNumber(avgAndBestResult(i) - minNum * 60, 2, , , 0)
+            If secNum < 10.00 Then
+                secNum = "0" & secNum
+            End If
+            avgAndBestResult(i) = minNum & ":" & secNum
+        End If
+    Next
 
     getAvgAndBestResult = avgAndBestResult
 End Function
 
 ''''''''''''''''''''''''''''''''''''''
 
-Function WritePagesCode()
-    checkTxtFile(codeTxtPath)
-    getSource(getUrl())
-    Sleep(1000)
 
-    Dim MaxPage, url, i
-    MaxPage = getInfoFromTxt("尾页", "pn=", 3, "尾页", -2)
-    For i = 2 To MaxPage
-        url = getUrl() & "?pn=" & i
-        getSource(url)
-    Next
-    Sleep(1000)
-    getTextFromCode()
-    Msgbox("Done!")
-End Function
 
-Function getTextFromCode()
-    Dim strResult, strUserName, countStart
-    strResult = getArrayFromTxt("j_d_post_content", "j_d_post_content", 40, "user-hide-post-down", -31)
-    strUserName = getArrayFromTxt("img username", "username", 10, "src=", -11)
-    For i = 0 to UBound(strUserName)
-        If (strUserName(i) = "魔方英语会计学") AND (Instr(strResult(i),"--完--") > 0) Then
-            countStart = i
-            Exit For
-        End If
-    Next
 
-    'For i = countStart+1 To UBound(strUserName)
-        'msgbox(strUserName(i) & vbLf & strResult(i))
-    'Next
-    getCleanResult strResult, strUserName, countStart
-End Function
 
-Function getCleanResult(strResultArray, strUserNameArray, countStart)
-    checkTxtFile(resultTxtPath)
-    checkTxtFile(noResultTxtPath)
-    'addProjectName("333")
-    Dim allProjectArray, seqProjectInStr, flag
 
-    For i = countStart+1 To UBound(strResultArray)
-        allProjectArray = getAllProjectName()
-        flag = True
-        For j = 0 To UBound(allProjectArray)
-            seqProjectInStr = getSeqOfProjectInStr(strResultArray(i), allProjectArray(j))
-            If seqProjectInStr <> "" Then
-                getStrResult strResultArray(i), strUserNameArray(i), seqProjectInStr, allProjectArray(j), i
-                flag = False
-            End If
-        Next
-        If flag Then
-            getStrResult strResultArray(i), strUserNameArray(i), "", "", i
-        End If
-    Next
 
-    writeToExcel()
-    Msgbox("OK")
-End Function
 
-Function getStrResult(str, strUserName, countCheck, projectName, floorNum)
-    If countCheck <> "" Then
-        Dim finalResultArray, strResult, j, numResult
-        strResult = ""
-        numResult = 5
 
-        If (projectName = "333bf") Or (projectName = "333fm") Then
-            numResult = 3
-        End If
 
-        finalResultArray = getArrayResult(str, countCheck, numResult, projectName)
-
-        For j = 0 To numResult-1
-            strResult = strResult & " " & finalResultArray(j)
-        Next
-
-        strResult = Trim(strResult)
-
-        saveResult str, strResult, strUserName, floorNum, projectName
-    Else
-        saveResult str, "", strUserName, floorNum, ""
-    End If
-End Function
-
-Function saveResult(str, strResult, strUserName, floorNum, projectName)
-    Dim oTxt
-    If strResult <> "" Then
-        Set oTxt = Fso.OpenTextFile(resultTxtPath, 8)
-
-        ReDim Preserve floorData(countResultData)
-        ReDim Preserve userNameData(countResultData)
-        ReDim Preserve projectData(countResultData)
-        ReDim Preserve resultData(countResultData)
-        floorData(countResultData) = floorNum & "楼"
-        userNameData(countResultData) = strUserName
-        projectData(countResultData) = projectName
-        resultData(countResultData) = strResult
-
-        oTxt.WriteLine(floorData(countResultData))
-        oTxt.WriteLine(str)
-        oTxt.WriteLine(userNameData(countResultData))
-        oTxt.WriteLine(projectData(countResultData))
-        oTxt.WriteLine(resultData(countResultData))
-        oTxt.WriteLine()
-        oTxt.WriteLine()
-
-        countResultData = countResultData + 1
-    Else
-        Set oTxt = Fso.OpenTextFile(noResultTxtPath, 8)
-        ReDim Preserve floorDataNoResult(countNoResultData)
-        ReDim Preserve userNameDataNoResult(countNoResultData)
-        ReDim Preserve projectDataNoResult(countNoResultData)
-        floorDataNoResult(countNoResultData) = floorNum & "楼"
-        userNameDataNoResult(countNoResultData) = strUserName
-        projectDataNoResult(countNoResultData) = projectName
-
-        oTxt.WriteLine(floorDataNoResult(countNoResultData))
-        oTxt.WriteLine(str)
-        oTxt.WriteLine(userNameDataNoResult(countNoResultData))
-        oTxt.WriteLine(projectDataNoResult(countNoResultData))
-        oTxt.WriteLine()
-        oTxt.WriteLine()
-    End If
-    Set oTxt = Nothing
-End Function
 
 Function addProjectName(projectName)
     countResultData = countResultData + 1
@@ -887,60 +987,7 @@ Function addProjectName(projectName)
     countResultData = countResultData + 1
 End Function
 
-Function writeToExcel()
-    sortByProject()
-    Dim ExcelApp, ExcelBook, ExcelSheet
-    Set ExcelApp = CreateObject("Excel.Application")
-    Set ExcelBook= ExcelApp.Workbooks.Open(ws.CurrentDirectory&"\result.xlsx")
-    Set ExcelSheet = ExcelBook.Sheets("Sheet1")
 
-    ExcelSheet.Columns("A:G").NumberFormatLocal = "@"
-
-    writeAllProjectResult ExcelSheet, userNameData_333, resultData_333, "333"
-    writeAllProjectResult ExcelSheet, userNameData_444, resultData_444, "444"
-    writeAllProjectResult ExcelSheet, userNameData_555, resultData_555, "555"
-    writeAllProjectResult ExcelSheet, userNameData_222, resultData_222, "222"
-    writeAllProjectResult ExcelSheet, userNameData_333bf, resultData_333bf, "333bf"
-    writeAllProjectResult ExcelSheet, userNameData_333oh, resultData_333oh, "333oh"
-    writeAllProjectResult ExcelSheet, userNameData_333fm, resultData_333fm, "333fm"
-    writeAllProjectResult ExcelSheet, userNameData_py, resultData_py, "py"
-    writeAllProjectResult ExcelSheet, userNameData_mega, resultData_mega, "mega"
-    writeAllProjectResult ExcelSheet, userNameData_sq, resultData_sq, "sq"
-    writeAllProjectResult ExcelSheet, userNameData_clock, resultData_clock, "clock"
-    writeAllProjectResult ExcelSheet, userNameData_sk, resultData_sk, "sk"
-    writeAllProjectResult ExcelSheet, userNameData_666, resultData_666, "666"
-    writeAllProjectResult ExcelSheet, userNameData_777, resultData_777, "777"
-
-    ExcelBook.Save
-    ExcelBook.Close
-    ExcelApp.Quit
-    Set ExcelSheet = Nothing
-    Set ExcelBook = Nothing
-    Set ExcelApp = Nothing
-End Function
-
-Function writeAllProjectResult(ExcelSheet, userNameArray, resultArray, projectName)
-    Dim strResultArray
-    ExcelSheet.Cells(countExcelRow+1, 1).Value = projectName
-    countExcelRow = countExcelRow + 1
-
-    For i = 0 To UBound(resultArray)
-        If resultArray(i) <> "" Then
-            strResultArray = Split(resultArray(i), " ")
-        Else
-            ReDim strResultArray(4)
-        End If
-
-        ExcelSheet.Cells(countExcelRow+1, 1).Value = userNameArray(i)
-        For j = 0 To UBound(strResultArray)
-            ExcelSheet.Cells(countExcelRow+1,j+2).Value = strResultArray(j)
-        Next
-
-        countExcelRow = countExcelRow + 1
-    Next
-
-    countExcelRow = countExcelRow + 1
-End Function
 
 </Script>
 </Body>
