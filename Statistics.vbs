@@ -369,36 +369,43 @@ Function revertResult(iResult, sOptName)
 End Function
 
 Function replaceHtmlStr(sStr)
-	Dim sTmp, iImgStart, iImgLen, iDivStart, iDivLen
+	Dim sTmp, iStart, iLen
 	sTmp = sStr
 	sTmp = RePlace(sTmp, "<br>", " ")
 	sTmp = RePlace(sTmp, "&#39;", "'")
-    
-    Do Until Not (InStr(sTmp, "<img") > 0)
-        iImgStart = InStr(sTmp, "<img")
-        If iImgStart > 0 Then
-            iImgLen = InStr(safeMid(sTmp, iImgStart, 0, "replaceHtmlStr 111"), ">")
-            If iImgLen > 0 Then
-                sTmp = RePlace(sTmp, safeMid(sTmp, iImgStart, iImgLen, "replaceHtmlStr 222"), " ")
-            End If
-        End If
-    Loop
 
-    Do Until Not (InStr(sTmp, "<div") > 0)
-        iDivStart = InStr(sTmp, "<div")
-        If iDivStart > 0 Then
-            iDivLen = InStr(safeMid(sTmp, iDivStart, 0, "replaceHtmlStr 333"), "</div>") + 5
-            If iDivLen > 0 Then
-                sTmp = RePlace(sTmp, safeMid(sTmp, iDivStart, iDivLen, "replaceHtmlStr 444"), " ")
-            End If
-        End If
-    Loop
+    sTmp = removeLongHtmlStr(sTmp, "<img", ">", " ")
+    sTmp = removeLongHtmlStr(sTmp, "<div", "</div>", " ")
+    sTmp = removeLongHtmlStr(sTmp, "<a href=", "</a>", " ")
 
     Do Until Not (InStr(sTmp, "  ") > 0)
         sTmp = RePlace(sTmp, "  ", " ")
     Loop
 
 	replaceHtmlStr = sTmp
+End Function
+
+Function replaceStrForUserName(str)
+    Dim sTmp, iImgStart, iImgLen
+    sTmp = str
+    sTmp = removeLongHtmlStr(sTmp, "<img", ">", "")
+    replaceStrForUserName = sTmp
+End Function
+
+Function removeLongHtmlStr(str, sHead, sEnd, sNew)
+    Dim sTmp, iStart, iLen
+    sTmp = str
+    iStart = InStr(sTmp, sHead)
+    Do Until Not (iStart > 0)
+        iLen = InStr(safeMid(sTmp, iStart, 0, "removeLongHtmlStr 111"), sEnd) + Len(sEnd) - 1
+        If iLen > 0 Then
+            sTmp = RePlace(sTmp, safeMid(sTmp, iStart, iLen, "removeLongHtmlStr 222"), sNew)
+        Else
+            sTmp = RePlace(sTmp, safeMid(sTmp, iStart, 0, "removeLongHtmlStr 333"), sNew)
+        End If
+        iStart = InStr(sTmp, sHead)
+    Loop
+    removeLongHtmlStr = sTmp
 End Function
 
 Function replaceStrForOptName(sStr)
@@ -602,6 +609,7 @@ Function getMsgArrayFromCode()
     iCompNum = getInfoFromTxt("<title>", "第", 1, "期")
     bContinue = True
 
+    checkUserName()
     checkArrayForBubble()
 
     Dim lenMessageText, lenUserText, lenPostNum
@@ -654,6 +662,14 @@ End Function
             Set oTxt = Nothing
             getArrayFromTxt = aGet
         End Function
+
+        Sub checkUserName()
+            Dim sTmp
+            For i = 0 To safeUBound(aUserText, "checkArrayForBubble", 1)
+                sTmp = aUserText(i)
+                aUserText(i) = replaceStrForUserName(sTmp)
+            Next
+        End Sub
 
         Function checkArrayForBubble()
             For i = 0 To safeUBound(aMessageText, "checkArrayForBubble", 1)
