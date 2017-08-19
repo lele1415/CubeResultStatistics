@@ -32,7 +32,7 @@
 <br>排除楼层: <input type="text" id="except_floor_id" />
 <br>排除ID: <input type="text" id="except_name_id" />
 
-<br><input type="button" id="getCode_id" onclick="getTextFromCode(0)" value="Get results" />
+<br><input type="button" id="getCode_id" onclick="getDataArrayFromCode(0)" value="Get results" />
 
 <br>floor: <input type="input" id="floorNumInput_id" size=1 />
 <select id="inputProjectName_id">
@@ -479,13 +479,13 @@ Function cutArray(aOrigin, iStart, iEnd)
 	cutArray = aCuted
 End Function
 
-Function joinArray(aOrigin)
+Function joinArrayWithSpace(aOrigin)
 	Dim sJoined
 	sJoined = ""
 	For i = 0 To UBound(aOrigin)
 		sJoined = sJoined & " " & aOrigin(i)
 	Next
-	joinArray = Trim(sJoined)
+	joinArrayWithSpace = Trim(sJoined)
 End Function
 
 
@@ -511,7 +511,7 @@ Function fewResultsTest()
 		testFlag = True
 		inputFlag = False
 		iStartNum = getSeqInArrayBySearchStr(getValueById("floorNumInput_id"), aFloorNum)
-		handleOriginDataStr()
+		spiltStrAndGetProjectInfo()
 	End If
 End Function
 
@@ -534,7 +534,7 @@ Function inputResult()
 	If bContinue Then
 	    inputFlag = True
 	    testFlag = False
-	    handleOriginDataStrForInput()
+	    spiltStrAndGetProjectInfoForInput()
 	End If
 End Function
 
@@ -561,7 +561,7 @@ Function getPagesCode()
             Sleep(1000)
         Next
         'Sleep(1000)
-        'getTextFromCode(0)
+        'getDataArrayFromCode(0)
         Msgbox("Done!")
     Else
         Msgbox("Fail! iMaxPageNum=" & iMaxPageNum)
@@ -593,9 +593,9 @@ End Function
 
 
 '*************************************************
-'****get origin data array.
+'****get data array.
 '*************************************************
-Function getTextFromCode()
+Function getDataArrayFromCode()
     Dim bContinue
     aUserResult = getArrayFromTxt("j_d_post_content", "j_d_post_content", 40, "user-hide-post-down", -31)
     aUserName = getArrayFromTxt("p_author_name", "_blank", 8, "</a>", 0)
@@ -607,7 +607,7 @@ Function getTextFromCode()
 
     If UBound(aUserResult) <> UBound(aUserName) _
     	    Or UBound(aUserName) <> UBound(aFloorNum) Then
-    	MsgBox( "Error: getTextFromCode" & Vblf &_
+    	MsgBox( "Error: getDataArrayFromCode" & Vblf &_
     		    "UBound(aUserResult)=" & UBound(aUserResult) & Vblf &_
     	        "UBound(aUserName)=" & UBound(aUserName) & Vblf &_
     	        "UBound(aFloorNum)=" & UBound(aFloorNum) )
@@ -624,7 +624,7 @@ Function getTextFromCode()
     End If
 
     If bContinue Then
-        handleOriginDataStr()
+        spiltStrAndGetProjectInfo()
     End If
 End Function
 
@@ -662,9 +662,9 @@ End Function
 
 
 '*************************************************
-'****handle origin data string.
+'****split str and get project info.
 '*************************************************
-Function handleOriginDataStrForInput()
+Function spiltStrAndGetProjectInfoForInput()
 	If getValueById("inputResultText_id") <> "" Then
 	    getPureResult getValueById("inputResultText_id"), aUserName(iStartNum), aFloorNum(iStartNum), getValueById("inputProjectName_id")
 	Else
@@ -672,7 +672,7 @@ Function handleOriginDataStrForInput()
 	End If
 End Function
 
-Function handleOriginDataStr()
+Function spiltStrAndGetProjectInfo()
     If Not testFlag Then
         initTxtFile(resultTxtPath)
         initTxtFile(noResultTxtPath)
@@ -694,10 +694,10 @@ Function handleOriginDataStr()
                 For j = 0 To UBound(aProjectInfo) - 1
                 	Dim aCutedUserResult
                 	aCutedUserResult = cutArray(aSplitUserResult, aProjectInfo(1, j), aProjectInfo(1, j + 1))
-                    getPureResult aCutedUserResult, aUserName(i), aFloorNum(i), aProjectInfo(0, j)
+                    getPureResult joinArrayWithSpace(aCutedUserResult), aUserName(i), aFloorNum(i), aProjectInfo(0, j)
                 Next
             Else
-                saveResult joinArray(aCutedUserResult), "", strUserName, floorNum, ""
+                saveResult joinArrayWithSpace(aCutedUserResult), "", strUserName, floorNum, ""
             End If
 
             If testFlag Then
@@ -787,21 +787,23 @@ End Function
 '*************************************************
 '****get result.
 '*************************************************
-Function getPureResult(str, strUserName, floorNum, projectName)
+Function getPureResult(sResult, sUserName, iFloorNum, sProjectName)
     Dim finalResultArray, strResult, j, numResult, avgResult, bestResult
     strResult = ""
     numResult = 5
 
-    If (projectName = "333bf") Or (projectName = "333fm") Or (projectName = "666") Or (projectName = "777") Then
+    If (sProjectName = "333bf") Or _
+            (sProjectName = "333fm") Or _
+            (sProjectName = "666") Or _
+            (sProjectName = "777") Then
         numResult = 3
     End If
 
     If testFlag Then
-        Msgbox("getPureResult str="&str)
         Msgbox("getPureResult countCheck="&countCheck)
     End If
 
-    finalResultArray = getArrayResult(str, countCheck, numResult, projectName)
+    finalResultArray = getArrayResult(sResult, countCheck, numResult, sProjectName)
 
     If UBound(finalResultArray) > 0 Then
         If finalResultArray(2) <> "" Then
@@ -809,7 +811,7 @@ Function getPureResult(str, strUserName, floorNum, projectName)
             avgResult = avgAndBestResult(0)
             bestResult = avgAndBestResult(1)
 
-            If projectName = "333fm" Then
+            If sProjectName = "333fm" Then
                 bestResult = FormatNumber(bestResult, 0, , , 0)
             End If
 
@@ -832,19 +834,23 @@ Function getPureResult(str, strUserName, floorNum, projectName)
     End If
 
     If Not inputFlag Then
-        saveResult str, strResult, strUserName, floorNum, projectName
+        saveResult sResult, strResult, sUserName, iFloorNum, sProjectName
     Else
-        If projectName <> "333fm" Then
-            If Msgbox(floorNum & "楼" & Vblf & strUserName & Vblf & str & Vblf & projectName & Vblf & strResult, 1) = 1 Then
-                saveResult str, strResult, strUserName, floorNum, projectName
+        If sProjectName <> "333fm" Then
+            If Msgbox(iFloorNum & "楼" & Vblf & sUserName & Vblf & sResult & Vblf & sProjectName & Vblf & strResult, 1) = 1 Then
+                saveResult sResult, strResult, sUserName, iFloorNum, sProjectName
             End If
         Else
-            If Msgbox(floorNum & "楼" & Vblf & strUserName & Vblf & projectName & Vblf & strResult, 1) = 1 Then
-                saveResult str, strResult, strUserName, floorNum, projectName
+            If Msgbox(iFloorNum & "楼" & Vblf & sUserName & Vblf & sProjectName & Vblf & strResult, 1) = 1 Then
+                saveResult sResult, strResult, sUserName, iFloorNum, sProjectName
             End If
         End If
     End If
 End Function
+
+        Function isResultNum(sStr)
+            
+        End Function
 
         Function getArrayResult(str, countCheck, numResult, projectName)
             Dim resultArray
@@ -1026,30 +1032,23 @@ End Function
                     Next
                 End Function
 
-        Function changeStrToSimple(str)
-            Dim tmpStr, simpleStr
-            tmpStr = str
-            simpleStr = ""
-            For searchStep = 1 To Len(tmpStr)
+        Function changeStrToSimple(sStr)
+            Dim sTmp, sSimple
+            sTmp = sStr
+            sSimple = ""
+            For searchStep = 1 To Len(sTmp)
                 Select Case True
-                    Case IsNumeric(Mid(tmpStr, searchStep, 1))
-                        simpleStr = simpleStr & "0"
-                    Case isCharacter(Mid(tmpStr, searchStep, 1), "Dd")
-                        simpleStr = simpleStr & "D"
-                    Case isCharacter(Mid(tmpStr, searchStep, 1), "Nn")
-                        simpleStr = simpleStr & "N"
-                    Case isCharacter(Mid(tmpStr, searchStep, 1), "Ff")
-                        simpleStr = simpleStr & "F"
-                    Case isCharacter(Mid(tmpStr, searchStep, 1), ".。")
-                        simpleStr = simpleStr & "."
-                    Case isCharacter(Mid(tmpStr, searchStep, 1), ":：")
-                        simpleStr = simpleStr & ":"
+                    Case IsNumeric(Mid(sTmp, searchStep, 1))
+                    Case isCharacter(Mid(sTmp, searchStep, 1), ".。")
+                        sSimple = sSimple & "."
+                    Case isCharacter(Mid(sTmp, searchStep, 1), ":：")
+                        sSimple = sSimple & ":"
                     Case Else
-                        simpleStr = simpleStr & "_"
+                        sSimple = sSimple & "_"
                 End Select
             Next
-            simpleStr = RePlace(simpleStr, "DNF", "D0.00")
-            changeStrToSimple = simpleStr
+
+            changeStrToSimple = sSimple
         End Function
 
         Function getAllStepInStr(str1, str2)
