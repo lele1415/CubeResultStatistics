@@ -697,6 +697,8 @@ End Function
             If getedNum = numResult Then
                 finalArray = newArray
             Else
+                newArray(0) = 0
+                newArray(1) = 1
                 checkCloseNum diffStepArray2, numResult, 1, getedNum, newArray
                 If getedNum = numResult Then
                     finalArray = newArray
