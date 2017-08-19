@@ -342,7 +342,7 @@ End Function
                     'Msgbox(countStart & " " & countEnd)
                     tmpStr = Mid(getStrLine, countStart, strLen)
                     countEnd = InStr(tmpStr, strEnd)
-                    if countEnd > 0 Then 
+                    If countEnd > 0 Then 
                         strArray(count) = Mid(tmpStr, 1, countEnd-1)
                         count = count + 1
                     End If
@@ -362,8 +362,9 @@ Function dealOriginStr(strResultArray, strUserNameArray, strFloorNum, countStart
         checkTxtFile(resultTxtPath)
         checkTxtFile(noResultTxtPath)
     End If
-    Dim allProjectArray, seqProjectInStr, flag, projectArray(), projectCount, tmpResultStr
+    Dim allProjectArray, seqProjectInStr, flag, projectArray(), projectCount, tmpResultStr, originStrResultArray
     ReDim projectArray(1,0)
+    originStrResultArray = strResultArray
 
     If Not inputFlag Then
         For i = countStart To UBound(strResultArray)
@@ -389,16 +390,23 @@ Function dealOriginStr(strResultArray, strUserNameArray, strFloorNum, countStart
             Else
                 sortMultiArray projectArray, projectCount-1, 1, 1
                 For j = 0 To projectCount-1
-                    If j < projectCount-1 Then
-                        tmpResultStr = Mid(strResultArray(i), projectArray(1,j), projectArray(1,j+1) - projectArray(1,j))
+                    If projectArray(0,j) <> "333fm" Then
+                        tmpResultStr = strResultArray(i)
                     Else
-                        tmpResultStr = Mid(strResultArray(i), projectArray(1,j))
+                        tmpResultStr = removeUselessStrForFm(originStrResultArray(i))
                     End If
+
+                    If j < projectCount-1 Then
+                        tmpResultStr = Mid(tmpResultStr, projectArray(1,j), projectArray(1,j+1) - projectArray(1,j))
+                    Else
+                        tmpResultStr = Mid(tmpResultStr, projectArray(1,j))
+                    End If
+
                     getAndDealResult tmpResultStr, strUserNameArray(i), strFloorNum(i), 1, projectArray(0,j)
                 Next
             End If
 
-            if debug Then
+            If debug Then
                 Exit For
             End If
         Next
@@ -454,7 +462,7 @@ Function getAndDealResult(str, strUserName, floorNum, countCheck, projectName)
             numResult = 3
         End If
 
-        if debug Then
+        If debug Then
             Msgbox(str)
             Msgbox(countCheck)
         End If
@@ -492,8 +500,14 @@ Function getAndDealResult(str, strUserName, floorNum, countCheck, projectName)
         If Not inputFlag Then
             saveResult str, strResult, strUserName, floorNum, projectName
         Else
-            if Msgbox(floorNum & "楼" & Vblf & strUserName & Vblf & str & Vblf & projectName & Vblf & strResult, 1) = 1 Then
-                saveResult str, strResult, strUserName, floorNum, projectName
+            If projectName <> "333fm" Then
+                If Msgbox(floorNum & "楼" & Vblf & strUserName & Vblf & str & Vblf & projectName & Vblf & strResult, 1) = 1 Then
+                    saveResult str, strResult, strUserName, floorNum, projectName
+                End If
+            Else
+                If Msgbox(floorNum & "楼" & Vblf & strUserName & Vblf & projectName & Vblf & strResult, 1) = 1 Then
+                    saveResult str, strResult, strUserName, floorNum, projectName
+                End If
             End If
         End If
     Else
@@ -791,14 +805,21 @@ End Function
                 End Function
 
         Function getFmResult(str, countStart)
-            Dim countFm, strTmp1, strTmp2, fmResult(2), countGetedResult, searchStep, searchStepResult(2), tmpFmResult
+            Dim countFm, strTmp1, strTmp2, fmResult(2), countGetedResult, searchStep, searchStepResult(2), tmpFmResult, finalFmResult, specialFmResult
             countFm = ""
             countGetedResult = 0
             searchStep = 0
+
+            If debug Then
+                Msgbox("333fm str=" & Vblf & str)
+            End If
             
-            Do Until (countGetedResult = 3) Or (searchStep > 15)
-                strTmp1 = Mid(str, countStart+searchStep+1, 1)
-                strTmp2 = Mid(str, countStart+searchStep+2, 1)
+            Do Until (countGetedResult = 3) Or (searchStep > Len(str)-countStart-1)
+                strTmp1 = Mid(str, countStart+searchStep, 1)
+                strTmp2 = Mid(str, countStart+searchStep+1, 1)
+                If debug Then
+                    Msgbox("333fm strTmp1=" & strTmp1 & Vblf & "strTmp2=" & strTmp2)
+                End If
                 If IsNumeric(strTmp1) And IsNumeric(strTmp2) Then
                     fmResult(countGetedResult) = strTmp1 & strTmp2
                     searchStepResult(countGetedResult) = countStart + searchStep + 1
@@ -818,31 +839,48 @@ End Function
                 End If
             Loop
 
-            getFmResult = fmResult
+            finalFmResult = fmResult
+            If Not fmResult(2) > 0 Then
+                specialFmResult = getFmResultSpecial(str, countStart)
+                If specialFmResult(2) > 0 Then
+                    finalFmResult = specialFmResult
+                End If
+            End If
+            getFmResult = finalFmResult
         End Function
 
         Function getFmResultSpecial(str, countStart)
-            Dim countFm, strTmp1, strTmp2, fmResult(2), countGetedResult, searchStep
+            Dim countFm, strTmp1, strTmp2, fmResult(2), countGetedResult, searchStep, searchStr
             countFm = 0
             countGetedResult = 0
             searchStep = 0
+            searchStr = ""
 
-            Select Case True
-                Case InStr(countStart, str, "Total steps") > 0
-                    countFm = InStr(countStart, str, "Total steps")
-            End Select
+            searchStrArray = Array("Total steps", "最终解法")
 
-            Do Until (Not countFm > 0) Or (countGetedResult = 3) Or (searchStep > Len(str)-countFm-2)
-                strTmp1 = Mid(str, countFm+searchStep+1, 1)
-                strTmp2 = Mid(str, countFm+searchStep+2, 1)
-                If IsNumeric(strTmp1) And IsNumeric(strTmp2) Then
-                    fmResult(countGetedResult) = strTmp1 & strTmp2
-                    countGetedResult = countGetedResult + 1
-                    countFm = InStr(countFm+11, str, "Total steps")
-                    searchStep = 0
+            For i = 0 To UBound(searchStrArray)
+                countFm = InStr(countStart, str, searchStrArray(i))
+                If countFm > 0 Then
+                    searchStr = searchStrArray(i)
+                    Exit For
+                Else
+                    countFm = 0
                 End If
-                searchStep = searchStep + 1
-            Loop
+            Next
+
+            If countFm > 0 Then
+                Do Until (countGetedResult = 3) Or (searchStep > Len(str)-countFm-1)
+                    strTmp1 = Mid(str, countFm+searchStep, 1)
+                    strTmp2 = Mid(str, countFm+searchStep+1, 1)
+                    If IsNumeric(strTmp1) And IsNumeric(strTmp2) Then
+                        fmResult(countGetedResult) = strTmp1 & strTmp2
+                        countGetedResult = countGetedResult + 1
+                        countFm = InStr(countFm+Len(searchStr), str, searchStr)
+                        searchStep = 0
+                    End If
+                    searchStep = searchStep + 1
+                Loop
+            End If
             getFmResultSpecial = fmResult
         End Function
 
@@ -1465,13 +1503,27 @@ Function removeUselessStr(str)
 	tmpStr = RePlace(tmpStr, "(", "")
 	tmpStr = RePlace(tmpStr, ")", "")
 	tmpStr = RePlace(tmpStr, "（", "")
-	tmpStr = RePlace(tmpStr, "）", "")
+    tmpStr = RePlace(tmpStr, "）", "")
+	tmpStr = RePlace(tmpStr, "&#39;", "'")
 
     Do Until Not (InStr(tmpStr, "  ") > 0)
         tmpStr = RePlace(tmpStr, "  ", " ")
     Loop
 
 	removeUselessStr = tmpStr
+End Function
+
+Function removeUselessStrForFm(str)
+    Dim tmpStr
+    tmpStr = str
+    tmpStr = RePlace(tmpStr, "<br>", " ")
+    tmpStr = RePlace(tmpStr, "&#39;", "'")
+
+    Do Until Not (InStr(tmpStr, "  ") > 0)
+        tmpStr = RePlace(tmpStr, "  ", " ")
+    Loop
+
+    removeUselessStrForFm = tmpStr
 End Function
 
 
