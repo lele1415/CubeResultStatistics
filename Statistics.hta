@@ -325,7 +325,8 @@ Function dealOriginStr(strResultArray, strUserNameArray, strFloorNum, countStart
         checkTxtFile(resultTxtPath)
         checkTxtFile(noResultTxtPath)
     End If
-    Dim allProjectArray, seqProjectInStr, flag
+    Dim allProjectArray, seqProjectInStr, flag, projectArray(), projectCount, tmpResultStr
+    ReDim projectArray(1,0)
 
     If Not inputFlag Then
         For i = countStart To UBound(strResultArray)
@@ -333,15 +334,31 @@ Function dealOriginStr(strResultArray, strUserNameArray, strFloorNum, countStart
             setFloorNumForShow(strFloorNum(i))
             allProjectArray = getAllProjectName()
             flag = True
+            projectCount = 0
             For j = 0 To UBound(allProjectArray)
                 seqProjectInStr = getSeqOfProjectInStr(strResultArray(i), allProjectArray(j))
-                If seqProjectInStr <> "" Then
-                    getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), seqProjectInStr, allProjectArray(j)
+                If seqProjectInStr > 0 Then
+                    ReDim Preserve projectArray(1,projectCount)
+                    projectArray(0,projectCount) = allProjectArray(j)
+                    projectArray(1,projectCount) = seqProjectInStr
+                    projectCount = projectCount + 1
+
+                    'getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), seqProjectInStr, allProjectArray(j)
                     flag = False
                 End If
             Next
             If flag Then
                 getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), "", ""
+            Else
+                sortMultiArray projectArray, projectCount-1, 1, 1
+                For j = 0 To projectCount-1
+                    If j < projectCount-1 Then
+                        tmpResultStr = Mid(strResultArray(i), projectArray(1,j), projectArray(1,j+1) - projectArray(1,j))
+                    Else
+                        tmpResultStr = Mid(strResultArray(i), projectArray(1,j))
+                    End If
+                    getAndDealResult tmpResultStr, strUserNameArray(i), strFloorNum(i), 1, projectArray(0,j)
+                Next
             End If
 
             if debug Then
@@ -361,8 +378,8 @@ Function dealOriginStr(strResultArray, strUserNameArray, strFloorNum, countStart
 End Function
 
         Function getSeqOfProjectInStr(str, projectName)
-            Dim seqFinal, tmpStr, checkStrArray, seqInStr
-            seqFinal = ""
+            Dim tmpStr, checkStrArray, seqInStr
+            seqInStr = ""
             tmpStr = LCase(str)
             checkStrArray = getProjectCheckStrArray(projectName)
 
@@ -373,16 +390,14 @@ End Function
             For i = 0 To UBound(checkStrArray)
                 seqInStr = InStr(tmpStr, checkStrArray(i))
                 If seqInStr > 0 Then
-                    seqFinal = seqInStr + Len(checkStrArray(i))
+                    If IsNumeric(projectName) And (Not InStr(checkStrArray(i), "beginFlag") > 0) Then
+                        seqInStr = seqInStr - 9
+                    End If
                     Exit For
                 End If
             Next
 
-            If IsNumeric(projectName) And (seqFinal <> "") Then
-                seqFinal = seqFinal - 9
-            End If
-
-            getSeqOfProjectInStr = seqFinal
+            getSeqOfProjectInStr = seqInStr
         End Function
 
 
@@ -493,14 +508,7 @@ End Function
             tmpStr = str
             tmpCountStart = countStart
 
-            inStrCount = InStr(tmpStr, "成绩列表")
-            If inStrCount > 0 Then
-                tmpStr = Mid(tmpStr, inStrCount)
-                tmpCountStart = 1
-                listFlag = True
-            Else
-                listFlag = False
-            End If
+            checkListExist tmpStr, tmpCountStart, Array("成绩列表","详细时间")
 
             SimpleStr = changeStrToSimple(Mid(tmpStr, tmpCountStart))
             dnfStep = getAllStepInStr(SimpleStr, "D0.00")
@@ -611,6 +619,21 @@ End Function
             End If
             getFiveResult = resultArray
         End Function
+
+                Function checkListExist(tmpStr, tmpCountStart, keyArray)
+                    Dim inStrCount
+                    For i = 0 To UBound(keyArray)
+                        inStrCount = InStr(tmpStr, keyArray(i))
+                        If inStrCount > 0 Then
+                            tmpStr = Mid(tmpStr, inStrCount)
+                            tmpCountStart = 1
+                            listFlag = True
+                            Exit For
+                        Else
+                            listFlag = False
+                        End If
+                    Next
+                End Function
 
         Function changeStrToSimple(str)
             Dim tmpStr, simpleStr
@@ -1235,6 +1258,22 @@ End Function
 FUnction clearArray(strArray)
 	For i = 0 To UBound(strArray)
         strArray(i) = ""
+    Next
+End Function
+
+Function sortMultiArray(mulitArray, ub1, ub2, keyNum)
+    Dim tmpStr
+    For i = 0 To ub1-1
+        For j = 1 To ub1-i
+            'Msgbox(mulitArray(keyNum, i) & " " & mulitArray(keyNum, i+j))
+            If mulitArray(keyNum, i) > mulitArray(keyNum, i+j) Then
+                For k = 0 To ub2
+                    tmpStr = mulitArray(k, i)
+                    mulitArray(k, i) = mulitArray(k, i+j)
+                    mulitArray(k, i+j) = tmpStr
+                Next
+            End If
+        Next
     Next
 End Function
 
