@@ -514,14 +514,17 @@ End Function
 
 Function coverInArray(aArray, iSeq)
     Dim lenArray
+    MsgBox("111")
     lenArray = safeUBound(aArray, "coverInArray", 1)
     If iSeq < lenArray Then
         For i = iSeq To lenArray - 1
             aArray(i) = aArray(i + 1)
         Next
     End If
+    MsgBox("222")
     
     ReDim Preserve aArray(lenArray - 1)
+    MsgBox("333")
 End Function
 
 Function swapTwoStrings(s1, s2)
@@ -1101,10 +1104,13 @@ End Function
             count = 0
 
             For j = 0 To iTmpResultCount - 1
-                If aAllIsValid(j) And aAllOptName(j) = aAllValidOptName(i) Then
+                If aAllIsValid(j) And _
+                        aAllOptName(j) = aAllValidOptName(i) And _
+                        getExistInArray(aTmpUserText, aAllUserText(j)) = "" Then
                     ReDim Preserve aTmpUserText(count)
                     ReDim Preserve aTmpPureResults(count)
                     ReDim Preserve aTmpSortedResults(count)
+
                     aTmpUserText(count) = aAllUserText(j)
                     aTmpPureResults(count) = aAllPureResults(j)
                     aTmpSortedResults(count) = aAllSortedResults(j)
@@ -1199,21 +1205,8 @@ End Function
                     End If
                 Next
             Next
-
-            checkAndPopSameResult aTmpUserText, aTmpPureResults, aTmpSortedResults
         End If
     End Function
-
-        Function checkAndPopSameResult(aTmpUserText, aTmpPureResults, aTmpSortedResults)
-            For count = 0 To UBound(aTmpUserText) - 1
-                If aTmpUserText(count) = aTmpUserText(count + 1) Then
-                    MsgBox("[keep]: "&aTmpUserText(count)&" "&resultArray(count)&vbLf&"[pop]: "&aTmpUserText(count + 1)&" "&resultArray(count + 1))
-                    coverInArray aTmpUserText, count
-                    coverInArray aTmpPureResults, count
-                    coverInArray aTmpSortedResults, count
-                End If
-            Next
-        End Function
 
         Function compareTwoResult(iResult1, iResult2, i, j, aTmpUserText, aTmpPureResults, aTmpSortedResults)
             Dim flag
