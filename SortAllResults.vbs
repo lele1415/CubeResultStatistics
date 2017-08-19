@@ -1,163 +1,123 @@
 '*************************************************
 '****sort all results.
 '*************************************************
+Dim vaAllResults_333
+Dim vaAllResults_444
+Dim vaAllResults_555
+Dim vaAllResults_222
+Dim vaAllResults_3bf
+Dim vaAllResults_3oh
+Dim vaAllResults_3fm
+Dim vaAllResults_mega
+Dim vaAllResults_py
+Dim vaAllResults_sq
+Dim vaAllResults_clk
+Dim vaAllResults_sk
+Dim vaAllResults_666
+Dim vaAllResults_777
 Function sortAllResults()
-    sortByOptName()
+    Call sortByOptName()
 
-    sortByAvgResult aTmpUserText_333, aTmpPureResults_333, aTmpSortedResults_333, 0
-    sortByAvgResult aTmpUserText_444, aTmpPureResults_444, aTmpSortedResults_444, 0
-    sortByAvgResult aTmpUserText_555, aTmpPureResults_555, aTmpSortedResults_555, 0
-    sortByAvgResult aTmpUserText_222, aTmpPureResults_222, aTmpSortedResults_222, 0
-    sortByAvgResult aTmpUserText_333bf, aTmpPureResults_333bf, aTmpSortedResults_333bf, 1
-    sortByAvgResult aTmpUserText_333oh, aTmpPureResults_333oh, aTmpSortedResults_333oh, 0
-    sortByAvgResult aTmpUserText_333fm, aTmpPureResults_333fm, aTmpSortedResults_333fm, 0
-    sortByAvgResult aTmpUserText_py, aTmpPureResults_py, aTmpSortedResults_py, 0
-    sortByAvgResult aTmpUserText_mega, aTmpPureResults_mega, aTmpSortedResults_mega, 0
-    sortByAvgResult aTmpUserText_sq, aTmpPureResults_sq, aTmpSortedResults_sq, 0
-    sortByAvgResult aTmpUserText_clock, aTmpPureResults_clock, aTmpSortedResults_clock, 0
-    sortByAvgResult aTmpUserText_sk, aTmpPureResults_sk, aTmpSortedResults_sk, 0
-    sortByAvgResult aTmpUserText_666, aTmpPureResults_666, aTmpSortedResults_666, 0
-    sortByAvgResult aTmpUserText_777, aTmpPureResults_777, aTmpSortedResults_777, 0
+    Call sortByAvgResult(vaAllResults_333, true)
+    Call sortByAvgResult(vaAllResults_444, true)
+    Call sortByAvgResult(vaAllResults_555, true)
+    Call sortByAvgResult(vaAllResults_222, true)
+    Call sortByAvgResult(vaAllResults_3bf, false)
+    Call sortByAvgResult(vaAllResults_3oh, true)
+    Call sortByAvgResult(vaAllResults_3fm, true)
+    Call sortByAvgResult(vaAllResults_mega, true)
+    Call sortByAvgResult(vaAllResults_py, true)
+    Call sortByAvgResult(vaAllResults_sq, true)
+    Call sortByAvgResult(vaAllResults_clk, true)
+    Call sortByAvgResult(vaAllResults_sk, true)
+    Call sortByAvgResult(vaAllResults_666, true)
+    Call sortByAvgResult(vaAllResults_777, true)
 
     MsgBox("OK")
 End Function
 
     Function sortByOptName()
-        Dim aAllValidOptName, count, aTmpUserText(), aTmpPureResults(), aTmpSortedResults()
-        aAllValidOptName = getAllOptName()
-        count = 0
-        
+        Set vaAllResults_333 = New VariableArray
+        Set vaAllResults_444 = New VariableArray
+        Set vaAllResults_555 = New VariableArray
+        Set vaAllResults_222 = New VariableArray
+        Set vaAllResults_3bf = New VariableArray
+        Set vaAllResults_3oh = New VariableArray
+        Set vaAllResults_3fm = New VariableArray
+        Set vaAllResults_mega = New VariableArray
+        Set vaAllResults_py = New VariableArray
+        Set vaAllResults_sq = New VariableArray
+        Set vaAllResults_clk = New VariableArray
+        Set vaAllResults_sk = New VariableArray
+        Set vaAllResults_666 = New VariableArray
+        Set vaAllResults_777 = New VariableArray
 
-        For i = 0 To UBound(aAllValidOptName)
-            ReDim Preserve aTmpUserText(0)
-            ReDim Preserve aTmpPureResults(0)
-            ReDim Preserve aTmpSortedResults(0)
-            aTmpUserText(0) = ""
-            aTmpPureResults(0) = ""
-            aTmpSortedResults(0) = ""
-            count = 0
-
-            For j = 0 To iTmpResultCount - 1
-                If aAllIsValid(j) And _
-                        aAllOptName(j) = aAllValidOptName(i) And _
-                        getExistInArray(aTmpUserText, aAllUserText(j)) = "" Then
-                    ReDim Preserve aTmpUserText(count)
-                    ReDim Preserve aTmpPureResults(count)
-                    ReDim Preserve aTmpSortedResults(count)
-
-                    aTmpUserText(count) = aAllUserText(j)
-                    aTmpPureResults(count) = aAllPureResults(j)
-                    aTmpSortedResults(count) = aAllSortedResults(j)
-                    count = count + 1
-                End If
-            Next
-
-            Select Case aAllValidOptName(i)
-                Case "333"
-                    aTmpUserText_333 = aTmpUserText
-                    aTmpPureResults_333 = aTmpPureResults
-                    aTmpSortedResults_333 = aTmpSortedResults
-                Case "444"
-                    aTmpUserText_444 = aTmpUserText
-                    aTmpPureResults_444 = aTmpPureResults
-                    aTmpSortedResults_444 = aTmpSortedResults
-                Case "555"
-                    aTmpUserText_555 = aTmpUserText
-                    aTmpPureResults_555 = aTmpPureResults
-                    aTmpSortedResults_555 = aTmpSortedResults
-                Case "222"
-                    aTmpUserText_222 = aTmpUserText
-                    aTmpPureResults_222 = aTmpPureResults
-                    aTmpSortedResults_222 = aTmpSortedResults
-                Case "333bf"
-                    aTmpUserText_333bf = aTmpUserText
-                    aTmpPureResults_333bf = aTmpPureResults
-                    aTmpSortedResults_333bf = aTmpSortedResults
-                Case "333oh"
-                    aTmpUserText_333oh = aTmpUserText
-                    aTmpPureResults_333oh = aTmpPureResults
-                    aTmpSortedResults_333oh = aTmpSortedResults
-                Case "333fm"
-                    aTmpUserText_333fm = aTmpUserText
-                    aTmpPureResults_333fm = aTmpPureResults
-                    aTmpSortedResults_333fm = aTmpSortedResults
-                Case "py"
-                    aTmpUserText_py = aTmpUserText
-                    aTmpPureResults_py = aTmpPureResults
-                    aTmpSortedResults_py = aTmpSortedResults
-                Case "mega"
-                    aTmpUserText_mega = aTmpUserText
-                    aTmpPureResults_mega = aTmpPureResults
-                    aTmpSortedResults_mega = aTmpSortedResults
-                Case "sq"
-                    aTmpUserText_sq = aTmpUserText
-                    aTmpPureResults_sq = aTmpPureResults
-                    aTmpSortedResults_sq = aTmpSortedResults
-                Case "clock"
-                    aTmpUserText_clock = aTmpUserText
-                    aTmpPureResults_clock = aTmpPureResults
-                    aTmpSortedResults_clock = aTmpSortedResults
-                Case "sk"
-                    aTmpUserText_sk = aTmpUserText
-                    aTmpPureResults_sk = aTmpPureResults
-                    aTmpSortedResults_sk = aTmpSortedResults
-                Case "666"
-                    aTmpUserText_666 = aTmpUserText
-                    aTmpPureResults_666 = aTmpPureResults
-                    aTmpSortedResults_666 = aTmpSortedResults
-                Case "777"
-                    aTmpUserText_777 = aTmpUserText
-                    aTmpPureResults_777 = aTmpPureResults
-                    aTmpSortedResults_777 = aTmpSortedResults
+        Dim i, obj
+        For i = 0 To vaAllValidResultInfo.Bound
+            Set obj = vaAllValidResultInfo.V(i)
+            Select Case obj.ResultOptSeq
+                Case OPT_SEQ_333
+                    vaAllResults_333.Append(obj)
+                Case OPT_SEQ_444
+                    vaAllResults_444.Append(obj)
+                Case OPT_SEQ_555
+                    vaAllResults_555.Append(obj)
+                Case OPT_SEQ_222
+                    vaAllResults_222.Append(obj)
+                Case OPT_SEQ_3bf
+                    vaAllResults_3bf.Append(obj)
+                Case OPT_SEQ_3oh
+                    vaAllResults_3oh.Append(obj)
+                Case OPT_SEQ_3fm
+                    vaAllResults_3fm.Append(obj)
+                Case OPT_SEQ_mega
+                    vaAllResults_mega.Append(obj)
+                Case OPT_SEQ_py
+                    vaAllResults_py.Append(obj)
+                Case OPT_SEQ_sq
+                    vaAllResults_sq.Append(obj)
+                Case OPT_SEQ_clk
+                    vaAllResults_clk.Append(obj)
+                Case OPT_SEQ_sk
+                    vaAllResults_sk.Append(obj)
+                Case OPT_SEQ_666
+                    vaAllResults_666.Append(obj)
+                Case OPT_SEQ_777
+                    vaAllResults_777.Append(obj)
             End Select
         Next
     End Function
 
-    Function sortByAvgResult(aTmpUserText, aTmpPureResults, aTmpSortedResults, iSeq)
-        Dim lenTmpUserText, flag
-        lenTmpUserText = safeUBound(aTmpUserText, "sortByAvgResult 111", 1)
-        flag = 0
+    Function sortByAvgResult(vaObj, bCompartByAvg)
+        If vaObj.Bound < 1 Then
+            Exit Function
+        End If
 
-        If lenTmpUserText > 0 Then
-            For i = 0 To lenTmpUserText - 1
-                For j = i + 1 To lenTmpUserText
-                    Dim aResults1, aResults2
-                    aResults1 = Split(aTmpSortedResults(i))
-                    aResults2 = Split(aTmpSortedResults(j))
-
-                    If iSeq = 0 Then
-                        flag = compareTwoResult(aResults1(iSeq), aResults2(iSeq), i, j, aTmpUserText, aTmpPureResults, aTmpSortedResults)
+        Dim i, iCompareResult
+        If bCompartByAvg Then
+            For i = 0 To vaObj.Bound - 1
+                iCompareResult = StrComp(vaObj.V(i).AvgResult, vaObj.V(i + 1).AvgResult)
+                If iCompareResult > 0 Then
+                    Call vaObj.SwapTwoValues(i, i + 1)
+                ElseIf iCompareResult = 0 Then
+                    iCompareResult = StrComp(vaObj.V(i).SortedResults, vaObj.V(i + 1).SortedResults)
+                    If iCompareResult > 0 Then
+                        Call vaObj.SwapTwoValues(i, i + 1)
                     End If
-
-                    If (iSeq = 1 Or flag = 1) Then
-                        For k = 1 To safeUBound(aResults1, "sortByAvgResult 222", 1) - 2
-                            flag = compareTwoResult(aResults1(k), aResults2(k), i, j, aTmpUserText, aTmpPureResults, aTmpSortedResults)
-                            If flag = 0 Then
-                                Exit For
-                            End If
-                        Next
+                End If
+            Next
+        Else
+            For i = 0 To vaObj.Bound - 1
+                iCompareResult = StrComp(vaObj.V(i).BestResult, vaObj.V(i + 1).BestResult)
+                If iCompareResult > 0 Then
+                    Call vaObj.SwapTwoValues(i, i + 1)
+                ElseIf iCompareResult = 0 Then
+                    iCompareResult = StrComp(vaObj.V(i).SortedResults, vaObj.V(i + 1).SortedResults)
+                    If iCompareResult > 0 Then
+                        Call vaObj.SwapTwoValues(i, i + 1)
                     End If
-                Next
+                End If
             Next
         End If
     End Function
 
-        Function compareTwoResult(iResult1, iResult2, i, j, aTmpUserText, aTmpPureResults, aTmpSortedResults)
-            Dim flag
-            flag = 0
-            'If Not IsNumeric(iResult1) Then
-            '    MsgBox("iResult1=" & iResult1 & Vblf &_
-            '            "aTmpUserText(i)=" & aTmpUserText(i) & Vblf &_
-            '            "aTmpPureResults(i)=" & aTmpPureResults(i) & Vblf &_
-            '            "aTmpSortedResults(i)=" & aTmpSortedResults(i))
-            'End If
-            If iResult1 - iResult2 > 0 Then
-                swapTwoStrings aTmpUserText(i), aTmpUserText(j)
-                swapTwoStrings aTmpPureResults(i), aTmpPureResults(j)
-                swapTwoStrings aTmpSortedResults(i), aTmpSortedResults(j)
-            ElseIf iResult1 - iResult2 = 0 Then
-                flag = 1
-            End If
-
-            compareTwoResult = flag
-        End Function

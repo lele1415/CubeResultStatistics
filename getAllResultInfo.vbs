@@ -110,8 +110,11 @@ End Function
         End Sub
 
         Sub addOptInfo(optFullName, optSeq, optNeedNum)
-            Dim aRecordInfo
+            Dim aRecordInfo, iBestRecord, iAvgRecord
             aRecordInfo = Split(aAllRecords(optSeq))
+            iBestRecord = checkColonAndFormat(aRecordInfo(1))
+            iAvgRecord = checkColonAndFormat(aRecordInfo(2))
+
             Dim optInfo : Set optInfo = New OptionInfo
             optInfo.FullName = optFullName
             optInfo.Seq = optSeq
@@ -120,6 +123,12 @@ End Function
             optInfo.AvgRecord = aRecordInfo(2)
             vaOptInfo.Append(optInfo)
         End Sub
+
+                Function checkColonAndFormat(iResult)
+                    If InStr(iResult, ":") Then
+                        checkColonAndFormat = formatResultStr(iResult, "")
+                    End If
+                End Function
 
         Sub loadAllRecords()
             Dim oTxt, count

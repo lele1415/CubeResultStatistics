@@ -70,6 +70,9 @@
 '//  
 '//  20170810
 '//      已完成：清除某个成绩后，自动选中下一个成绩
+'//  
+'//  20170812
+'//      1. 优化：getAllPostInfo, getPureResult, GetAvgAndSortedResults, ShowAllResultInfo
 -->
 
 <Html>
@@ -139,8 +142,9 @@
     <div>
         <input type="button" onclick="submitNewResultInfo()" value="Submit new result" />
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <input type="button" onclick="selectAnotherInvalidResult(0)" value="Next" />
-        <input type="button" onclick="selectAnotherInvalidResult(1)" value="Last" />
+        <input type="button" onclick="selectAnotherInvalidResult(0)" value="↓" />
+        &nbsp;&nbsp;
+        <input type="button" onclick="selectAnotherInvalidResult(1)" value="↑" />
     </div>
 </fieldset>
 
@@ -164,6 +168,7 @@
 <Script Language="VBScript" src="GetPureResult.vbs"></Script>
 <Script Language="VBScript" src="GetAvgAndSortedResults.vbs"></Script>
 <Script Language="VBScript" src="ShowAllResultInfo.vbs"></Script>
+<Script Language="VBScript" src="SortAllResults.vbs"></Script>
 
 </Body>
 </Html>

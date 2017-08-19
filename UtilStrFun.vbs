@@ -177,115 +177,134 @@ Function replaceCharacterInResultStr(sStr)
     replaceCharacterInResultStr = sSimple
 End Function
 
-Function formatResultStr(sStr)
-    Dim sTmp, sFormat
-    sTmp = sStr
-    sFormat = ""
-
-    Dim lenTmp, iPointInStr
-    lenTmp = Len(sTmp)
-    iPointInStr = InStr(sTmp, ".")
-
-    If iPointInStr > 0 Then
-        If lenTmp - iPointInStr > 2 Then
-            sTmp = safeMid(sTmp, 1, iPointInStr + 2, "formatResultStr")
-        End If
-    End If
-
-    If IsNumeric(sTmp) Then
-        If InStr(sTmp, ".") > 0 And _
-                Len(sTmp) >= 4 Then
-            sFormat = FormatNumber(sTmp, 2, , , 0)
-        End If
-    ElseIf InStr(sTmp, "DNF") > 0 Or _
-            InStr(sTmp, "DNS") > 0 Then
-        sFormat = 9999.99
+Function formatResultStr(sStr, optSeq)
+    If StrComp(optSeq, OPT_SEQ_3fm) = 0 Then
+        formatResultStr = formatResultStrForFm(sStr)
     Else
-        Dim iColonInStr, iColonCount, iPointCount, sPartMin, sPartSec
-        iColonInStr = InStr(sTmp, ":")
-        iColonCount = getCharCountInStr(sTmp, ":")
-        iPointCount = getCharCountInStr(sTmp, ".")
-        'MsgBox("iColonInStr="&iColonInStr&Vblf&_
-        '       "iPointInStr="&iPointInStr&Vblf&_
-        '       "iColonCount="&iColonCount&Vblf&_
-        '       "iPointCount="&iPointCount)
+        formatResultStr = formatResultStrForOthers(sStr)
+    End If
+End Function
 
-        If iColonInStr > 1 And _
-                iPointInStr > 1 And _
-                iColonInStr < Len(sTmp) And _
-                iPointInStr < Len(sTmp) And _
-                iPointInStr > iColonInStr + 1 And _
-                iColonCount = 1 And _
-                iPointCount = 1 Then
-            sPartMin = safeMid(sTmp, 1, iColonInStr-1, "formatResultStr 111")
-            sPartSec = safeMid(sTmp, iColonInStr+1, 0, "formatResultStr 222")
-            'MsgBox( "formatResultStr "&Vblf&_
-                    '"sPartMin="&sPartMin&Vblf&_
-                    '"sPartSec="&sPartSec )
-            If IsNumeric(sPartMin) And IsNumeric(sPartSec) Then
-                sFormat = sPartMin * 60 + sPartSec
-                sFormat = FormatNumber(sFormat, 2, , , 0)
-                'MsgBox( "formatResultStr "&Vblf&_
-                        '"sTmp="&sTmp )
-            Else
-                MsgBox( "Error: is not number"&Vblf&_
-                        "sPartMin="&sPartMin&Vblf&_
-                        "sPartSec="&sPartSec )
-            End If
+Function formatResultStrForOthers(sStr)
+    '//DNF or DNS
+    If InStr(sStr, "DNF") > 0 Or InStr(sStr, "DNS") > 0 Then
+        formatResultStrForOthers = 9999.99
+        Exit Function
+    End If
+
+
+    Dim iColonCount, iPointCount
+    iColonCount = getCharCountInStr(sTmp, ":")
+    iPointCount = getCharCountInStr(sTmp, ".")
+
+    '//invalid result str of xx:xx:xx.xx ???:xx
+    If (iColonCount > 1) Or (iPointCount <> 1) Then
+        formatResultStrForOthers = ""
+        Exit Function
+    End If
+
+    Dim iLenOfStr, iPointInStr
+    iLenOfStr = Len(sStr)
+    iPointInStr = InStr(sStr, ".")
+
+    '//invalid result str of .xx ???.x ???.
+    If iPointInStr = 1 Or (iLenOfStr - iPointInStr < 2) Then
+        formatResultStrForOthers = ""
+        Exit Function
+    End If
+
+    '//if have colon
+    If iColonCount = 1 Then
+        Dim iColonInStr
+        iColonInStr = InStr(sStr, ":")
+
+        '//invalid result str of xx:.xx  :xx  ???:
+        If (iPointInStr - iColonInStr) < 2 Or _
+                iColonInStr = 1 Or _
+                (iLenOfStr - iColonInStr) < 4 Then
+            formatResultStrForOthers = ""
+            Exit Function
         End If
     End If
 
-    formatResultStr = sFormat
+    '//cut ???.xx
+    Dim sFormat
+    sFormat = safeMid(sStr, 1, iPointInStr + 2, "formatResultStrForOthers 111")
+
+    '//get final str
+    If iColonCount = 1 Then
+        Dim sPartMin, sPartSec, aTmp
+        aTmp = Split(sFormat, ":")
+        sPartMin = aTmp(0)
+
+        If Not IsNumeric(sPartMin) Then
+            formatResultStrForOthers = ""
+            Exit Function
+        End If
+
+        sPartSec = aTmp(1)
+
+        sFormat = sPartMin * 60 + sPartSec
+        sFormat = FormatNumber(sFormat, 2, , , 0)
+    Else
+        sFormat = FormatNumber(sFormat, 2, , , 0)
+    End If
+
+    formatResultStrForOthers = sFormat
 End Function
 
 Function formatResultStrForFm(sStr)
-    Dim sTmp, sFormat
-    sTmp = sStr
-    sFormat = ""
-
-    If IsNumeric(sTmp) Then
-        If Len(sTmp) = 2  Then
-            If IsNumeric(Mid(sTmp, 1, 1)) And _
-                    IsNumeric(Mid(sTmp, 2, 1)) Then
-                sFormat = sTmp
-            End If
-        End If
-    ElseIf InStr(sTmp, "DNF") > 0 Or _
-            InStr(sTmp, "DNS") > 0 Then
-        sFormat = 9999.99
+    '//DNF or DNS
+    If InStr(sStr, "DNF") > 0 Or InStr(sStr, "DNS") > 0 Then
+        formatResultStrForOthers = 9999.99
+        Exit Function
     End If
 
-    formatResultStrForFm = sFormat
+    If Not IsNumeric(sStr) Then
+        formatResultStrForFm = ""
+        Exit Function
+    End If
+
+    Dim iPointInStr, iColonInStr
+    iPointInStr = InStr(sStr, ".")
+    iColonInStr = InStr(sStr, ":")
+
+    If iPointInStr > 0 Or iColonInStr > 0 Then
+        formatResultStrForFm = ""
+        Exit Function
+    End If
+
+    formatResultStrForFm = sStr
 End Function
 
-Function revertResult(iResult, sOptName)
-    Dim sTmp
-    sTmp = iResult
+Function revertResult(iResult, optSeq)
+    Dim sRevert
+    sRevert = iResult
 
-    If sOptName <> "333fm" Then
+    If sRevert = 9999.99 Then
+        revertResult = "DNF"
+        Exit Function
+    End If
+
+    If StrComp(optSeq, OPT_SEQ_3fm) <> 0 Then
         Dim minNum, secNum
-        If sTmp = 9999.99 Then
-            sTmp = "DNF"
-        ElseIf sTmp > 59.99 Then
-            minNum = int(sTmp / 60)
-            secNum = FormatNumber(sTmp - minNum * 60, 2, , , 0)
+        If sRevert > 59.99 Then
+            minNum = int(sRevert / 60)
+            secNum = FormatNumber(sRevert - minNum * 60, 2, , , 0)
             If secNum < 1.00 Then
                 secNum = "00" & secNum
             ElseIf secNum < 10.00 Then
                 secNum = "0" & secNum
             End If
-            sTmp = minNum & ":" & secNum
-        ElseIf sTmp < 1.00 Then
-            sTmp = "0" & sTmp
+            sRevert = minNum & ":" & secNum
+        ElseIf sRevert < 1.00 Then
+            sRevert = "0" & sRevert
         Else
-            sTmp = FormatNumber(sTmp, 2, , , 0)
+            sRevert = FormatNumber(sRevert, 2, , , 0)
         End If
-        
-        revertResult = sTmp
-    Else
-        If sTmp = 9999.99 Then sTmp = "DNF"
-        revertResult = sTmp
     End If
+        
+    revertResult = sRevert
 End Function
 
 Function replaceStrForOptName(sStr)

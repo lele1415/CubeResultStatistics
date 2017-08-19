@@ -32,11 +32,6 @@ Sub compareToRecord(oOptInfo, resultInfo, iAvgResult, iBestResult)
     iBestRecord = oOptInfo.BestRecord
     iAvgRecord = oOptInfo.AvgRecord
 
-    If StrComp(oOptInfo.Seq, OPT_SEQ_3fm) <> 0 Then
-        iBestRecord = formatResultStr(iBestRecord)
-        iAvgRecord = formatResultStr(iAvgRecord)
-    End If
-
     If iBestResult - iBestRecord <= 0 Then resultInfo.IsBestBr = True
     If iAvgResult - iAvgRecord <= 0 Then resultInfo.IsAvgBr = True
 End Sub

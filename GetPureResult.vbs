@@ -19,15 +19,8 @@ End Function
             aTmpResult = Split(replaceCharacterInResultStr(cutResultStrByKeyword(sResultText)))
             If Not isArray(aTmpResult) Then pickMachedResults = "" : Exit Function
 
-            Dim formatFun
-            If StrComp(iOptSeq, OPT_SEQ_3fm) = 0 Then
-                formatFun = "formatResultStrForFm"
-            Else
-                formatFun = "formatResultStr"
-            End If
-
             For i = 0 To UBound(aTmpResult)
-                Execute "sTmp = " & formatFun & "(aTmpResult(i))"
+                sTmp = formatResultStr(aTmpResult(i), iOptSeq)
                 If IsNumeric(sTmp) Then
                     sTmpResult = sTmpResult & " " & sTmp
                 End If
