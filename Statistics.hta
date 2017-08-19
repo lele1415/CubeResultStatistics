@@ -1,3 +1,12 @@
+'//<!--
+'//  更新日志：
+'//
+'//  12-14
+'//      1. 解决成绩间隔不同时可能产生顺序错乱的问题
+'//          checkCloseNum中的Else部分缺少"Exit For"
+'//  
+'//-->
+
 <Html>
 <Head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -483,8 +492,8 @@ Function getAndDealResult(str, strUserName, floorNum, countCheck, projectName)
         End If
 
         If debug Then
-            Msgbox(str)
-            Msgbox(countCheck)
+            Msgbox("getAndDealResult str="&str)
+            Msgbox("getAndDealResult countCheck="&countCheck)
         End If
 
         finalResultArray = getArrayResult(str, countCheck, numResult, projectName)
@@ -627,12 +636,11 @@ End Function
 	        Next
 
             If debug Then
-                Msgbox(tmpStr)
-                Msgbox(SimpleStr)
-                msgboxArray(resultStep)
-                msgboxArray(resultStep2)
+                Msgbox("getFiveResult tmpStr="&tmpStr)
+                Msgbox("getFiveResult SimpleStr="&SimpleStr)
+                msgboxArray "getFiveResult resultStep=", resultStep
+                msgboxArray "getFiveResult resultStep2=", resultStep2
             End If
-            'msgboxArray(getDiffStepArray(resultStep2))
 
             If UBound(resultStep2) >= numResult-1 Then
                 closeResultStep = getCloseNumArray(resultStep2, numResult)
@@ -642,7 +650,7 @@ End Function
                     Next
 
                     If debug Then
-                        msgboxArray(closeResultStep)
+                        msgboxArray "getFiveResult closeResultStep=", closeResultStep
                     End If
 
                     If UBound(closeResultStep) > 0 Then
@@ -696,7 +704,7 @@ End Function
                 End If
             End If
             If debug Then
-                msgboxArray(resultArray)
+                msgboxArray "getFiveResult resultArray=", resultArray
             End If
             getFiveResult = resultArray
         End Function
@@ -789,25 +797,34 @@ End Function
                 End If
             End If
             If debug Then
-                msgboxArray(finalArray)
+                msgboxArray "getCloseNumArray diffStepArray1=", diffStepArray1
+                msgboxArray "getCloseNumArray diffStepArray2=", diffStepArray2
+                msgboxArray "getCloseNumArray finalArray=", finalArray
             End If
             getCloseNumArray = finalArray
         End Function
 
                 Function checkCloseNum(numArray, numResult, limit, getedNum, newArray)
                     For i = 0 To UBound(numArray)
+                        'If debug Then
+                        '    Msgbox("checkCloseNum getedNum="&getedNum&" i="&i)
+                        'End If
                         If getedNum = numResult Then
                             Exit For
                         End If
                         
                         If (Abs(numArray(i)) <= limit) Or (listFlag)  Then
                             Redim Preserve newArray(getedNum)
-                            newArray(getedNum) = i+2
+	                        newArray(getedNum) = i+2
+                            'If debug Then
+                            '    Msgbox("checkCloseNum in getedNum="&getedNum&" i="&i)
+	                        'End If
                             getedNum = getedNum + 1
                         Else
                             getedNum = 2
                             newArray(0) = i+1
                             newArray(1) = i+2
+                            Exit For
                         End If
                     Next
                 End Function
@@ -1323,8 +1340,9 @@ Function cutStrWithKey(str, keyBegin, numBegin, keyEnd, numEnd)
     cutStrWithKey = tmpStr
 End Function
 
-Function msgboxArray(strArray)
+Function msgboxArray(strBegin, strArray)
     Dim tmpStr
+    tmpStr = strBegin
     For count = 0 To UBound(strArray)
     	tmpStr = tmpStr & " " & strArray(count)
     Next
