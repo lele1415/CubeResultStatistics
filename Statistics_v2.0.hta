@@ -13,6 +13,11 @@
 '//      1. 重写成绩识别代码，改为分段处理字符
 '//      2. 增加识别后的有效成绩列表、无效成绩列表、BR列表，方便手动修改
 '//      3. 代码整理
+'//  20170219
+'//      1. 增加某些项目名的全名称识别
+'//  20170226
+'//      1. 解决有相同成绩时对比出错
+'//           原因：aTmpSortedResults最后两个元素是sBrFlag，不是数字
 '//  
 -->
 
@@ -331,11 +336,11 @@ Function getOptCheckStrArray(OptName)
     checkStrArray_333bf = Array("三盲","333bf","3bf","3bld")
     checkStrArray_333oh = Array("三单","333oh","3oh","oh","3one")
     checkStrArray_333fm = Array("最少步","最小步","333fm","3fm","fm")
-    checkStrArray_mega = Array("五魔","mega","五魔方")
-    checkStrArray_py = Array("金字塔","塔","py")
-    checkStrArray_sq = Array("sq-1","sq1","sq")
+    checkStrArray_mega = Array("五魔","mega","megaminx","五魔方")
+    checkStrArray_py = Array("金字塔","塔","py","pyramid")
+    checkStrArray_sq = Array("sq","sq1","sq-1")
     checkStrArray_clock = Array("魔表","表","clock","clk")
-    checkStrArray_sk = Array("斜转","sk")
+    checkStrArray_sk = Array("斜转","sk","skewb")
 
     Select Case OptName
         Case "333"
@@ -1361,7 +1366,7 @@ End Function
                     End If
 
                     If (iSeq = 1 Or flag = 1) Then
-                        For k = 1 To safeUBound(aResults1, "sortByAvgResult 222", 1)
+                        For k = 1 To safeUBound(aResults1, "sortByAvgResult 222", 1) - 2
                             flag = compareTwoResult(aResults1(k), aResults2(k), i, j, aTmpUserText, aTmpPureResults, aTmpSortedResults)
                             If flag = 0 Then
                                 Exit For
@@ -1389,6 +1394,12 @@ End Function
         Function compareTwoResult(iResult1, iResult2, i, j, aTmpUserText, aTmpPureResults, aTmpSortedResults)
             Dim flag
             flag = 0
+            'If Not IsNumeric(iResult1) Then
+            '    MsgBox("iResult1=" & iResult1 & Vblf &_
+            '            "aTmpUserText(i)=" & aTmpUserText(i) & Vblf &_
+            '            "aTmpPureResults(i)=" & aTmpPureResults(i) & Vblf &_
+            '            "aTmpSortedResults(i)=" & aTmpSortedResults(i))
+            'End If
             If iResult1 - iResult2 > 0 Then
                 swapTwoStrings aTmpUserText(i), aTmpUserText(j)
                 swapTwoStrings aTmpPureResults(i), aTmpPureResults(j)
