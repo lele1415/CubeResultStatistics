@@ -7,12 +7,14 @@ Dim aEndStr : aEndStr = Array(",", "</a>", "</div><br></cc>")
 
 Dim iSeq : iSeq = 0
 Dim oTmp
-Dim aExceptPostNum
+Dim aIgnoredPostNum
 
 Sub getAllPostInfo()
     Call vaAllPostInfo.ResetArray()
-    aExceptPostNum = Split(getElementValue("exceptPostNum_id"), " ")
+    '//these post nums will be ignored
+    aIgnoredPostNum = Split(getElementValue("exceptPostNum_id"), " ")
 
+    '//read text of page code
     Dim oTxt, sReadLine
     Set oTxt = Fso.OpenTextFile(uPagesCodeFile, 1, False, True)
 
@@ -21,6 +23,7 @@ Sub getAllPostInfo()
 
         If iSeq > 0 Then
             Call searchInfo(sReadLine)
+            '//post num maybe in the same line with last post msg
             If iSeq = 0 Then Call searchInfo(sReadLine)
         Else
             Call searchInfo(sReadLine)
@@ -38,18 +41,22 @@ End Sub
 
         Sub searchInfo(sOrigin)
             Dim sGet
+            '//get post num
             If iSeq = 0 Then
                 sGet = cutStrWithHeadEndStr(sOrigin, aHeadStr(0), aEndStr(0))
                 If Not checkIsNeedPostNum(sGet) Then Exit Sub
+            '//get post user or msg
             Else
                 sGet = cutStrWithElement(sOrigin, aHeadStr(iSeq), aEndStr(iSeq))
             End If
                 
             If sGet <> "" Then
+                '//new PostInfo
                 If iSeq = 0 Then Set oTmp = New PostInfo
 
                 Call receiveInfoStr(sGet, oTmp)
 
+                '//already get a PostInfo
                 If iSeq = 2 Then
                     Dim oNew : Set oNew = oTmp
                     vaAllPostInfo.Append(oNew)
@@ -62,8 +69,8 @@ End Sub
 
         Function checkIsNeedPostNum(num)
             Dim i
-            For i = 0 To UBound(aExceptPostNum)
-                If num = aExceptPostNum(i) Then
+            For i = 0 To UBound(aIgnoredPostNum)
+                If num = aIgnoredPostNum(i) Then
                     checkIsNeedPostNum = False
                     Exit Function
                 End If
@@ -81,6 +88,7 @@ End Sub
                 Case 0
                     object.PostNum = str
                 Case 1
+                    Call removeElement(str, "<img")
                     object.PostUser = str
                 Case 2
                     str = LTrim(str)

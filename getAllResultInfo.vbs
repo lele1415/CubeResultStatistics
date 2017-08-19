@@ -86,6 +86,7 @@ Function getAllResultInfo()
     Next
     Call saveValidResultInfoToTxt()
     Call saveInValidResultInfoToTxt()
+    MsgBox("Get all result info done!")
     Call showAllResultInfo()
 
     MsgBox("getAllResultInfo done!")
@@ -151,7 +152,7 @@ End Function
                 Set obj = vaAllValidResultInfo.V(i)
                 oTxt.WriteLine(obj.PostNum)
                 oTxt.WriteLine(obj.ResultOwner)
-                oTxt.WriteLine(getOptFullNameBySeq(obj.OptSeq))
+                oTxt.WriteLine(getOptFullNameBySeq(obj.ResultOptSeq))
                 oTxt.WriteLine(obj.ResultText)
                 oTxt.WriteLine(obj.PureResults)
                 oTxt.WriteLine(obj.SortedResults)
@@ -175,7 +176,7 @@ End Function
                 Set obj = vaAllInvalidResultInfo.V(i)
                 oTxt.WriteLine(obj.PostNum)
                 oTxt.WriteLine(obj.ResultOwner)
-                oTxt.WriteLine(getOptFullNameBySeq(obj.OptSeq))
+                oTxt.WriteLine(getOptFullNameBySeq(obj.ResultOptSeq))
                 oTxt.WriteLine(obj.ResultText)
                 oTxt.WriteLine(obj.PureResults)
                 oTxt.WriteLine()
@@ -275,11 +276,11 @@ End Function
             Dim oNew : Set oNew = New ValidResultInfo
             oNew.PostNum = postNum
             oNew.ResultOwner = postUser
-            oNew.OptSeq = optSeq
+            oNew.ResultOptSeq = optSeq
             oNew.ResultText = resultText
             oNew.PureResults = pureResults
 
-            Call getSortedResult(pureResults, vaOptInfo.V(optSeq), oNew)
+            Call getSortedResult(pureResults, optSeq, oNew)
 
             Call vaAllValidResultInfo.Append(oNew)
         End Sub
@@ -297,7 +298,7 @@ End Function
             Dim oNew : Set oNew = New InvalidResultInfo
             oNew.PostNum = postNum
             oNew.ResultOwner = postUser
-            oNew.OptSeq = optSeq
+            oNew.ResultOptSeq = optSeq
             oNew.ResultText = resultText
             oNew.PureResults = pureResults
             Call vaAllInvalidResultInfo.Append(oNew)

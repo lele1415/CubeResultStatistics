@@ -62,6 +62,11 @@
 '//  
 '//  20170723
 '//      1. 优化：getPagesCode, getPureResult, getAllResultInfo
+'//      2. 添加：ShowAllResultInfo
+'//  
+'//  20170806
+'//      已完成：完善显示和修改成绩的功能
+'//      待解决：清除某个成绩后，自动选中下一个成绩
 -->
 
 <Html>
@@ -86,9 +91,9 @@
 <br>
 <fieldset>
     <div>
-        <select id="validResultList_id" onclick="showResultInfo('validResultList_id')" multiple="multiple" size="8"></select>
-        <select id="invalidResultList_id" onclick="showResultInfo('invalidResultList_id')" multiple="multiple" size="8"></select>
-        <select id="brResultList_id" onclick="showResultInfo('brResultList_id')" multiple="multiple" size="8"></select>
+        <select id="valid_results" onclick="showResultInfo('valid_results')" multiple="multiple" size="8"></select>
+        <select id="invalid_results" onclick="showResultInfo('invalid_results')" multiple="multiple" size="8"></select>
+        <select id="br_results" onclick="showResultInfo('br_results')" multiple="multiple" size="8"></select>
     </div>
     <br>
     <br>
@@ -112,6 +117,12 @@
             <option value="12">六阶</option>
             <option value="13">七阶</option>
         </select>
+    </div>
+    <div>
+        <textarea id="showResult_best_result" rows="1" cols="7"></textarea>
+        <textarea id="showResult_is_best_br" rows="1" cols="5"></textarea>
+        <textarea id="showResult_avg_result" rows="1" cols="7"></textarea>
+        <textarea id="showResult_is_avg_br" rows="1" cols="5"></textarea>
     </div>
     <br>
     <div>

@@ -1,13 +1,13 @@
 '*************************************************
 '****get avg and sorted results.
 '*************************************************
-Sub getSortedResult(sPureResult, optInfo, resultInfo)
-    Dim aTmp, aPureResults, iAvgResult, iBestResult, iEnd
+Sub getSortedResult(sPureResult, iOptSeq, resultInfo)
+    Dim aTmp, aPureResults, iAvgResult, iBestResult, oOptInfo, iEnd
     aPureResults = sortIntArray(Split(sPureResult))
-
     iBestResult = aPureResults(0)
+    Set oOptInfo = vaOptInfo.V(iOptSeq)
 
-    If optInfo.NeedNum = 5 Then
+    If oOptInfo.NeedNum = 5 Then
         iEnd = 3
     Else
         iEnd = 2
@@ -20,19 +20,19 @@ Sub getSortedResult(sPureResult, optInfo, resultInfo)
         iAvgResult = 9999.99
     End If
 
-    Call compareToRecord(optInfo, resultInfo, iAvgResult, iBestResult)
+    Call compareToRecord(oOptInfo, resultInfo, iAvgResult, iBestResult)
 
     resultInfo.BestResult = iBestResult
     resultInfo.AvgResult = iAvgResult
     resultInfo.SortedResults = joinArrayWithSpace(aPureResults)
 End Sub
 
-Sub compareToRecord(optInfo, resultInfo, iAvgResult, iBestResult)
+Sub compareToRecord(oOptInfo, resultInfo, iAvgResult, iBestResult)
     Dim iAvgRecord, iBestRecord
-    iBestRecord = optInfo.BestRecord
-    iAvgRecord = optInfo.AvgRecord
+    iBestRecord = oOptInfo.BestRecord
+    iAvgRecord = oOptInfo.AvgRecord
 
-    If optInfo.Seq <> OPT_SEQ_3fm Then
+    If oOptInfo.Seq <> OPT_SEQ_3fm Then
         iBestRecord = formatResultStr(iBestRecord)
         iAvgRecord = formatResultStr(iAvgRecord)
     End If

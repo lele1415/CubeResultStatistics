@@ -89,13 +89,13 @@ End Class
 
 
 Class ValidResultInfo
-    Private mPostNum, mResultOwner, mResultText, mOptSeq, mPureResults, mSortedResults, mBestResult, mAvgResult, mIsBestBr, mIsAvgBr
+    Private mPostNum, mResultOwner, mResultText, mResultOptSeq, mPureResults, mSortedResults, mBestResult, mAvgResult, mIsBestBr, mIsAvgBr
 
     Private Sub Class_Initialize
         mPostNum = ""
         mResultOwner = ""
         mResultText = ""
-        mOptSeq = ""
+        mResultOptSeq = ""
         mPureResults = ""
         mSortedResults = ""
         mBestResult = ""
@@ -116,8 +116,8 @@ Class ValidResultInfo
         mResultText = value
     End Property
 
-    Public Property Let OptSeq(value)
-        mOptSeq = value
+    Public Property Let ResultOptSeq(value)
+        mResultOptSeq = value
     End Property
 
     Public Property Let PureResults(value)
@@ -156,8 +156,8 @@ Class ValidResultInfo
         ResultText = mResultText
     End Property
 
-    Public Property Get OptSeq
-        OptSeq = mOptSeq
+    Public Property Get ResultOptSeq
+        ResultOptSeq = mResultOptSeq
     End Property
 
     Public Property Get PureResults
@@ -188,13 +188,13 @@ End Class
 
 
 Class InvalidResultInfo
-    Private mPostNum, mResultOwner, mResultText, mOptSeq, mPureResults
+    Private mPostNum, mResultOwner, mResultText, mResultOptSeq, mPureResults
 
     Private Sub Class_Initialize
         mPostNum = ""
         mResultOwner = ""
         mResultText = ""
-        mOptSeq = ""
+        mResultOptSeq = ""
         mPureResults = ""
     End Sub
 
@@ -210,8 +210,8 @@ Class InvalidResultInfo
         mResultText = value
     End Property
 
-    Public Property Let OptSeq(value)
-        mOptSeq = value
+    Public Property Let ResultOptSeq(value)
+        mResultOptSeq = value
     End Property
 
     Public Property Let PureResults(value)
@@ -230,8 +230,8 @@ Class InvalidResultInfo
         ResultText = mResultText
     End Property
 
-    Public Property Get OptSeq
-        OptSeq = mOptSeq
+    Public Property Get ResultOptSeq
+        ResultOptSeq = mResultOptSeq
     End Property
 
     Public Property Get PureResults
@@ -400,9 +400,15 @@ Class VariableArray
 
         If seq <> mBound Then
             Dim i
-            For i = seq To mBound - 1
-                mArray(i) = mArray(i + 1)
-            Next
+            If isObject(mArray(seq)) Then
+                For i = seq To mBound - 1
+                    Set mArray(i) = mArray(i + 1)
+                Next
+            Else
+                For i = seq To mBound - 1
+                    mArray(i) = mArray(i + 1)
+                Next
+            End If
         End If
 
         mBound = mBound - 1
