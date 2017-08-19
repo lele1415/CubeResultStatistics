@@ -32,7 +32,7 @@
 <br>排除楼层: <input type="text" id="except_floor_id" />
 <br>排除ID: <input type="text" id="except_name_id" />
 
-<br><input type="button" id="getCode_id" onclick="getDataArrayFromCode(0)" value="Get results" />
+<br><input type="button" id="getCode_id" onclick="getDataArrayFromCode()" value="Get results" />
 
 <br>floor: <input type="input" id="floorNumInput_id" size=1 />
 <select id="inputProjectName_id">
@@ -234,12 +234,12 @@ Function getFinalProjectName(projectName)
 End Function
 
 Function getProjectCheckStrArray(projectName)
-    checkStrArray_333 = Array("beginFlag333 "," 333 ","三阶","3阶","三速","3速")
-    checkStrArray_444 = Array("beginFlag444"," 444","四阶","4阶","四速","4速")
-    checkStrArray_555 = Array("beginFlag555"," 555","五阶","5阶","五速","5速")
-    checkStrArray_222 = Array("beginFlag222"," 222","二阶","2阶","二速","2速")
-    checkStrArray_666 = Array("beginFlag666"," 666","六阶","6阶","六速","6速")
-    checkStrArray_777 = Array("beginFlag777"," 777","七阶","7阶","七速","7速")
+    checkStrArray_333 = Array("333 ","三阶","3阶","三速","3速")
+    checkStrArray_444 = Array("444","四阶","4阶","四速","4速")
+    checkStrArray_555 = Array("555","五阶","5阶","五速","5速")
+    checkStrArray_222 = Array("222","二阶","2阶","二速","2速")
+    checkStrArray_666 = Array("666","六阶","6阶","六速","6速")
+    checkStrArray_777 = Array("777","七阶","7阶","七速","7速")
     checkStrArray_333bf = Array("三盲","3bf","3bld")
     checkStrArray_333oh = Array("三单","3oh","oh ","3one")
     checkStrArray_333fm = Array("最少步","最小步","3fm","<br>fm"," fm")
@@ -333,22 +333,45 @@ Function sortIntArray(intString)
     sortIntArray = tmpArray
 End Function
 
-Function changeResult(result)
-    Dim tmpStr
-    tmpStr = result
-    If tmpStr <> "DNF" And tmpStr <> "" Then
-        colonInStr = InStr(tmpStr, ":")
-        If colonInStr > 1 Then
-            tmpStr = Mid(tmpStr, 1, colonInStr-1) * 60 + Mid(tmpStr, colonInStr+1)
-        ElseIf colonInStr = 1 Then
-            tmpStr = RePlace(tmpStr, ":", "")
+Function getCharacterCountInStr(sStr, sCharacter)
+    Dim iStep, sTmp, iCount
+    sTmp = sStr
+    iCount = 0
+    Do Until Not (InStr(sTmp, sCharacter) > 0)
+        sTmp = RePlace(sTmp, sCharacter, "", 1, 1)
+        iCount = iCount + 1
+    Loop
+
+    getCharacterCountInStr = iCount
+End Function
+
+Function changeResult(sStr)
+    Dim sTmp
+    sTmp = ""
+
+    If InStr(sTmp, "DNF") > 0 Then
+        sTmp = 9999.99
+    Else
+        Dim iColonInStr, iPointInStr, iColonCount, iPointCount
+        sTmp = sStr
+        iColonInStr = InStr(sTmp, ":")
+        iPointInStr = InStr(sTmp, ".")
+        iColonCount = getCharacterCountInStr(sTmp, ":")
+        iPointCount = getCharacterCountInStr(sTmp, ".")
+
+        If iColonInStr > 1 And _
+                iPointInStr > 1 And _
+                iColonInStr < Len(sTmp) And _
+                iPointInStr < Len(sTmp) And _
+                iPointInStr > iColonInStr + 1 And _
+                iColonCount = 1 And _
+                iPointCount = 1 Then
+            sTmp = Mid(sTmp, 1, colonInStr-1) * 60 + Mid(sTmp, colonInStr+1)
+            sTmp = FormatNumber(sTmp, 2, , , 0)
         End If
-        tmpStr = FormatNumber(tmpStr, 2, , , 0)
-    ElseIf tmpStr = "DNF" Then
-        tmpStr = 9999.99
     End If
 
-    changeResult = tmpStr
+    changeResult = sTmp
 End Function
 
 Function revertResult(result)
@@ -472,6 +495,7 @@ Function getInfoFromTxt(strSearch, strStart, numStart, strEnd)
 End Function
 
 Function cutArray(aOrigin, iStart, iEnd)
+    MsgBox("iStart="&iStart&" iEnd="&iEnd)
 	ReDim aCuted(iEnd - iStart)
 	For i = iStart To iEnd
 		aCuted(i - iStart) = aOrigin(i)
@@ -487,6 +511,7 @@ Function joinArrayWithSpace(aOrigin)
 	Next
 	joinArrayWithSpace = Trim(sJoined)
 End Function
+
 
 
 
@@ -597,8 +622,8 @@ End Function
 '*************************************************
 Function getDataArrayFromCode()
     Dim bContinue
-    aUserResult = getArrayFromTxt("j_d_post_content", "j_d_post_content", 40, "user-hide-post-down", -31)
-    aUserName = getArrayFromTxt("p_author_name", "_blank", 8, "</a>", 0)
+    aUserResult = getArrayFromTxt("j_d_post_content", "j_d_post_content", 40, "user-hide-post-down", -32)
+    aUserName = getArrayFromTxt("alog-group=""p_author""", "_blank", 8, "</a>", 0)
     aFloorNum = getArrayFromTxt("post_no&quot", "post_no&quot", 14, ",", -1)
     strCompNum = getInfoFromTxt("<title>", "第", 1, "期")
     bContinue = True
@@ -606,11 +631,11 @@ Function getDataArrayFromCode()
     checkArrayForBubble(aUserResult)
 
     If UBound(aUserResult) <> UBound(aUserName) _
-    	    Or UBound(aUserName) <> UBound(aFloorNum) Then
-    	MsgBox( "Error: getDataArrayFromCode" & Vblf &_
-    		    "UBound(aUserResult)=" & UBound(aUserResult) & Vblf &_
-    	        "UBound(aUserName)=" & UBound(aUserName) & Vblf &_
-    	        "UBound(aFloorNum)=" & UBound(aFloorNum) )
+            Or UBound(aUserName) <> UBound(aFloorNum) Then
+        MsgBox( "Error: getDataArrayFromCode" & Vblf &_
+                "UBound(aUserResult)=" & UBound(aUserResult) & Vblf &_
+                "UBound(aUserName)=" & UBound(aUserName) & Vblf &_
+                "UBound(aFloorNum)=" & UBound(aFloorNum) )
         bContinue = False
     Else
         iOriginDataArrayLength = UBound(aUserResult)
@@ -619,7 +644,7 @@ Function getDataArrayFromCode()
     If Not IsNumeric(strCompNum) Then
         strCompNum = InputBox("Input CompNum")
         Do Until IsNumeric(strCompNum)
-        	strCompNum = InputBox("Input CompNum")
+            strCompNum = InputBox("Input CompNum")
         Loop
     End If
 
@@ -640,7 +665,7 @@ End Function
                     iCutBegin = InStr(sReadLine, sCutBegin) + iPlusNumToBegin
                     sReadLine = safeMid(sReadLine, iCutBegin, 0, "getArrayFromTxt(1)")
                     iCutEnd = InStr(sReadLine, sCutEnd) + iPlusNumToEnd
-                    aGet(iCount) = safeMid(sReadLine, 0, iCutEnd, "getArrayFromTxt(2)")
+                    aGet(iCount) = safeMid(sReadLine, 1, iCutEnd, "getArrayFromTxt(2)")
                     iCount = iCount + 1
                 End If
             Loop
@@ -665,11 +690,11 @@ End Function
 '****split str and get project info.
 '*************************************************
 Function spiltStrAndGetProjectInfoForInput()
-	If getValueById("inputResultText_id") <> "" Then
-	    getPureResult getValueById("inputResultText_id"), aUserName(iStartNum), aFloorNum(iStartNum), getValueById("inputProjectName_id")
-	Else
-	    getPureResult aUserResult(iStartNum), aUserName(iStartNum), aFloorNum(iStartNum), getValueById("inputProjectName_id")
-	End If
+    If getValueById("inputResultText_id") <> "" Then
+        getPureResult getValueById("inputResultText_id"), aUserName(iStartNum), aFloorNum(iStartNum), getValueById("inputProjectName_id")
+    Else
+        getPureResult aUserResult(iStartNum), aUserName(iStartNum), aFloorNum(iStartNum), getValueById("inputProjectName_id")
+    End If
 End Function
 
 Function spiltStrAndGetProjectInfo()
@@ -678,26 +703,28 @@ Function spiltStrAndGetProjectInfo()
         initTxtFile(noResultTxtPath)
     End If
 
-    For i = iStartNum To iOriginDataArrayLength
-    	If checkIsNeededFloor(aFloorNum(i)) And checkIsNeededName(aUserName(i)) Then
+    Dim aProjectInfo()
+    ReDim aProjectInfo(1,0)
+    For i = 6 To iOriginDataArrayLength
+        If checkIsNeededFloor(aFloorNum(i)) And checkIsNeededName(aUserName(i)) Then
             setInnerHtmlById "floorNum_id", aFloorNum(i)
             
-    		Dim aProjectInfo(), iProjectCount, aSplitUserResult, bGetProjectName
-    		ReDim aProjectInfo(1,0)
-    		iProjectCount = 0
-    		aSplitUserResult = Split(removeUselessStr(aUserResult(i)))
-    		bGetProjectName = False
+            Dim iProjectCount, aSplitUserResult, bGetProjectName
+            iProjectCount = 0
+            MsgBox(removeUselessStr(aUserResult(i)))
+            aSplitUserResult = Split(removeUselessStr(aUserResult(i)))
+            bGetProjectName = False
 
             getProjectInfoArray aProjectInfo, iProjectCount, aSplitUserResult, bGetProjectName
-            
+
             If bGetProjectName Then
                 For j = 0 To UBound(aProjectInfo) - 1
-                	Dim aCutedUserResult
-                	aCutedUserResult = cutArray(aSplitUserResult, aProjectInfo(1, j), aProjectInfo(1, j + 1))
+                    Dim aCutedUserResult
+                    aCutedUserResult = cutArray(aSplitUserResult, aProjectInfo(1, j), aProjectInfo(1, j + 1))
                     getPureResult joinArrayWithSpace(aCutedUserResult), aUserName(i), aFloorNum(i), aProjectInfo(0, j)
                 Next
             Else
-                saveResult joinArrayWithSpace(aCutedUserResult), "", strUserName, floorNum, ""
+                'saveResult joinArrayWithSpace(aSplitUserResult), "", strUserName, floorNum, ""
             End If
 
             If testFlag Then
@@ -706,28 +733,28 @@ Function spiltStrAndGetProjectInfo()
         End If
     Next
 
-	getResultDoneFlag = True
+    getResultDoneFlag = True
     MsgBox("OK")
 End Function
 
         Function getProjectInfoArray(aProjectInfo, iProjectCount, aSplitUserResult, bGetProjectName)
-        	Dim sProjectName
+            Dim sProjectName
 
-        	For i = 0 To UBound(aSplitUserResult)
-        		sProjectName = checkProjectNameStr(aSplitUserResult(i))
-        		If sProjectName <> "" Then
-	        	    ReDim Preserve aProjectInfo(1, iProjectCount)
-		        	aProjectInfo(0, iProjectCount) = sProjectName
-		        	aProjectInfo(1, iProjectCount) = i
-		        	iProjectCount = iProjectCount + 1
-		        	bGetProjectName = True
-		        End If
-		    Next
+            For i = 0 To UBound(aSplitUserResult)
+                sProjectName = checkProjectNameStr(aSplitUserResult(i))
+                If sProjectName <> "" Then
+                    ReDim Preserve aProjectInfo(1, iProjectCount)
+                    aProjectInfo(0, iProjectCount) = sProjectName
+                    aProjectInfo(1, iProjectCount) = i
+                    iProjectCount = iProjectCount + 1
+                    bGetProjectName = True
+                End If
+            Next
 
-		    ReDim Preserve aProjectInfo(1, iProjectCount)
-		    aProjectInfo(0, iProjectCount) = ""
-		    aProjectInfo(1, iProjectCount) = UBound(aSplitUserResult) + 1
-		End Function
+            ReDim Preserve aProjectInfo(1, iProjectCount)
+            aProjectInfo(0, iProjectCount) = ""
+            aProjectInfo(1, iProjectCount) = UBound(aSplitUserResult) + 1
+        End Function
 
         Function checkProjectNameStr(str)
         	Dim aAllProjectName, bExit
@@ -739,7 +766,8 @@ End Function
 	        	aProjectNameForCheck = getProjectCheckStrArray(aAllProjectName(i))
 
 	        	For j = 0 To UBound(aProjectNameForCheck)
-	        		If aProjectNameForCheck(j) = str Then
+                    MsgBox("aProjectNameForCheck(j)="&aProjectNameForCheck(j)&" str="&str)
+	        		If str = aProjectNameForCheck(j) Then
 	        			checkProjectNameStr = aAllProjectName(i)
 	        			bExit = True
 	        			Exit For
@@ -788,68 +816,83 @@ End Function
 '****get result.
 '*************************************************
 Function getPureResult(sResult, sUserName, iFloorNum, sProjectName)
-    Dim finalResultArray, strResult, j, numResult, avgResult, bestResult
-    strResult = ""
-    numResult = 5
+    Dim finalResultArray
 
-    If (sProjectName = "333bf") Or _
-            (sProjectName = "333fm") Or _
-            (sProjectName = "666") Or _
-            (sProjectName = "777") Then
-        numResult = 3
-    End If
+    finalResultArray = pickMachedResults(sResult)
 
-    If testFlag Then
-        Msgbox("getPureResult countCheck="&countCheck)
-    End If
-
-    finalResultArray = getArrayResult(sResult, countCheck, numResult, sProjectName)
-
-    If UBound(finalResultArray) > 0 Then
-        If finalResultArray(2) <> "" Then
-            avgAndBestResult = getAvgAndBestResult(finalResultArray)
-            avgResult = avgAndBestResult(0)
-            bestResult = avgAndBestResult(1)
-
-            If sProjectName = "333fm" Then
-                bestResult = FormatNumber(bestResult, 0, , , 0)
-            End If
-
-            strResult = avgResult & " " & bestResult
-
-            For j = 0 To UBound(finalResultArray)
-                strResult = strResult & " " & finalResultArray(j)
-            Next
-
-            strResult = Trim(strResult)
-        Else
-            avgResult = ""
-            bestResult = ""
-            strResult = ""
-        End If
-    Else
-        avgResult = ""
-        bestResult = ""
-        strResult = ""
-    End If
-
-    If Not inputFlag Then
-        saveResult sResult, strResult, sUserName, iFloorNum, sProjectName
-    Else
-        If sProjectName <> "333fm" Then
-            If Msgbox(iFloorNum & "楼" & Vblf & sUserName & Vblf & sResult & Vblf & sProjectName & Vblf & strResult, 1) = 1 Then
-                saveResult sResult, strResult, sUserName, iFloorNum, sProjectName
-            End If
-        Else
-            If Msgbox(iFloorNum & "楼" & Vblf & sUserName & Vblf & sProjectName & Vblf & strResult, 1) = 1 Then
-                saveResult sResult, strResult, sUserName, iFloorNum, sProjectName
-            End If
-        End If
-    End If
+'    If UBound(finalResultArray) > 0 Then
+'        If finalResultArray(2) <> "" Then
+'            avgAndBestResult = getAvgAndBestResult(finalResultArray)
+'            avgResult = avgAndBestResult(0)
+'            bestResult = avgAndBestResult(1)
+'
+'            If sProjectName = "333fm" Then
+'                bestResult = FormatNumber(bestResult, 0, , , 0)
+'            End If
+'
+'            strResult = avgResult & " " & bestResult
+'
+'            For j = 0 To UBound(finalResultArray)
+'                strResult = strResult & " " & finalResultArray(j)
+'            Next
+'
+'            strResult = Trim(strResult)
+'        Else
+'            avgResult = ""
+'            bestResult = ""
+'            strResult = ""
+'        End If
+'    Else
+'        avgResult = ""
+'        bestResult = ""
+'        strResult = ""
+'    End If
+'
+'    If Not inputFlag Then
+'        saveResult sResult, strResult, sUserName, iFloorNum, sProjectName
+'    Else
+'        If sProjectName <> "333fm" Then
+'            If Msgbox(iFloorNum & "楼" & Vblf & sUserName & Vblf & sResult & Vblf & sProjectName & Vblf & strResult, 1) = 1 Then
+'                saveResult sResult, strResult, sUserName, iFloorNum, sProjectName
+'            End If
+'        Else
+'            If Msgbox(iFloorNum & "楼" & Vblf & sUserName & Vblf & sProjectName & Vblf & strResult, 1) = 1 Then
+'                saveResult sResult, strResult, sUserName, iFloorNum, sProjectName
+'            End If
+'        End If
+'    End If
 End Function
 
-        Function isResultNum(sStr)
-            
+        Function getNeedNumOfResult(sProjectName)
+            If (sProjectName = "333bf") Or _
+                    (sProjectName = "333fm") Or _
+                    (sProjectName = "666") Or _
+                    (sProjectName = "777") Then
+                getNeedNumOfResult = 3
+            Else
+                getNeedNumOfResult = 5
+            End If
+        End Function
+
+        Function pickMachedResults(sResult)
+            Dim aTmpResult, sTmp, sTmpResult
+            aTmpResult = Split(getSimpleResultStr(sResult))
+            For i = 0 To UBound(aTmpResult)
+                sTmp = changeResult(aTmpResult(i))
+                If IsNumeric(sTmp) Then
+                    sTmpResult = sTmpResult & " " & sTmp
+                End If
+            Next
+            MsgBox(sTmpResult)
+
+            pickResults = Split(Trim(sTmpResult))
+        End Function
+
+        Function checkResults(aResult, iNeedNum)
+            Dim iNumResults
+            iNumResults = UBound(aResult)
+            'If UBound(aResult) > iNeedNum Then
+
         End Function
 
         Function getArrayResult(str, countCheck, numResult, projectName)
@@ -906,7 +949,7 @@ End Function
 
             checkListExist tmpStr, tmpCountStart, Array("成绩列表","详细时间")
 
-            SimpleStr = changeStrToSimple(Mid(tmpStr, tmpCountStart))
+            SimpleStr = getSimpleResultStr(Mid(tmpStr, tmpCountStart))
             dnfStep = getAllStepInStr(SimpleStr, "D0.00")
             resultStep = getAllStepInStr(SimpleStr, "0.00")
             resultStep2 = resultStep
@@ -1032,7 +1075,7 @@ End Function
                     Next
                 End Function
 
-        Function changeStrToSimple(sStr)
+        Function getSimpleResultStr(sStr)
             Dim sTmp, sSimple
             sTmp = sStr
             sSimple = ""
@@ -1044,11 +1087,15 @@ End Function
                     Case isCharacter(Mid(sTmp, searchStep, 1), ":：")
                         sSimple = sSimple & ":"
                     Case Else
-                        sSimple = sSimple & "_"
+                        sSimple = sSimple & " "
                 End Select
             Next
 
-            changeStrToSimple = sSimple
+            Do Until Not (InStr(sSimple, "  ") > 0)
+                sSimple = RePlace(sSimple, "  ", " ")
+            Loop
+
+            getSimpleResultStr = sSimple
         End Function
 
         Function getAllStepInStr(str1, str2)
@@ -1223,3 +1270,7 @@ End Function
             End If
             getFmResultSpecial = fmResult
         End Function
+
+</Script>
+</Body>
+</Html>
