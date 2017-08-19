@@ -6,7 +6,34 @@
 <Body bgcolor="#FFFFFF">
 
 url:<input type="text" id="url">
-<input type="button" id="getCode_id" onclick="getTextFromCode()" value="get!" />
+<input type="button" id="getCode_id" onclick="getPagesCode()" value="Get code" />
+<br>
+<input type="button" id="getCode_id" onclick="getTextFromCode(0)" value="Get results" />
+<br>
+<input type="button" id="getCodeTest_id" onclick="writeReslutsToExcel()" value="Write results" />
+<br>
+<input type="input" id="floorNumInput_id" />
+<select id="inputProjectName_id">"333","444","555","222","333bf","333oh","333fm","mega","py","sq","clock","sk","666","777"
+    <option value="333">333</option>
+    <option value="444">444</option>
+    <option value="555">555</option>
+    <option value="222">222</option>
+    <option value="333bf">333bf</option>
+    <option value="333oh">333oh</option>
+    <option value="333fm">333fm</option>
+    <option value="mega">mega</option>
+    <option value="py">py</option>
+    <option value="sq">sq</option>
+    <option value="clock">clock</option>
+    <option value="sk">sk</option>
+    <option value="666">666</option>
+    <option value="777">777</option>
+</select>
+<input type="button" id="fewResultsTest_id" onclick="fewResultsTest()" value="Test result" />
+<input type="button" id="inputResult_id" onclick="inputResult()" value="Input result" />
+<br>
+<br>
+<p>楼层: <b id="floorNum_id"></b></p> 
 
 <Script Language="JavaScript"> 
 
@@ -41,6 +68,18 @@ function writeSource() {
         writeToTxt(xmlHttp.responseText);
     } 
 } 
+
+function setFloorNumForShow(floorNum) {
+    document.getElementById("floorNum_id").innerHTML = floorNum;
+}
+
+function getFloorNumForTest() {
+    return document.getElementById("floorNumInput_id").value;
+}
+
+function getInputProjectName() {
+    return document.getElementById("inputProjectName_id").value;
+}
 </Script>
 <Script Language="VBScript">
 
@@ -74,6 +113,9 @@ Dim userNameData_666, resultData_666
 Dim userNameData_777, resultData_777
 Dim countExcelRow
 countExcelRow = 0
+Dim debug, inputFlag
+debug = False
+inputFlag = False
 
 Sub Sleep(MSecs)  
     Dim fso
@@ -87,6 +129,16 @@ Sub Sleep(MSecs)
     End If 
      CreateObject("WScript.Shell").Run "sleeper.vbs " & MSecs,1 , True 
 End Sub
+
+Function fewResultsTest()
+    debug = True
+    getTextFromCode(1)
+End Function
+
+Function inputResult()
+    inputFlag = True
+    getTextFromCode(1)
+End Function
 
 
 
@@ -106,8 +158,8 @@ Function getPagesCode()
         getSource(url)
         Sleep(1000)
     Next
-    Sleep(1000)
-    getTextFromCode()
+    'Sleep(1000)
+    'getTextFromCode(0)
     Msgbox("Done!")
 End Function
 
@@ -150,18 +202,27 @@ End Function
 '*************************************************
 '****get origin Str from Code for deal.
 '*************************************************
-Function getTextFromCode()
+Function getTextFromCode(testFlag)
     Dim tmpStrResult, strResult, strUserName, countStart
     tmpStrResult = getArrayFromTxt("j_d_post_content", "j_d_post_content", 40, "user-hide-post-down", -31)
     strResult = checkStrArrayForBubble(tmpStrResult)
     strUserName = getArrayFromTxt("p_author_name", "_blank", 8, "</a>", 0)
     strFloorNum = getShortStrFromTxt("post_no&quot", "post_no&quot", 14, 4, ",")
-    For i = 0 to UBound(strUserName)
-        If (strUserName(i) = "魔方英语会计学") AND (Instr(strResult(i),"--完--") > 0) Then
-            countStart = i
-            Exit For
-        End If
-    Next
+    If testFlag = 0 Then
+        For i = 0 to UBound(strUserName)
+            If (strUserName(i) = "魔方英语会计学") AND (Instr(strResult(i),"--完--") > 0) Then
+                countStart = i + 1
+                Exit For
+            End If
+        Next
+    Else
+        For i = 0 to UBound(strUserName)
+            If strFloorNum(i) = getFloorNumForTest() Then
+                countStart = i
+                Exit For
+            End If
+        Next
+    End If
 
     'For i = countStart+1 To UBound(strUserName)
         'msgbox(strUserName(i) & vbLf & strResult(i))
@@ -234,26 +295,37 @@ End Function
 '****deal origin Str.
 '*************************************************
 Function dealOriginStr(strResultArray, strUserNameArray, strFloorNum, countStart)
-    checkTxtFile(resultTxtPath)
-    checkTxtFile(noResultTxtPath)
+    If Not inputFlag Then
+        checkTxtFile(resultTxtPath)
+        checkTxtFile(noResultTxtPath)
+    End If
     Dim allProjectArray, seqProjectInStr, flag
 
-    For i = 0 To UBound(strResultArray)
-        allProjectArray = getAllProjectName()
-        flag = True
-        For j = 0 To UBound(allProjectArray)
-            seqProjectInStr = getSeqOfProjectInStr(strResultArray(i), allProjectArray(j))
-            If seqProjectInStr <> "" Then
-                getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), seqProjectInStr, allProjectArray(j)
-                flag = False
+    If Not inputFlag Then
+        For i = countStart To UBound(strResultArray)
+            setFloorNumForShow(strFloorNum(i))
+            allProjectArray = getAllProjectName()
+            flag = True
+            For j = 0 To UBound(allProjectArray)
+                seqProjectInStr = getSeqOfProjectInStr(strResultArray(i), allProjectArray(j))
+                If seqProjectInStr <> "" Then
+                    getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), seqProjectInStr, allProjectArray(j)
+                    flag = False
+                End If
+            Next
+            If flag Then
+                getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), "", ""
+            End If
+
+            if debug Then
+                Exit For
             End If
         Next
-        If flag Then
-            getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), "", ""
-        End If
-    Next
+    Else
+        getAndDealResult strResultArray(countStart), strUserNameArray(countStart), strFloorNum(countStart), 1, getInputProjectName()
+    End If
 
-    'writeToExcel()
+    'writeReslutsToExcel()
     Msgbox("OK")
 End Function
 
@@ -297,6 +369,10 @@ Function getAndDealResult(str, strUserName, floorNum, countCheck, projectName)
             numResult = 3
         End If
 
+        if debug Then
+            Msgbox(str)
+            Msgbox(countCheck)
+        End If
         finalResultArray = getArrayResult(str, countCheck, numResult, projectName)
 
         If UBound(finalResultArray) > 0 Then
@@ -305,7 +381,6 @@ Function getAndDealResult(str, strUserName, floorNum, countCheck, projectName)
             bestResult = avgAndBestResult(1)
 
             If projectName = "333fm" Then
-                avgResult = FormatNumber(avgResult, 0, , , 0)
                 bestResult = FormatNumber(bestResult, 0, , , 0)
             End If
 
@@ -373,15 +448,30 @@ End Function
         End Function
 
         Function getFiveResult(str, countStart, numResult)
-            Dim tmpStr, resultArray(), countGetedResult, result(4,3), tmpStep, tmpStepResult, stepResult(4)
+            Dim tmpStr, tmpCountStart, SimpleStr, resultArray(), countGetedResult, result(4,3), tmpStep, tmpStepResult, stepResult(4)
             ReDim Preserve resultArray(0)
             countGetedResult = 0
             tmpStepResult = 0
-            tmpStr = changeStrToSimple(Mid(str, countStart))
-            dnfStep = getAllStepInStr(tmpStr, "D0.00")
-            tmpStep = getAllStepInStr(tmpStr, "0.00")
+            tmpStr = str
+            tmpCountStart = countStart
+            inStrCount = InStr(tmpStr, "成绩列表")
+            If inStrCount > 0 Then
+                tmpStr = Mid(tmpStr, inStrCount)
+                tmpCountStart = 1
+            End If
+            SimpleStr = changeStrToSimple(Mid(tmpStr, tmpCountStart))
+            dnfStep = getAllStepInStr(SimpleStr, "D0.00")
+            tmpStep = getAllStepInStr(SimpleStr, "0.00")
+            If debug Then
+                Msgbox(tmpStr)
+                Msgbox(SimpleStr)
+                msgboxArray(tmpStep)
+            End If
             If UBound(tmpStep) >= numResult-1 Then
                 tmpStep = getCloseNumArray(tmpStep, numResult)
+                If debug Then
+                    msgboxArray(tmpStep)
+                End If
                 If UBound(tmpStep) > 0 Then
                     '//'modified tmpStep For DNF
                     If dnfStep(0) <> "" Then
@@ -399,17 +489,17 @@ End Function
                     '//'get result with tmpStep
                     For i = 0 To UBound(tmpStep)
                         ReDim Preserve resultArray(i)
-                        tmpStep(i) = tmpStep(i) + countStart - 1
-                        resultArray(i) = Mid(str, tmpStep(i), 4)
-                        If isCharacter(Mid(str, tmpStep(i), 1), "Dd") Then
+                        tmpStep(i) = tmpStep(i) + tmpCountStart - 1
+                        resultArray(i) = Mid(tmpStr, tmpStep(i), 4)
+                        If isCharacter(Mid(tmpStr, tmpStep(i), 1), "Dd") Then
                             resultArray(i) = "DNF"
                         Else
                             If tmpStep(i) > 3 Then
-                                num1 = Mid(str, tmpStep(i)-3, 1)
-                                num2 = Mid(str, tmpStep(i)-2, 1)
-                                num3 = Mid(str, tmpStep(i)-1, 1)
+                                num1 = Mid(tmpStr, tmpStep(i)-3, 1)
+                                num2 = Mid(tmpStr, tmpStep(i)-2, 1)
+                                num3 = Mid(tmpStr, tmpStep(i)-1, 1)
                             ElseIf tmpStep(i) > 1 Then
-                                num3 = Mid(str, tmpStep(i)-1, 1)
+                                num3 = Mid(tmpStr, tmpStep(i)-1, 1)
                             End If
 
                             If IsNumeric(num3) Then
@@ -421,6 +511,9 @@ End Function
                         End If
                     Next
                 End If
+            End If
+            If debug Then
+                msgboxArray(resultArray)
             End If
             getFiveResult = resultArray
         End Function
@@ -487,7 +580,7 @@ End Function
                     Exit For
                 End If
                 
-                If Abs(diffStepArray2(i)) <= 2  Then
+                If Abs(diffStepArray2(i)) <= 3  Then
                     Redim Preserve newArray(j)
                     newArray(j) = intArray(i+2)
                     j = j + 1
@@ -637,7 +730,7 @@ End Function
 '*************************************************
 '****write final result into excel file.
 '*************************************************
-Function writeToExcel()
+Function writeReslutsToExcel()
     sortByProject()
 
     sortByAvgResult userNameData_333, resultData_333, 0
@@ -660,8 +753,6 @@ Function writeToExcel()
     Set ExcelBook= ExcelApp.Workbooks.Open(ws.CurrentDirectory&"\result.xlsx")
     Set ExcelSheet = ExcelBook.Sheets("Sheet1")
 
-    ExcelSheet.Columns("A:H").NumberFormatLocal = "@"
-
     writeAllProjectResult ExcelSheet, userNameData_333, resultData_333, "333"
     writeAllProjectResult ExcelSheet, userNameData_444, resultData_444, "444"
     writeAllProjectResult ExcelSheet, userNameData_555, resultData_555, "555"
@@ -683,6 +774,7 @@ Function writeToExcel()
     Set ExcelSheet = Nothing
     Set ExcelBook = Nothing
     Set ExcelApp = Nothing
+    Msgbox("Write done!")
 End Function
 
         Function sortByProject()
@@ -790,25 +882,72 @@ End Function
         End Function
 
         Function writeAllProjectResult(ExcelSheet, userNameArray, resultArray, projectName)
-            Dim strResultArray
-            ExcelSheet.Cells(countExcelRow+1, 1).Value = projectName
+            Dim strResultArray, rankNum
+            rankNum = 0
             countExcelRow = countExcelRow + 1
+            For i = 1 To 9
+                If i = 1 Then
+                    ExcelSheet.Cells(countExcelRow, i).HorizontalAlignment = 2
+                ElseIf i = 2 Then
+                    ExcelSheet.Cells(countExcelRow, i).HorizontalAlignment = 3
+                Else
+                    ExcelSheet.Cells(countExcelRow, i).HorizontalAlignment = 4
+                End If
+                ExcelSheet.Cells(countExcelRow, i).Interior.Color = RGB(0,0,0)
+                ExcelSheet.Cells(countExcelRow, i).Font.Color = RGB(255,255,255)
+            Next
+
+            ExcelSheet.Cells(countExcelRow, 1).Value = projectName
+            ExcelSheet.Cells(countExcelRow, 2).Value = "ID"
+            ExcelSheet.Cells(countExcelRow, 3).Value = "最好成绩"
+            ExcelSheet.Cells(countExcelRow, 4).Value = "平均成绩"
+            ExcelSheet.Cells(countExcelRow, 5).Value = "t1"
+            ExcelSheet.Cells(countExcelRow, 6).Value = "t2"
+            ExcelSheet.Cells(countExcelRow, 7).Value = "t3"
+            ExcelSheet.Cells(countExcelRow, 8).Value = "t4"
+            ExcelSheet.Cells(countExcelRow, 9).Value = "t5"
 
             For i = 0 To UBound(resultArray)
+                countExcelRow = countExcelRow + 1
+                rankNum = rankNum + 1
                 If resultArray(i) <> "" Then
                     strResultArray = Split(resultArray(i), " ")
                 Else
                     ReDim strResultArray(4)
                 End If
 
-                ExcelSheet.Cells(countExcelRow+1, 1).Value = userNameArray(i)
-                ExcelSheet.Cells(countExcelRow+1, 2).Value = strResultArray(0)
-                ExcelSheet.Cells(countExcelRow+1, 3).Value = strResultArray(1)
-                For j = 2 To UBound(strResultArray)
-                    ExcelSheet.Cells(countExcelRow+1, j+2).Value = strResultArray(j)
+                For j = 1 To 9
+                    If j = 2 Then
+                        ExcelSheet.Cells(countExcelRow, j).HorizontalAlignment = 2
+                    Else
+                        ExcelSheet.Cells(countExcelRow, j).HorizontalAlignment = 4
+                    End If
+
+                    If j = 4 Then
+                        ExcelSheet.Cells(countExcelRow, j).Font.Bold = True
+                    End If
+
+                    If j < 3 Then
+                        ExcelSheet.Cells(countExcelRow, j).Font.Color = RGB(247,83,9)
+                    Else
+                        ExcelSheet.Cells(countExcelRow, j).NumberFormat = "@"
+                        ExcelSheet.Cells(countExcelRow, j).Font.Color = RGB(0,0,0)
+                    End If
+
+                    If isEvenNum(i) Then
+                        ExcelSheet.Cells(countExcelRow, j).Interior.Color = RGB(255,255,255)
+                    Else
+                        ExcelSheet.Cells(countExcelRow, j).Interior.Color = RGB(230,230,230)
+                    End If
                 Next
 
-                countExcelRow = countExcelRow + 1
+                ExcelSheet.Cells(countExcelRow, 1).Value = rankNum
+                ExcelSheet.Cells(countExcelRow, 2).Value = userNameArray(i)
+                ExcelSheet.Cells(countExcelRow, 3).Value = strResultArray(1)
+                ExcelSheet.Cells(countExcelRow, 4).Value = strResultArray(0)
+                For j = 2 To UBound(strResultArray)
+                    ExcelSheet.Cells(countExcelRow, j+3).Value = strResultArray(j)
+                Next
             Next
 
             countExcelRow = countExcelRow + 1
@@ -861,6 +1000,16 @@ Function isCharacter(character,characters)
     isCharacter = flag
 End Function
 
+Function isEvenNum(num)
+    Dim flag, tmpNum
+    flag = False
+    tmpNum = num
+    tmpNum = tmpNum / 2
+    If tmpNum = Round(tmpNum, 0) Then
+        flag = True
+    End If
+    isEvenNum = flag
+End Function
 
 Function getAllProjectName()
     tmpArray = Array("333","444","555","222","333bf","333oh","333fm","mega","py","sq","clock","sk","666","777")
