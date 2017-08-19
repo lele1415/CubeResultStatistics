@@ -5,13 +5,13 @@
 </Head>
 <Body bgcolor="#FFFFFF">
 
-url:<input type="text" id="url">
+周赛链接: <input type="text" id="url">
 <input type="button" id="getCode_id" onclick="getPagesCode()" value="Get code" />
 已获取<b id="PageNum_id">0</b>页
-<br>
-<input type="button" id="getCode_id" onclick="getTextFromCode(0)" value="Get results" />
-<br>
-floor: <input type="input" id="floorNumInput_id" size=1 />
+<br>排除楼层: <input type="text" id="except_floor_id" />
+<br>排除ID: <input type="text" id="except_name_id" />
+<br><input type="button" id="getCode_id" onclick="getTextFromCode(0)" value="Get results" />
+<br>floor: <input type="input" id="floorNumInput_id" size=1 />
 <select id="inputProjectName_id">
     <option value="333">333</option>
     <option value="444">444</option>
@@ -28,11 +28,9 @@ floor: <input type="input" id="floorNumInput_id" size=1 />
     <option value="666">666</option>
     <option value="777">777</option>
 </select>
-<br>
-<textarea id="inputResultText_id" rows="5" cols="30"></textarea>
-<br>
-<input type="button" id="fewResultsTest_id" onclick="fewResultsTest()" value="Test result" />
-<input type="button" id="inputResult_id" onclick="inputResult()" value="Input result" />
+<br><textarea id="inputResultText_id" rows="5" cols="30"></textarea>
+<br><input type="button" id="fewResultsTest_id" onclick="fewResultsTest()" value="Test result" />
+    <input type="button" id="inputResult_id" onclick="inputResult()" value="Input result" />
 <br>
 <br>
 楼层: <b id="floorNum_id"></b>
@@ -79,25 +77,14 @@ function writeSource() {
     } 
 } 
 
-function setFloorNumForShow(floorNum) {
-    document.getElementById("floorNum_id").innerHTML = floorNum;
+function getValueById(id) {
+    return document.getElementById(id).value;
 }
 
-function getFloorNumForTest() {
-    return document.getElementById("floorNumInput_id").value;
+function setInnerHtmlById(id, text) {
+	document.getElementById(id).innerHTML = text;
 }
 
-function getInputProjectName() {
-    return document.getElementById("inputProjectName_id").value;
-}
-
-function getInputResultText() {
-    return document.getElementById("inputResultText_id").innerHTML;
-}
-
-function setPageNumForShow(pageNum) {
-    document.getElementById("PageNum_id").innerHTML = pageNum;
-}
 </Script>
 <Script Language="VBScript">
 
@@ -191,7 +178,7 @@ End Function
 Function getPagesCode()
     checkTxtFile(codeTxtPath)
     getSource(getUrl())
-    setPageNumForShow(1)
+    setInnerHtmlById "PageNum_id", 1
     Sleep(1000)
 
     Dim MaxPage, url, i
@@ -200,7 +187,7 @@ Function getPagesCode()
         For i = 2 To MaxPage
             url = getUrl() & "?pn=" & i
             getSource(url)
-            setPageNumForShow(i)
+            setInnerHtmlById "PageNum_id", i
             Sleep(1000)
         Next
         'Sleep(1000)
@@ -243,6 +230,7 @@ End Function
             Loop
             Set oTxt = Nothing
             If Flag Then
+            	getStrLine = Mid(getStrLine, InStr(getStrLine, strSearch))
                 countStart = InStr(getStrLine,strStart) + numStart
                 getStrLine = Mid(getStrLine, countStart)
                 countLength = InStr(getStrLine, strEnd) - 1
@@ -266,6 +254,9 @@ Function getTextFromCode(testFlag)
     strUserName = getArrayFromTxt("p_author_name", "_blank", 8, "</a>", 0)
     strFloorNum = getShortStrArrayFromTxt("post_no&quot", "post_no&quot", 14, 4, ",")
     strCompNum = getInfoFromTxt("<title>", "第", 1, "期")
+    If Not IsNumeric(strCompNum) Then
+        strCompNum = InputBox("Input num of comp")
+    End If
     If testFlag = 0 Then
         countStart = 0
         'For i = 0 to UBound(strUserName)
@@ -280,7 +271,7 @@ Function getTextFromCode(testFlag)
         'Next
     Else
         For i = 0 to UBound(strUserName)
-            If strFloorNum(i) = getFloorNumForTest() Then
+            If strFloorNum(i) = getValueById("floorNumInput_id") Then
                 countStart = i
                 Exit For
             End If
@@ -368,53 +359,55 @@ Function dealOriginStr(strResultArray, strUserNameArray, strFloorNum, countStart
 
     If Not inputFlag Then
         For i = countStart To UBound(strResultArray)
-            strResultArray(i) = removeUselessStr(strResultArray(i))
-            setFloorNumForShow(strFloorNum(i))
-            allProjectArray = getAllProjectName()
-            flag = True
-            projectCount = 0
-            For j = 0 To UBound(allProjectArray)
-                seqProjectInStr = getSeqOfProjectInStr(strResultArray(i), allProjectArray(j))
-                If seqProjectInStr > 0 Then
-                    ReDim Preserve projectArray(1,projectCount)
-                    projectArray(0,projectCount) = allProjectArray(j)
-                    projectArray(1,projectCount) = seqProjectInStr
-                    projectCount = projectCount + 1
+        	If checkIsNeededFloor(strFloorNum(i)) And checkIsNeededName(strUserNameArray(i)) Then
+	            strResultArray(i) = removeUselessStr(strResultArray(i))
+	            setInnerHtmlById "floorNum_id", strFloorNum(i)
+	            allProjectArray = getAllProjectName()
+	            flag = True
+	            projectCount = 0
+	            For j = 0 To UBound(allProjectArray)
+	                seqProjectInStr = getSeqOfProjectInStr(strResultArray(i), allProjectArray(j))
+	                If seqProjectInStr > 0 Then
+	                    ReDim Preserve projectArray(1,projectCount)
+	                    projectArray(0,projectCount) = allProjectArray(j)
+	                    projectArray(1,projectCount) = seqProjectInStr
+	                    projectCount = projectCount + 1
 
-                    'getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), seqProjectInStr, allProjectArray(j)
-                    flag = False
-                End If
-            Next
-            If flag Then
-                getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), "", ""
-            Else
-                sortMultiArray projectArray, projectCount-1, 1, 1
-                For j = 0 To projectCount-1
-                    If projectArray(0,j) <> "333fm" Then
-                        tmpResultStr = strResultArray(i)
-                    Else
-                        tmpResultStr = removeUselessStrForFm(originStrResultArray(i))
-                    End If
+	                    'getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), seqProjectInStr, allProjectArray(j)
+	                    flag = False
+	                End If
+	            Next
+	            If flag Then
+	                getAndDealResult strResultArray(i), strUserNameArray(i), strFloorNum(i), "", ""
+	            Else
+	                sortMultiArray projectArray, projectCount-1, 1, 1
+	                For j = 0 To projectCount-1
+	                    If projectArray(0,j) <> "333fm" Then
+	                        tmpResultStr = strResultArray(i)
+	                    Else
+	                        tmpResultStr = removeUselessStrForFm(originStrResultArray(i))
+	                    End If
 
-                    If j < projectCount-1 Then
-                        tmpResultStr = Mid(tmpResultStr, projectArray(1,j), projectArray(1,j+1) - projectArray(1,j))
-                    Else
-                        tmpResultStr = Mid(tmpResultStr, projectArray(1,j))
-                    End If
+	                    If j < projectCount-1 Then
+	                        tmpResultStr = Mid(tmpResultStr, projectArray(1,j), projectArray(1,j+1) - projectArray(1,j))
+	                    Else
+	                        tmpResultStr = Mid(tmpResultStr, projectArray(1,j))
+	                    End If
 
-                    getAndDealResult tmpResultStr, strUserNameArray(i), strFloorNum(i), 1, projectArray(0,j)
-                Next
-            End If
+	                    getAndDealResult tmpResultStr, strUserNameArray(i), strFloorNum(i), 1, projectArray(0,j)
+	                Next
+	            End If
 
-            If debug Then
-                Exit For
-            End If
+	            If debug Then
+	                Exit For
+	            End If
+	        End If
         Next
     Else
-        If getInputResultText() <> "" Then
-            getAndDealResult getInputResultText(), strUserNameArray(countStart), strFloorNum(countStart), 1, getInputProjectName()
+        If getValueById("inputResultText_id") <> "" Then
+            getAndDealResult getValueById("inputResultText_id"), strUserNameArray(countStart), strFloorNum(countStart), 1, getValueById("inputProjectName_id")
         Else
-            getAndDealResult strResultArray(countStart), strUserNameArray(countStart), strFloorNum(countStart), 1, getInputProjectName()
+            getAndDealResult strResultArray(countStart), strUserNameArray(countStart), strFloorNum(countStart), 1, getValueById("inputProjectName_id")
         End If
     End If
 
@@ -446,6 +439,33 @@ End Function
 
             getSeqOfProjectInStr = seqInStr
         End Function
+
+        Function checkIsNeededFloor(floor)
+        	Dim exceptFloorList, flag
+        	exceptFloorList = Split(getValueById("except_floor_id"), " ")
+        	flag = True
+        	For i = 0 To UBound(exceptFloorList)
+        		If floor = exceptFloorList(i) Then
+        			flag = False
+        			Exit For
+        		End If
+        	Next
+        	checkIsNeededFloor = flag
+        End Function
+
+        Function checkIsNeededName(name)
+        	Dim exceptNameList, flag
+        	exceptNameList = Split(getValueById("except_name_id"), " ")
+        	flag = True
+        	For i = 0 To UBound(exceptNameList)
+        		If name = exceptNameList(i) Then
+        			flag = False
+        			Exit For
+        		End If
+        	Next
+        	checkIsNeededName = flag
+        End Function
+
 
 
 
@@ -650,6 +670,8 @@ End Function
                                 For j = 1 To 4
                                     If closeResultStep(i) > j Then
                                         num(j-1) = Mid(tmpStr, closeResultStep(i)-j, 1)
+                                    Else
+                                        num(j-1) = ""
                                     End If
                                 Next
 
