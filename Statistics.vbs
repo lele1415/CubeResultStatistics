@@ -339,9 +339,11 @@ Function formatResultStrForFm(sStr)
 End Function
 
 Function revertResult(iResult, sOptName)
+    Dim sTmp
+    sTmp = iResult
+
     If sOptName <> "333fm" Then
-        Dim sTmp, minNum, secNum
-        sTmp = iResult
+        Dim minNum, secNum
         If sTmp = 9999.99 Then
             sTmp = "DNF"
         ElseIf sTmp > 59.99 Then
@@ -361,7 +363,8 @@ Function revertResult(iResult, sOptName)
         
         revertResult = sTmp
     Else
-        revertResult = iResult
+        If sTmp = 9999.99 Then sTmp = "DNF"
+        revertResult = sTmp
     End If
 End Function
 
