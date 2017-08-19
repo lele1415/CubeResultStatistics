@@ -31,7 +31,19 @@
 '//      1. 改为JavaScript方法获取网页源码
 '//      2. 解决网页含有特殊字符时写入txt文件报错的问题
 '//           改为以Unicode格式打开文件
+'//  20170605
+'//      1. 添加金字塔识别字符：pyram
 '//  
+'//  20170716
+'//      1. 解决ID中带图片的问题
+'//      2. 解决回复中带@信息，导致显示报错的问题
+'//  
+'//  20170806
+'//      1. 解决问题：excel表中的BR成绩未格式化
+'//  
+'//  v3.0
+'//  20170522
+'//      1. vbs文件分离模块化
 -->
 
 <Html>
@@ -106,6 +118,18 @@
 
 
 <Script Language="JavaScript" src="Statistics.js"></Script>
-<Script Language="VBScript" src="Statistics.vbs"></Script>
+<!-- <Script Language="VBScript" src="Statistics.vbs"></Script> -->
+<Script Language="VBScript" src="Util.vbs"></Script>
+<Script Language="VBScript" src="UtilStrFun.vbs"></Script>
+<Script Language="VBScript" src="UtilArrayFun.vbs"></Script>
+<Script Language="VBScript" src="GetPagesCode.vbs"></Script>
+<Script Language="VBScript" src="GetMsgArrayFromCode.vbs"></Script>
+<Script Language="VBScript" src="SpiltStrAndGetOptInfo.vbs"></Script>
+<Script Language="VBScript" src="GetPureResult.vbs"></Script>
+<Script Language="VBScript" src="SaveResultToArray.vbs"></Script>
+<Script Language="VBScript" src="GetAvgAndSortedResults.vbs"></Script>
+<Script Language="VBScript" src="SortAllResults.vbs"></Script>
+<Script Language="VBScript" src="WriteReslutsToExcel.vbs"></Script>
+<Script Language="VBScript" src="WriteBrToExcel.vbs"></Script>
 </Body>
 </Html>
