@@ -7,6 +7,8 @@ Dim uPostInfoTxtPath : uPostInfoTxtPath = CrtPath & "\tmpFiles\ResultInfo.txt"
 Dim uNoPostInfoTxtPath : uNoPostInfoTxtPath = CrtPath & "\tmpFiles\NoResultInfo.txt"
 Dim aAllRecords(13)
 
+Const ID_CRT_POSTNUM = "crt_postNum"
+
 'Dim OptName_333 : Set OptName_333 = New OptName ： OptName_333.OfficialName = "三阶" : OptName_333.OtherNames = Array()
 'Dim OptName_444 : Set OptName_444 = New OptName ： OptName_444.OfficialName = "四阶" : OptName_444.OtherNames = Array()
 'Dim OptName_555 : Set OptName_555 = New OptName ： OptName_555.OfficialName = "五阶" : OptName_555.OtherNames = Array()
@@ -82,6 +84,7 @@ Function getAllResultInfo()
     Call vaAllInvalidResultInfo.ResetArray()
     Dim i, optName
     For i = 0 To vaAllPostInfo.Bound
+        Call setInnerHtml(ID_CRT_POSTNUM, vaAllPostInfo.V(i).PostNum)
         Call getOptName(vaAllPostInfo.V(i))
     Next
     Call saveValidResultInfoToTxt()
@@ -119,25 +122,31 @@ End Function
             optInfo.FullName = optFullName
             optInfo.Seq = optSeq
             optInfo.NeedNum = optNeedNum
-            optInfo.BestRecord = aRecordInfo(1)
-            optInfo.AvgRecord = aRecordInfo(2)
+            optInfo.BestRecord = iBestRecord
+            optInfo.AvgRecord = iAvgRecord
             vaOptInfo.Append(optInfo)
         End Sub
 
                 Function checkColonAndFormat(iResult)
                     If InStr(iResult, ":") Then
                         checkColonAndFormat = formatResultStr(iResult, "")
+                    Else
+                        checkColonAndFormat = iResult
                     End If
                 End Function
 
         Sub loadAllRecords()
             Dim oTxt, count
-            Set oTxt = Fso.OpenTextFile(uRecordTxt, 1)
+            Set oTxt = Fso.OpenTextFile(uRecordTxt, 1, False, True)
             count = 0
 
+            Dim sLine
             Do Until oTxt.AtEndOfStream
-                aAllRecords(count) = oTxt.ReadLine
-                count = count + 1
+                sLine = oTxt.ReadLine
+                If Trim(sLine) <> "" Then
+                    aAllRecords(count) = sLine
+                    count = count + 1
+                End If
             Loop
 
             oTxt.Close
@@ -196,7 +205,7 @@ End Function
         End Sub
 
         Sub getOptName(object)
-            Dim aTmp, i, j, optSeqLast, optSeqNext, seqLast, seqNext, optCount
+            Dim aTmp, i, optSeqLast, optSeqNext, seqLast, seqNext, optCount
             optSeqLast = ""
             seqLast = 0
             optCount = 0
@@ -263,7 +272,7 @@ End Function
         End Function
 
         Sub addValidResultInfo(postNum, postUser, optSeq, aPostMsg, seqLast, seqNext, optCount)
-            Dim i, resultText
+            Dim resultText
 
             If seqLast < seqNext Then
                 resultText = getResultText(aPostMsg, seqLast + 1, seqNext)
@@ -274,6 +283,10 @@ End Function
 
             If resultText = "" Then Call addInvalidResultInfo(postNum, postUser, optSeq, "", "") : Exit Sub
 
+            '//check the same owner and opt
+            If checkOwnerAndOptIsExist(postUser, optSeq) Then Exit Sub
+
+            '//get pure results
             Dim aPureResultInfo, pureResults, isValid
             aPureResultInfo = getPureResult(resultText, optSeq)
             pureResults = aPureResultInfo(0)
@@ -312,4 +325,22 @@ End Function
             oNew.PureResults = pureResults
             Call vaAllInvalidResultInfo.Append(oNew)
         End Sub
+
+        Function checkOwnerAndOptIsExist(sOwner, iOptSeq)
+            If vaAllValidResultInfo.Bound = -1 Then
+                checkOwnerAndOptIsExist = False
+                Exit Function
+            End If
+
+            Dim i, oResult
+            For i = 0 To vaAllValidResultInfo.Bound
+                Set oResult = vaAllValidResultInfo.V(i)
+                If oResult.ResultOwner = sOwner And oResult.ResultOptSeq = iOptSeq Then
+                    checkOwnerAndOptIsExist = True
+                    Exit Function
+                End If
+            Next
+
+            checkOwnerAndOptIsExist = False
+        End Function
         

@@ -160,11 +160,11 @@ Function replaceCharacterInResultStr(sStr)
             Case InStr(",，", sChar) > 0
                 sSimple = sSimple & " "
             Case InStr("dD", sChar) > 0
-                sSimple = sSimple & "D"
+                sSimple = sSimple & "d"
             Case InStr("nN", sChar) > 0
-                sSimple = sSimple & "N"
+                sSimple = sSimple & "n"
             Case InStr("fF", sChar) > 0
-                sSimple = sSimple & "F"
+                sSimple = sSimple & "f"
             Case Else
                 sSimple = sSimple & " "
         End Select
@@ -187,15 +187,14 @@ End Function
 
 Function formatResultStrForOthers(sStr)
     '//DNF or DNS
-    If InStr(sStr, "DNF") > 0 Or InStr(sStr, "DNS") > 0 Then
+    If InStr(sStr, "dnf") > 0 Or InStr(sStr, "dns") > 0 Then
         formatResultStrForOthers = 9999.99
         Exit Function
     End If
 
-
     Dim iColonCount, iPointCount
-    iColonCount = getCharCountInStr(sTmp, ":")
-    iPointCount = getCharCountInStr(sTmp, ".")
+    iColonCount = getCharCountInStr(sStr, ":")
+    iPointCount = getCharCountInStr(sStr, ".")
 
     '//invalid result str of xx:xx:xx.xx ???:xx
     If (iColonCount > 1) Or (iPointCount <> 1) Then
@@ -255,8 +254,8 @@ End Function
 
 Function formatResultStrForFm(sStr)
     '//DNF or DNS
-    If InStr(sStr, "DNF") > 0 Or InStr(sStr, "DNS") > 0 Then
-        formatResultStrForOthers = 9999.99
+    If InStr(sStr, "dnf") > 0 Or InStr(sStr, "dns") > 0 Then
+        formatResultStrForFm = 9999.99
         Exit Function
     End If
 

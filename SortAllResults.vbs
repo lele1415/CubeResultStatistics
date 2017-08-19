@@ -93,31 +93,66 @@ End Function
             Exit Function
         End If
 
-        Dim i, iCompareResult
+        Dim i, j, oResult1, oResult2, iCompareResult
         If bCompartByAvg Then
             For i = 0 To vaObj.Bound - 1
-                iCompareResult = StrComp(vaObj.V(i).AvgResult, vaObj.V(i + 1).AvgResult)
-                If iCompareResult > 0 Then
-                    Call vaObj.SwapTwoValues(i, i + 1)
-                ElseIf iCompareResult = 0 Then
-                    iCompareResult = StrComp(vaObj.V(i).SortedResults, vaObj.V(i + 1).SortedResults)
+                Set oResult1 = vaObj.V(i)
+
+                For j = i + 1 To vaObj.Bound
+                    Set oResult2 = vaObj.V(j)
+                    iCompareResult = oResult1.AvgResult - oResult2.AvgResult
+
                     If iCompareResult > 0 Then
-                        Call vaObj.SwapTwoValues(i, i + 1)
+                        Call vaObj.SwapTwoValues(i, j)
+                        Set oResult1 = vaObj.V(i)
+                    ElseIf iCompareResult = 0 Then
+                        iCompareResult = compareAllResults(oResult1.SortedResults, oResult2.SortedResults)
+                        If iCompareResult > 0 Then
+                            Call vaObj.SwapTwoValues(i, j)
+                            Set oResult1 = vaObj.V(i)
+                        End If
                     End If
-                End If
+                Next
             Next
         Else
             For i = 0 To vaObj.Bound - 1
-                iCompareResult = StrComp(vaObj.V(i).BestResult, vaObj.V(i + 1).BestResult)
-                If iCompareResult > 0 Then
-                    Call vaObj.SwapTwoValues(i, i + 1)
-                ElseIf iCompareResult = 0 Then
-                    iCompareResult = StrComp(vaObj.V(i).SortedResults, vaObj.V(i + 1).SortedResults)
+                Set oResult1 = vaObj.V(i)
+                
+                For j = i + 1 To vaObj.Bound
+                    Set oResult2 = vaObj.V(j)
+                    iCompareResult = oResult1.BestResult - oResult2.BestResult
+
                     If iCompareResult > 0 Then
-                        Call vaObj.SwapTwoValues(i, i + 1)
+                        Call vaObj.SwapTwoValues(i, j)
+                        Set oResult1 = vaObj.V(i)
+                    ElseIf iCompareResult = 0 Then
+                        iCompareResult = compareAllResults(oResult1.SortedResults, oResult2.SortedResults)
+                        If iCompareResult > 0 Then
+                            Call vaObj.SwapTwoValues(i, j)
+                            Set oResult1 = vaObj.V(i)
+                        End If
                     End If
-                End If
+                Next
             Next
         End If
     End Function
+
+            Function compareAllResults(sSortedResults1, sSortedResults2)
+                Dim k, aTmp1, aTmp2, iDiff
+                aTmp1 = Split(sSortedResults1)
+                aTmp2 = Split(sSortedResults2)
+
+                For k = 0 To UBound(aTmp1)
+                    iDiff = aTmp1(k) - aTmp2(k)
+                    If iDiff < 0 Then
+                        compareAllResults = 0
+                        Exit Function
+                    ElseIf iDiff > 0 Then
+                        compareAllResults = 1
+                        Exit Function
+                    End If
+                Next
+                
+                compareAllResults = 0
+            End Function
 

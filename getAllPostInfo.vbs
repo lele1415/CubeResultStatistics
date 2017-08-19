@@ -8,11 +8,13 @@ Dim aEndStr : aEndStr = Array(",", "</a>", "</div><br></cc>")
 Dim iSeq : iSeq = 0
 Dim oTmp
 Dim aIgnoredPostNum
+Dim aIgnoredResultOwner
 
 Sub getAllPostInfo()
     Call vaAllPostInfo.ResetArray()
     '//these post nums will be ignored
     aIgnoredPostNum = Split(getElementValue("exceptPostNum_id"), " ")
+    aIgnoredResultOwner = Split(getElementValue("except_name_id"), " ")
 
     '//read text of page code
     Dim oTxt, sReadLine
@@ -44,15 +46,19 @@ End Sub
             '//get post num
             If iSeq = 0 Then
                 sGet = cutStrWithHeadEndStr(sOrigin, aHeadStr(0), aEndStr(0))
-                If Not checkIsNeedPostNum(sGet) Then Exit Sub
             '//get post user or msg
             Else
                 sGet = cutStrWithElement(sOrigin, aHeadStr(iSeq), aEndStr(iSeq))
             End If
                 
             If sGet <> "" Then
-                '//new PostInfo
-                If iSeq = 0 Then Set oTmp = New PostInfo
+                If iSeq = 0 Then
+                    If Not checkIsValidPostNum(sGet) Then Exit Sub
+                    '//new PostInfo
+                    Set oTmp = New PostInfo
+                ElseIf iSeq = 1 Then
+                    If Not checkIsValidResultOwner(sGet) Then Exit Sub
+                End If
 
                 Call receiveInfoStr(sGet, oTmp)
 
@@ -67,15 +73,26 @@ End Sub
             End If
         End Sub
 
-        Function checkIsNeedPostNum(num)
+        Function checkIsValidPostNum(num)
             Dim i
             For i = 0 To UBound(aIgnoredPostNum)
                 If num = aIgnoredPostNum(i) Then
-                    checkIsNeedPostNum = False
+                    checkIsValidPostNum = False
                     Exit Function
                 End If
             Next
-            checkIsNeedPostNum = True
+            checkIsValidPostNum = True
+        End Function
+
+        Function checkIsValidResultOwner(name)
+            Dim i
+            For i = 0 To UBound(aIgnoredResultOwner)
+                If name = aIgnoredResultOwner(i) Then
+                    checkIsValidResultOwner = False
+                    Exit Function
+                End If
+            Next
+            checkIsValidResultOwner = True
         End Function
 
         Sub seqPlus()

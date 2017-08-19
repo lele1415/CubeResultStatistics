@@ -73,6 +73,10 @@
 '//  
 '//  20170812
 '//      1. 优化：getAllPostInfo, getPureResult, GetAvgAndSortedResults, ShowAllResultInfo
+'//  
+'//  20170813
+'//      已完成：按项目分类，并排序
+'//      已完成：写入excel，保存BR成绩
 -->
 
 <Html>
@@ -148,7 +152,7 @@
     </div>
 </fieldset>
 
-<br>楼层: <b id="postNum_id"></b>
+<br>楼层: <b id="crt_postNum"></b>
 
 <br> <input type="button" onclick="sortAllResults()" value="Sort results" />
 
@@ -169,6 +173,7 @@
 <Script Language="VBScript" src="GetAvgAndSortedResults.vbs"></Script>
 <Script Language="VBScript" src="ShowAllResultInfo.vbs"></Script>
 <Script Language="VBScript" src="SortAllResults.vbs"></Script>
+<Script Language="VBScript" src="WriteReslutsToExcel.vbs"></Script>
 
 </Body>
 </Html>

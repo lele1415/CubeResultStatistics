@@ -24,25 +24,6 @@ Function getAllOptName()
     getAllOptName = tmpArray
 End Function
 
-Function getSeqInAllOptName(sOptName)
-    Dim aTmp, iSeq
-    aTmp = getAllOptName()
-    iSeq = ""
-
-    For i = 0 To UBound(aTmp)
-        If aTmp(i) = sOptName Then
-            iSeq = i
-            Exit For
-        End If
-    Next
-
-    If iSeq <> "" Then
-        getSeqInAllOptName = iSeq
-    Else
-        MsgBox("Not a option name!")
-    End If
-End Function
-
 Function getFinalOptName(OptName)
     Dim oldOptNameArray, newOptNameArray, finalOptName
     oldOptNameArray = getAllOptName()

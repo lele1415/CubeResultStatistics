@@ -131,7 +131,7 @@ Sub submitNewResultInfo()
             Call removeOption(ID_SELECT_INVALID_RESULTS, mCrtShowSeq)
 
             If oVRI.IsBestBr Or oVRI.IsAvgBr Then
-                Call addOption(ID_SELECT_BR_RESULTS, iNewPostNum&"楼 "&sNewPostUser, mCrtShowSeq)
+                Call addOption(ID_SELECT_BR_RESULTS, iNewPostNum&"楼 "&sNewPostUser, vaAllValidResultInfo.Bound)
             End If
 
         Case ID_SELECT_BR_RESULTS
