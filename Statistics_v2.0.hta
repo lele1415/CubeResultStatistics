@@ -9,11 +9,10 @@
 '//      1. 增加去重功能（ID和项目相同）
 '//      2. 按项目排序后的成绩写入txt文件
 '//  
-'//  遗留问题    
-'//      1. 有DNF的时候，不同长度的成绩获取错乱
-'//      2. 缺少实时保存已处理成绩的功能
-'//      3. 缺少手动删除错误成绩的功能
-'//      4. 缺少BR自动更新的功能
+'//  20170205    
+'//      1. 重写成绩识别代码，改为分段处理字符
+'//      2. 增加识别后的有效成绩列表、无效成绩列表、BR列表，方便手动修改
+'//      3. 代码整理
 '//  
 -->
 
@@ -179,13 +178,10 @@ Dim ws, Fso
 Set ws=CreateObject("wscript.shell")
 Set Fso=CreateObject("Scripting.FileSystemObject")
 
-Dim uCodeTxtPath, uOriginMsgTxtPath, uFinalResultTxt, uNoResultTxt, uRecordTxt, uSortedResultsTxt, uValidResultTxt
+Dim uCodeTxtPath, uOriginMsgTxtPath, uRecordTxt, uValidResultTxt
 uCodeTxtPath = ws.CurrentDirectory&"\code.txt"
 uOriginMsgTxtPath = ws.CurrentDirectory&"\OriginMsg.txt"
-uFinalResultTxt = ws.CurrentDirectory&"\result.txt"
-uNoResultTxt = ws.CurrentDirectory&"\noResult.txt"
 uRecordTxt = ws.CurrentDirectory&"\record.txt"
-uSortedResultsTxt = ws.CurrentDirectory&"\sortedResult.txt"
 uValidResultTxt = ws.CurrentDirectory&"\validResult.txt"
 uInvalidResultTxt = ws.CurrentDirectory&"\invalidResult.txt"
 
@@ -541,17 +537,27 @@ Function revertResult(iResult, sOptName)
 End Function
 
 Function replaceHtmlStr(sStr)
-	Dim sTmp, iImg
+	Dim sTmp, iImgStart, iImgLen, iDivStart, iDivLen
 	sTmp = sStr
 	sTmp = RePlace(sTmp, "<br>", " ")
 	sTmp = RePlace(sTmp, "&#39;", "'")
     
     Do Until Not (InStr(sTmp, "<img") > 0)
-        iImg = InStr(sTmp, "<img")
-        If iImg > 0 Then
-            iImg2 = InStr(safeMid(sTmp, iImg, 0, "replaceHtmlStr 111"), ">")
-            If iImg2 > 0 Then
-                sTmp = RePlace(sTmp, safeMid(sTmp, iImg, iImg2, "replaceHtmlStr 222"), " ")
+        iImgStart = InStr(sTmp, "<img")
+        If iImgStart > 0 Then
+            iImgLen = InStr(safeMid(sTmp, iImgStart, 0, "replaceHtmlStr 111"), ">")
+            If iImgLen > 0 Then
+                sTmp = RePlace(sTmp, safeMid(sTmp, iImgStart, iImgLen, "replaceHtmlStr 222"), " ")
+            End If
+        End If
+    Loop
+
+    Do Until Not (InStr(sTmp, "<div") > 0)
+        iDivStart = InStr(sTmp, "<div")
+        If iDivStart > 0 Then
+            iDivLen = InStr(safeMid(sTmp, iDivStart, 0, "replaceHtmlStr 333"), "</div>") + 5
+            If iDivLen > 0 Then
+                sTmp = RePlace(sTmp, safeMid(sTmp, iDivStart, iDivLen, "replaceHtmlStr 444"), " ")
             End If
         End If
     Loop
@@ -694,57 +700,6 @@ Function swapTwoStrings(s1, s2)
     sTmp = s1
     s1 = s2
     s2 = sTmp
-End Function
-
-
-
-
-
-'*************************************************
-'****Test and input result.
-'*************************************************
-Function fewResultsTest()
-	Dim bContinue
-	bContinue = True
-
-	Select Case True
-		Case Not getResultDoneFlag
-		    bContinue = False
-	        MsgBox("click 'get result' first")
-	    Case Not IsNumeric(getValueById("postNumInput_id"))
-	        bContinue = False
-	        MsgBox("Check the input")
-	End Select
-
-	If bContinue Then
-		testFlag = True
-		inputFlag = False
-		iStartPostNum = getSeqInArrayBySearchStr(getValueById("postNumInput_id"), aPostNum)
-		spiltStrAndGetOptInfo()
-	End If
-End Function
-
-Function inputResult()
-	Dim bContinue
-	bContinue = True
-
-	Select Case True
-		Case Not getResultDoneFlag
-		    bContinue = False
-	        MsgBox("click 'get result' first")
-	    Case Not IsNumeric(getValueById("postNumInput_id"))
-	        bContinue = False
-	        MsgBox("Check the postNum")
-	    Case getValueById("inputResultText_id") <> ""
-	        bContinue = False
-	        MsgBox("Check the resultText")
-	End Select
-
-	If bContinue Then
-	    inputFlag = True
-	    testFlag = False
-	    spiltStrAndGetOptInfoForInput()
-	End If
 End Function
 
 
@@ -898,18 +853,8 @@ End Function
 '*************************************************
 '****split str and get Opt info.
 '*************************************************
-Function spiltStrAndGetOptInfoForInput()
-    If getValueById("inputResultText_id") <> "" Then
-        getPureResult getValueById("inputResultText_id"), aUserText(iStartPostNum), aPostNum(iStartPostNum), getValueById("inputOptName_id")
-    Else
-        getPureResult aMessageText(iStartPostNum), aUserText(iStartPostNum), aPostNum(iStartPostNum), getValueById("inputOptName_id")
-    End If
-End Function
-
 Function spiltStrAndGetOptInfo()
     If Not testFlag Then
-        initTxtFile(uFinalResultTxt)
-        initTxtFile(uNoResultTxt)
         initTxtFile(uValidResultTxt)
         initTxtFile(uInvalidResultTxt)
         loadAllRecords()
@@ -917,13 +862,15 @@ Function spiltStrAndGetOptInfo()
 
     Dim aOptInfo()
     ReDim aOptInfo(1,0)
-    For i = 6 To iOriginDataArrayLength
+    For i = 0 To iOriginDataArrayLength
         If checkPostNumIsNeed(aPostNum(i)) And checkUserIsNeed(aUserText(i)) Then
             setInnerHtmlById "postNum_id", aPostNum(i)
             
             Dim iOptCount, aSplitMessageText, bGetOptName
             iOptCount = 0
-            'MsgBox(replaceHtmlStr(aMessageText(i)))
+            'If aPostNum(i) = 59 Then
+                'MsgBox(replaceHtmlStr(aMessageText(i)))
+            'End If
             aSplitMessageText = Split(replaceHtmlStr(aMessageText(i)))
             bGetOptName = False
 
@@ -1054,49 +1001,6 @@ Function getPureResult(sMessageText, sUserText, iPostNum, sOptName)
     Else
         getPureResult = Array("", False)
     End If
-    
-
-'    If UBound(finalResultArray) > 0 Then
-'        If finalResultArray(2) <> "" Then
-'            avgAndBestResult = getAvgAndSortedResults(finalResultArray)
-'            avgResult = avgAndBestResult(0)
-'            bestResult = avgAndBestResult(1)
-'
-'            If sOptName = "333fm" Then
-'                bestResult = FormatNumber(bestResult, 0, , , 0)
-'            End If
-'
-'            strResult = avgResult & " " & bestResult
-'
-'            For j = 0 To UBound(finalResultArray)
-'                strResult = strResult & " " & finalResultArray(j)
-'            Next
-'
-'            strResult = Trim(strResult)
-'        Else
-'            avgResult = ""
-'            bestResult = ""
-'            strResult = ""
-'        End If
-'    Else
-'        avgResult = ""
-'        bestResult = ""
-'        strResult = ""
-'    End If
-'
-'    If Not inputFlag Then
-'        saveResult sMessageText, strResult, sUserText, iPostNum, sOptName
-'    Else
-'        If sOptName <> "333fm" Then
-'            If Msgbox(iPostNum & "楼" & Vblf & sUserText & Vblf & sMessageText & Vblf & sOptName & Vblf & strResult, 1) = 1 Then
-'                saveResult sMessageText, strResult, sUserText, iPostNum, sOptName
-'            End If
-'        Else
-'            If Msgbox(iPostNum & "楼" & Vblf & sUserText & Vblf & sOptName & Vblf & strResult, 1) = 1 Then
-'                saveResult sMessageText, strResult, sUserText, iPostNum, sOptName
-'            End If
-'        End If
-'    End If
 End Function
 
         Function getNeedNumOfResult(sOptName)
