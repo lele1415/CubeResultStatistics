@@ -1429,13 +1429,13 @@ Function writeBrToExcel(newFilePath, haveNewBr)
                 ExcelSheet.Cells(brLine, j).Interior.Color = RGB(255,218,101)
             Next
 
-            ExcelSheet.Cells(brLine, 2).Value = brResultData(2,i)
+            ExcelSheet.Cells(brLine, 2).Value = revertResult(brResultData(2,i), brResultData(0,i))
             ExcelSheet.Cells(brLine, 4).Value = brResultData(1,i)
             ExcelSheet.Cells(brLine, 5).Value = iCompNum & "期"
 
             If brResultData(3,i) Then
                 For j = 0 To UBound(aSplitPureResults)
-                    ExcelSheet.Cells(brLine, j + 6).Value = aSplitPureResults(j)
+                    ExcelSheet.Cells(brLine, j + 6).Value = revertResult(aSplitPureResults(j), brResultData(0,i))
                 Next
             End If
         Next
