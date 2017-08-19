@@ -40,23 +40,78 @@ Function getStrInTextFile(path, sKey, sHead, sEnd)
 End Function
 
 Function cutStrWithHeadEndStr(sOrigin, sHead, sEnd)
-    Dim sTmp, iHead, iEnd
-    sTmp = sOrigin
-    iHead = InStr(sTmp, sHead) + Len(sHead)
-    iEnd = InStr(iHead, sTmp, sEnd)
+    Dim iHead
+    iHead = InStr(sOrigin, sHead) + Len(sHead)
+    If iHead = Len(sHead) Then cutStrWithHeadEndStr = "" : Exit Function
 
-    If iHead = Len(sHead) Or iEnd = 0 Then
-        MsgBox("cutStrWithHeadEndStr: Not find sHead or sEnd" & Vblf &_
-                "sHead=" & sHead & Vblf &_
-                "sEnd=" & sEnd & Vblf &_
-                "sOrigin=" & sOrigin)
-        cutStrWithHeadEndStr = ""
-        Exit Function
-    End If
+    Dim iEnd
+    iEnd = InStr(iHead, sOrigin, sEnd)
+    If iEnd = Len(sHead) Then cutStrWithHeadEndStr = "" : Exit Function
 
-    sTmp = Mid(sTmp, iHead, iEnd - iHead)
-    cutStrWithHeadEndStr = sTmp
+    cutStrWithHeadEndStr = Mid(sOrigin, iHead, iEnd - iHead)
 End Function
+
+Function cutStrWithElement(sOrigin, sHead, sEnd)
+    Dim iHead
+    iHead = InStr(sOrigin, sHead)
+    If iHead = 0 Then cutStrWithElement = "" : Exit Function
+
+    iHead = InStr(iHead + Len(sHead), sOrigin, ">") + 1
+    If iHead = 1 Then cutStrWithElement = "" : Exit Function
+
+    Dim iEnd
+    iEnd = InStr(iHead, sOrigin, sEnd)
+    If iEnd = 0 Then cutStrWithElement = "" : Exit Function
+
+    cutStrWithElement = Mid(sOrigin, iHead, iEnd - iHead)
+End Function
+
+Function cutStrWithElementRev(sOrigin, sHead, sEnd)
+    Dim iHead
+    iHead = InStr(sOrigin, sHead)
+    If iHead = 0 Then cutStrWithElementRev = "" : Exit Function
+
+    iHead = InStr(iHead + Len(sHead), sOrigin, ">") + 1
+    If iHead = 1 Then cutStrWithElementRev = "" : Exit Function
+
+    Dim iEnd
+    iEnd = InStrRev(sOrigin, sEnd)
+    If iEnd = 0 Then cutStrWithElementRev = "" : Exit Function
+        
+    iEnd = InStrRev(sOrigin, "</", iEnd)
+    If iEnd = 0 Then cutStrWithElementRev = "" : Exit Function
+
+    cutStrWithElementRev = Mid(sOrigin, iHead, iEnd - iHead)
+End Function
+
+Sub removeHtmlStr(sOrigin)
+    Dim iImgStart, iImgLen, iDivStart, iDivLen
+    sOrigin = RePlace(sOrigin, "<br>", " ")
+    sOrigin = RePlace(sOrigin, "&#39;", "'")
+    sOrigin = RePlace(sOrigin, "</a>", "")
+    sOrigin = RePlace(sOrigin, "</div>", "")
+    sOrigin = RePlace(sOrigin, "</span>", "")
+    
+    Call removeElement(sOrigin, "<img")
+    Call removeElement(sOrigin, "<div")
+    Call removeElement(sOrigin, "<embed")
+    Call removeElement(sOrigin, "<a href")
+
+    Do Until Not (InStr(sOrigin, "  ") > 0)
+        sOrigin = RePlace(sOrigin, "  ", " ")
+    Loop
+End Sub
+
+Sub removeElement(sOrigin, sElement)
+    Dim iHead, iEnd
+    iHead = InStr(sOrigin, sElement)
+    Do While (iHead > 0)
+        iEnd = InStr(sOrigin, ">")
+        If iEnd = 0 Then Exit Do
+        sOrigin = RePlace(sOrigin, Mid(sOrigin, iHead, iEnd - iHead + 1), "")
+        iHead = InStr(sOrigin, sElement)
+    Loop
+End Sub
 
 Function isEvenNum(iNum)
     Dim numTmp
@@ -224,39 +279,6 @@ Function revertResult(iResult, sOptName)
         If sTmp = 9999.99 Then sTmp = "DNF"
         revertResult = sTmp
     End If
-End Function
-
-Function replaceHtmlStr(sStr)
-    Dim sTmp, iImgStart, iImgLen, iDivStart, iDivLen
-    sTmp = sStr
-    sTmp = RePlace(sTmp, "<br>", " ")
-    sTmp = RePlace(sTmp, "&#39;", "'")
-    
-    Do Until Not (InStr(sTmp, "<img") > 0)
-        iImgStart = InStr(sTmp, "<img")
-        If iImgStart > 0 Then
-            iImgLen = InStr(safeMid(sTmp, iImgStart, 0, "replaceHtmlStr 111"), ">")
-            If iImgLen > 0 Then
-                sTmp = RePlace(sTmp, safeMid(sTmp, iImgStart, iImgLen, "replaceHtmlStr 222"), " ")
-            End If
-        End If
-    Loop
-
-    Do Until Not (InStr(sTmp, "<div") > 0)
-        iDivStart = InStr(sTmp, "<div")
-        If iDivStart > 0 Then
-            iDivLen = InStr(safeMid(sTmp, iDivStart, 0, "replaceHtmlStr 333"), "</div>") + 5
-            If iDivLen > 0 Then
-                sTmp = RePlace(sTmp, safeMid(sTmp, iDivStart, iDivLen, "replaceHtmlStr 444"), " ")
-            End If
-        End If
-    Loop
-
-    Do Until Not (InStr(sTmp, "  ") > 0)
-        sTmp = RePlace(sTmp, "  ", " ")
-    Loop
-
-    replaceHtmlStr = sTmp
 End Function
 
 Function replaceStrForOptName(sStr)

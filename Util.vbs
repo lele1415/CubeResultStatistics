@@ -18,14 +18,6 @@ uValidResultTxt = CrtPath & "\tmpFiles\validResult.txt"
 uInvalidResultTxt = CrtPath & "\tmpFiles\invalidResult.txt"
 uAllResultFolder = CrtPath & "\allResults\"
 
-Const ID_URL = "url"
-
-Dim iCrtPageNum : iCrtPageNum = 1
-Dim iMaxPageNum : iMaxPageNum = 0
-DIm oTxtPagesCode
-Dim bGetCodeDone : bGetCodeDone = False
-Dim rootUrl
-
 Dim countResultData, countNoResultData, brResultCount, iCompNum, countExcelRow, seqOfShowingResult, listOfShowingResult
 countResultData = 0
 countNoResultData = 0

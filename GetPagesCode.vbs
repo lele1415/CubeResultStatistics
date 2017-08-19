@@ -2,6 +2,15 @@
 '*************************************************
 '****get code from Pages, and write into text file.
 '*************************************************
+Const ID_URL = "url"
+
+Dim iCrtPageNum : iCrtPageNum = 1
+Dim iMaxPageNum : iMaxPageNum = 0
+Dim iCompNum : iCompNum = 0
+Dim oTxtPagesCode
+Dim bGetCodeDone : bGetCodeDone = False
+Dim rootUrl
+
 Sub getPagesCode()
     rootUrl = getElementValue(ID_URL)
 
@@ -23,6 +32,7 @@ Sub getPagesCode()
     
     Call oTxtPagesCode.Close
     Set oTxtPagesCode = Nothing
+    Call checkCompNum()
     Msgbox("Done!")
 End Sub
 
@@ -32,6 +42,8 @@ End Sub
 
             If iMaxPageNum = 0 Then
                 iMaxPageNum = cutStrWithHeadEndStr(sCode, "total_page"":", "};")
+                Dim sTitle : sTitle = cutStrWithHeadEndStr(sCode, "<title>", "</title>")
+                iCompNum = cutStrWithHeadEndStr(sTitle, "第", "期")
             End If
 
             bGetCodeDone = True
@@ -69,3 +81,12 @@ End Sub
 
             checkMaxPageNum = True
         End Function
+
+        Sub checkCompNum()
+            If Not IsNumeric(iCompNum) Then
+                iCompNum = InputBox("Input CompNum")
+                Do Until IsNumeric(iCompNum)
+                    iCompNum = InputBox("Input CompNum")
+                Loop
+            End If
+        End Sub
