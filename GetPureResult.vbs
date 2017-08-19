@@ -20,7 +20,7 @@ End Function
             If Not isArray(aTmpResult) Then pickMachedResults = "" : Exit Function
 
             Dim formatFun
-            If iOptSeq = OPT_SEQ_3fm Then
+            If StrComp(iOptSeq, OPT_SEQ_3fm) = 0 Then
                 formatFun = "formatResultStrForFm"
             Else
                 formatFun = "formatResultStr"

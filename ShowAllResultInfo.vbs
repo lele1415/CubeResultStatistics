@@ -47,6 +47,8 @@ Sub showResultInfo(selectId)
     mCrtShowSelectId = selectId
     mCrtShowSeq = document.getElementById(selectId).value
 
+    If mCrtShowSeq = "" Then Exit Sub
+
     Dim obj
     Select Case selectId
         Case ID_SELECT_VALID_RESULTS
@@ -77,6 +79,20 @@ Sub showResultInfo(selectId)
     Call setInnerHtmlById(ID_TEXT_PURE_RESULTS, obj.PureResults)
 End Sub
 
+Sub clearAllResultInfoText()
+    Call setInnerHtmlById(ID_TEXT_POST_NUM, "")
+    Call setInnerHtmlById(ID_TEXT_POST_USER, "")
+    Call setValueById(ID_TEXT_OPT_NAME, "")
+
+    Call setInnerHtmlById(ID_TEXT_BEST_RESULT, "")
+    Call setInnerHtmlById(ID_TEXT_IS_BEST_BR, "")
+    Call setInnerHtmlById(ID_TEXT_AVG_RESULT, "")
+    Call setInnerHtmlById(ID_TEXT_IS_AVG_BR, "")
+
+    Call setInnerHtmlById(ID_TEXT_RESULT_TEXT, "")
+    Call setInnerHtmlById(ID_TEXT_PURE_RESULTS, "")
+End Sub
+
 Sub submitNewResultInfo()
     Dim iNewPostNum, sNewPostUser, iNewOptSeq, sNewResultText, sNewPureResult, bIsValid
 
@@ -84,6 +100,11 @@ Sub submitNewResultInfo()
     sNewPostUser = getValueById(ID_TEXT_POST_USER)
     iNewOptSeq = getValueById(ID_TEXT_OPT_NAME)
     sNewResultText = getValueById(ID_TEXT_RESULT_TEXT)
+
+    If iNewOptSeq = "" Then
+        MsgBox("optName is empty!")
+        Exit Sub
+    End If
 
     Dim aTmp
     aTmp = getPureResult(sNewResultText, iNewOptSeq)
@@ -143,5 +164,12 @@ End Sub
             Call getSortedResult(sNewPureResult, iNewOptSeq, obj)
 
             Call vaAllValidResultInfo.Append(obj)
-            Call vaAllInvalidResultInfo.PopBySeq(mCrtShowSeq)
+            'Call vaAllInvalidResultInfo.PopBySeq(mCrtShowSeq)
         End Sub
+
+Sub selectAnotherInvalidResult(which)
+    Dim mCrtShowInvalidSeq
+    mCrtShowInvalidSeq = document.getElementById(ID_SELECT_INVALID_RESULTS).value
+    If mCrtShowInvalidSeq = "" Then Exit Sub
+    Call selectAnotherOption(ID_SELECT_INVALID_RESULTS, mCrtShowInvalidSeq, which)
+End Sub

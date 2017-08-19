@@ -13,6 +13,37 @@ function removeOption(SelectId, OptionValue)
         for(var i=0;i<lenOfChild;i++){
             if (parentNode.childNodes[i].value == OptionValue) {
                 parentNode.removeChild(parentNode.childNodes[i]);
+                if (i < lenOfChild - 1) {
+                    parentNode.childNodes[i].selected = true;
+                    showResultInfo(SelectId);
+                } else if (i > 0) {
+                    parentNode.childNodes[i - 1].selected = true;
+                    showResultInfo(SelectId);
+                } else {
+                    clearAllResultInfoText();
+                }
+                break;
+            }
+        }   
+    }
+}
+
+function selectAnotherOption(SelectId, OptionValue, which)
+{
+    var parentNode = document.getElementById(SelectId);
+    var lenOfChild = parentNode.childNodes.length;
+    if (lenOfChild > 0){
+        for(var i=0;i<lenOfChild;i++){
+            if (parentNode.childNodes[i].value == OptionValue) {
+                parentNode.childNodes[i].selected = false;
+
+                if (which == 0 && i < lenOfChild - 1) {
+                    parentNode.childNodes[i + 1].selected = true;
+                    showResultInfo(SelectId);
+                } else if (which == 1 && i > 0) {
+                    parentNode.childNodes[i - 1].selected = true;
+                    showResultInfo(SelectId);
+                }
                 break;
             }
         }   

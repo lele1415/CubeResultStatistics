@@ -67,6 +67,9 @@
 '//  20170806
 '//      已完成：完善显示和修改成绩的功能
 '//      待解决：清除某个成绩后，自动选中下一个成绩
+'//  
+'//  20170810
+'//      已完成：清除某个成绩后，自动选中下一个成绩
 -->
 
 <Html>
@@ -135,6 +138,9 @@
     <br>
     <div>
         <input type="button" onclick="submitNewResultInfo()" value="Submit new result" />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" onclick="selectAnotherInvalidResult(0)" value="Next" />
+        <input type="button" onclick="selectAnotherInvalidResult(1)" value="Last" />
     </div>
 </fieldset>
 
