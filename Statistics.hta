@@ -1,0 +1,176 @@
+<Html>
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<Title>666</Title>
+</Head>
+<Body bgcolor="#FFFFFF">
+
+url:<input type="text" id="url">
+<input type="button" id="getCode_id" onclick="getTextFromCode()" value="get!" />
+
+<Script Language="JavaScript"> 
+
+//用于创建XMLHttpRequest对象 
+function createXmlHttp() { 
+    //根据window.XMLHttpRequest对象是否存在使用不同的创建方式 
+    if (window.XMLHttpRequest) { 
+        xmlHttp = new XMLHttpRequest(); //FireFox、Opera等浏览器支持的创建方式 
+    } else { 
+        xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");//IE浏览器支持的创建方式 
+    } 
+} 
+
+function getUrl() {
+    var url = document.getElementById("url").value;
+    return url;
+}
+
+//直接通过XMLHttpRequest对象获取远程网页源代码 
+function getSource(url) { 
+    //document.getElementById("source").value = "正在加载……"; //提示正在加载 
+    createXmlHttp(); //创建XMLHttpRequest对象 
+    xmlHttp.onreadystatechange = writeSource; //设置回调函数 
+    xmlHttp.open("GET", url, true); 
+    xmlHttp.send(null); 
+} 
+
+//将远程网页源代码写入页面文字区域 
+function writeSource() { 
+    if (xmlHttp.readyState == 4) { 
+        //document.getElementById("source").value = xmlHttp.responseText; 
+        writeToTxt(xmlHttp.responseText);
+    } 
+} 
+</Script>
+<Script Language="VBScript">
+
+Dim width,height
+width=CreateObject("HtmlFile").ParentWindow.Screen.AvailWidth
+Window.MoveTo width-400,300
+Window.ResizeTo 400,240
+
+Dim ws, Fso, TxtPath
+Set ws=CreateObject("wscript.shell")
+Set Fso=CreateObject("Scripting.FileSystemObject")
+TxtPath = ws.CurrentDirectory&"\"&"temp.txt"
+
+Sub Sleep(MSecs)  
+    Dim fso
+    Dim objOutputFile
+
+    Set fso = CreateObject("Scripting.FileSystemObject") 
+    If Fso.FileExists("sleeper.vbs")=False Then 
+        Set objOutputFile = fso.CreateTextFile("sleeper.vbs", True) 
+        objOutputFile.Write "wscript.sleep WScript.Arguments(0)" 
+        objOutputFile.Close 
+    End If 
+     CreateObject("WScript.Shell").Run "sleeper.vbs " & MSecs,1 , True 
+End Sub
+
+Function checkTxtFile()
+    If Fso.FileExists(TxtPath) Then
+        Dim TxtFile
+    	Set TxtFile = Fso.getFile(TxtPath)
+    	TxtFile.Delete
+    	Set TxtFile = Nothing
+    End If    
+    Fso.CreateTextFile TxtPath, True
+End Function
+
+Function writeToTxt(responseText)
+    Set oTxt = Fso.OpenTextFile(TxtPath,8)
+    oTxt.Write(responseText)
+    oTxt.Close
+    Set oTxt = Nothing
+End Function
+
+Function getInfoFromTxt(strSearch, strStart, numStart, strEnd, numEnd)
+    Dim oTxt, getStrLine, MaxPage
+    Set oTxt = Fso.OpenTextFile(TxtPath,1)
+
+    Do Until oTxt.AtEndOfStream
+        getStrLine = oTxt.ReadLine
+        If InStr(getStrLine,strSearch) > 0 Then
+        	Exit Do
+        End If
+    Loop
+    Set oTxt = Nothing
+	countStart = InStr(getStrLine,strStart) + numStart
+    countEnd = InStr(getStrLine,strEnd) + numEnd
+    'Msgbox(countStart & " " & countEnd)
+    getInfoFromTxt = Mid(getStrLine, countStart, countEnd-countStart)
+End Function
+
+Function getArrayFromTxt(strSearch, strStart, numStart, strEnd, numEnd)
+    Dim oTxt, getStrLine, MaxPage, strArray(), count
+    Set oTxt = Fso.OpenTextFile(TxtPath,1)
+    count = 0
+    Do Until oTxt.AtEndOfStream
+        getStrLine = oTxt.ReadLine
+        If InStr(getStrLine,strSearch) > 0 Then
+        	ReDim Preserve strArray(count)
+        	countStart = InStr(getStrLine,strStart) + numStart
+		    countEnd = InStr(getStrLine,strEnd) + numEnd
+		    'Msgbox(countStart & " " & countEnd)
+		    strArray(count) = Mid(getStrLine, countStart, countEnd-countStart)
+		    count = count + 1
+        End If
+    Loop
+    Set oTxt = Nothing
+    getArrayFromTxt = strArray
+End Function
+
+Function getTimesOfStrAppeared(str1, str2)
+    Dim count
+    count = 0
+    Do Until (Not InStr(str1, str2) > 0)
+    	count = count + 1
+    	str1 = RePlace(str1, str2, StrReverse(str2), 1, 1)
+    Loop
+    getTimesOfStrAppeared = count
+End Function
+
+
+
+Function WritePagesCode()
+    checkTxtFile()
+    getSource(getUrl())
+    Sleep(1000)
+
+    Dim MaxPage, url, i
+    MaxPage = getInfoFromTxt("尾页", "pn=", 3, "尾页", -2)
+    For i = 2 To MaxPage
+	    url = getUrl() & "?pn=" & i
+	    getSource(url)
+	Next
+
+    Msgbox("Done!")
+End Function
+
+Function getTextFromCode()
+    Dim strResult, strUserName, countStart
+    strResult = getArrayFromTxt("j_d_post_content", "j_d_post_content", 40, "user-hide-post-down", -31)
+    strUserName = getArrayFromTxt("img username", "username", 10, "src=", -11)
+    For i = 0 to UBound(strUserName)
+    	If (strUserName(i) = "魔方英语会计学") AND (Instr(strResult(i),"--完--") > 0) Then
+            countStart = i
+            Exit For
+        End If
+    Next
+
+    'For i = countStart+1 To UBound(strUserName)
+        'msgbox(strUserName(i) & vbLf & strResult(i))
+    'Next
+    getCleanResult strResult, countStart
+End Function
+
+Function getCleanResult(strArray, countStart)
+    For i = countStart+1 To UBound(strArray)
+        'count333 = InStr(strArray(i), "333")
+        'countBr = InStr(strArray(i), "<br>")
+        Msgbox(getTimesOfStrAppeared(strArray(i), "<br>"))
+    Next
+End Function
+</Script>
+</Body>
+</Html>
