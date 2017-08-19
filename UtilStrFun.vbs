@@ -66,24 +66,6 @@ Function cutStrWithElement(sOrigin, sHead, sEnd)
     cutStrWithElement = Mid(sOrigin, iHead, iEnd - iHead)
 End Function
 
-Function cutStrWithElementRev(sOrigin, sHead, sEnd)
-    Dim iHead
-    iHead = InStr(sOrigin, sHead)
-    If iHead = 0 Then cutStrWithElementRev = "" : Exit Function
-
-    iHead = InStr(iHead + Len(sHead), sOrigin, ">") + 1
-    If iHead = 1 Then cutStrWithElementRev = "" : Exit Function
-
-    Dim iEnd
-    iEnd = InStrRev(sOrigin, sEnd)
-    If iEnd = 0 Then cutStrWithElementRev = "" : Exit Function
-        
-    iEnd = InStrRev(sOrigin, "</", iEnd)
-    If iEnd = 0 Then cutStrWithElementRev = "" : Exit Function
-
-    cutStrWithElementRev = Mid(sOrigin, iHead, iEnd - iHead)
-End Function
-
 Sub removeHtmlStr(sOrigin)
     Dim iImgStart, iImgLen, iDivStart, iDivLen
     sOrigin = RePlace(sOrigin, "<br>", " ")
@@ -97,7 +79,7 @@ Sub removeHtmlStr(sOrigin)
     Call removeElement(sOrigin, "<embed")
     Call removeElement(sOrigin, "<a href")
 
-    Do Until Not (InStr(sOrigin, "  ") > 0)
+    Do While (InStr(sOrigin, "  ") > 0)
         sOrigin = RePlace(sOrigin, "  ", " ")
     Loop
 End Sub
@@ -106,7 +88,7 @@ Sub removeElement(sOrigin, sElement)
     Dim iHead, iEnd
     iHead = InStr(sOrigin, sElement)
     Do While (iHead > 0)
-        iEnd = InStr(sOrigin, ">")
+        iEnd = InStr(iHead, sOrigin, ">")
         If iEnd = 0 Then Exit Do
         sOrigin = RePlace(sOrigin, Mid(sOrigin, iHead, iEnd - iHead + 1), "")
         iHead = InStr(sOrigin, sElement)

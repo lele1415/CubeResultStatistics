@@ -5,26 +5,42 @@ Dim vaAllResultInfo : Set vaAllResultInfo = New VariableArray
 Dim vaAllNoResultInfo : Set vaAllNoResultInfo = New VariableArray
 Dim uPostInfoTxtPath : uPostInfoTxtPath = CrtPath & "\tmpFiles\ResultInfo.txt"
 Dim uNoPostInfoTxtPath : uNoPostInfoTxtPath = CrtPath & "\tmpFiles\NoResultInfo.txt"
+
+Const OPT_333 = "三阶"
+Const OPT_444 = "四阶"
+Const OPT_555 = "五阶"
+Const OPT_222 = "二阶"
+Const OPT_3bf = "三盲"
+Const OPT_3oh = "三单"
+Const OPT_3fm = "最少步"
+Const OPT_mega = "五魔"
+Const OPT_py = "金字塔"
+Const OPT_sq = "SQ-1"
+Const OPT_clk = "魔表"
+Const OPT_sk = "斜转"
+Const OPT_666 = "六阶"
+Const OPT_777 = "七阶"
+
 Dim aOptName_333, aOptName_24567, aOptName_other
-aOptName_333 = Array(Array("三阶", "333", "3阶", "3速"), _
-                        Array("三盲", "3盲", "333bf", "3bf", "3阶盲拧", "3bld") , _
-                        Array("三单", "3单", "333oh", "3oh", "3阶单手", "3one") , _
-                        Array("最少步", "333fm", "3fm"))
+aOptName_333 = Array(Array(OPT_333, "333", "3阶", "3速"), _
+                        Array(OPT_3bf, "3盲", "333bf", "3bf", "3阶盲拧", "3bld") , _
+                        Array(OPT_3oh, "3单", "333oh", "3oh", "3阶单手", "3one") , _
+                        Array(OPT_3fm, "333fm", "3fm"))
 
-aOptName_24567 = Array(Array("二阶", "222","2阶","2速"), _
-                        Array("四阶", "444","4阶","4速"), _
-                        Array("五阶", "555","5阶","5速"), _
-                        Array("六阶", "666","6阶","6速"), _
-                        Array("七阶", "777","7阶","7速"), _
-                        Array("五魔", "5魔", "5魔方"))
+aOptName_24567 = Array(Array(OPT_222, "222","2阶","2速"), _
+                        Array(OPT_444, "444","4阶","4速"), _
+                        Array(OPT_555, "555","5阶","5速"), _
+                        Array(OPT_666, "666","6阶","6速"), _
+                        Array(OPT_777, "777","7阶","7速"), _
+                        Array(OPT_mega, "5魔", "5魔方"))
 
-aOptName_other = Array(Array("三单", "oh"), _
-                        Array("最少步", "最少步", "最小步", "fm"), _
-                        Array("五魔", "mega", "megaminx"), _
-                        Array("金字塔", "塔", "金字塔", "py", "pyramid"), _
-                        Array("SQ-1", "sq", "sq1", "sq-1"), _
-                        Array("魔表", "表", "魔表", "clock", "clk"), _
-                        Array("斜转", "sk", "斜转", "skewb"))
+aOptName_other = Array(Array(OPT_3oh, "oh"), _
+                        Array(OPT_3fm, "最少步", "最小步", "fm"), _
+                        Array(OPT_mega, "mega", "megaminx"), _
+                        Array(OPT_py, "塔", "金字塔", "py", "pyramid", "pyram"), _
+                        Array(OPT_sq, "sq", "sq1", "sq-1"), _
+                        Array(OPT_clk, "表", "魔表", "clock", "clk"), _
+                        Array(OPT_sk, "sk", "斜转", "skewb"))
 
 Function getAllResultInfo()
     Call vaAllResultInfo.ResetArray()
@@ -138,6 +154,7 @@ End Function
             oNew.ResultOwner = object.PostUser
             oNew.ResultOpt = optName
             oNew.ResultText = resultText
+            oNew.PureResults = getPureResult(resultText, optName)
             Call vaAllResultInfo.Append(oNew)
         End Sub
 

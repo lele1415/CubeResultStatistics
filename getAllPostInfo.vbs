@@ -93,7 +93,7 @@ End Sub
         Sub checkArrayForBubble(sMsg)
             If InStr(sMsg, "post_bubble_middle") > 0 Then
                 Dim sTmp
-                sTmp = cutStrWithElementRev(sMsg, "post_bubble_middle", "post_bubble_bottom")
+                sTmp = cutStrWithElement(sMsg, "post_bubble_middle", "</div>")
                 If sTmp <> "" Then sMsg = sTmp
             End If
         End Sub

@@ -1,7 +1,7 @@
 '*************************************************
 '****get result.
 '*************************************************
-Function getPureResult(sMessageText, sUserText, iPostNum, sOptName)
+Function getPureResult(sMessageText, sOptName)
     Dim aPickedResult, iNeedNum, aPureResult, isValid
     aPickedResult = pickMachedResults(sMessageText, sOptName)
     If isArray(aPickedResult) Then

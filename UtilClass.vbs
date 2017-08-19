@@ -35,7 +35,7 @@ End Class
 
 
 Class ResultInfo
-    Private mResultOwner, mResultText, mResultOpt, mPureResults, mSortedResults, mBestResult, mAvgResult
+    Private mResultOwner, mResultText, mResultOpt, mPureResults(), mSortedResults(), mBestResult, mAvgResult
 
     Private Sub Class_Initialize
         mResultOwner = ""
@@ -58,12 +58,36 @@ Class ResultInfo
         mResultOpt = value
     End Property
 
+    Public Property Let PureResults(newArray)
+        If Not isArray(newArray) Then
+            MsgBox("Error: Let PureResults(newArray) newArray is not array")
+            Exit Property
+        End If
+        Dim i
+        For i = 0 To UBound(newArray)
+            ReDim Preserve mPureResults(i)
+            mPureResults(i) = newArray(i)
+        Next
+    End Property
+
     Public Property Let PureResults(seq, value)
         If seq >= 0 And seq <= 4 Then
             mPureResults(seq) = value
         Else
             MsgBox("Let PureResults: seq is out of bound. seq = " & seq)
         End If
+    End Property
+
+    Public Property Let SortedResults(newArray)
+        If Not isArray(newArray) Then
+            MsgBox("Error: Let SortedResults(newArray) newArray is not array")
+            Exit Property
+        End If
+        Dim i
+        For i = 0 To UBound(newArray)
+            ReDim Preserve mSortedResults(i)
+            mSortedResults(i) = newArray(i)
+        Next
     End Property
 
     Public Property Let SortedResults(seq, value)
@@ -94,12 +118,20 @@ Class ResultInfo
         ResultOpt = mResultOpt
     End Property
 
+    Public Property Get PureResults
+        PureResults = mPureResults
+    End Property
+
     Public Property Get PureResults(seq)
         If seq >= 0 And seq <= 4 Then
             PureResults = mPureResults(seq)
         Else
             MsgBox("Get PureResults: seq is out of bound. seq = " & seq)
         End If
+    End Property
+
+    Public Property Get SortedResults
+        SortedResults = mSortedResults
     End Property
 
     Public Property Get SortedResults(seq)
@@ -194,6 +226,7 @@ Class VariableArray
             Exit Property
         End If
 
+        Call ResetArray()
         Dim i
         For i = 0 To UBound(newArray)
             mBound = mBound + 1
