@@ -39,8 +39,9 @@
 <br>
 <fieldset>
     <div>
-        <select id="validResultList_id" onchange="showResult(true)" multiple="multiple" size="8"></select>
-        <select id="invalidResultList_id" onchange="showResult(false)" multiple="multiple" size="8"></select>
+        <select id="validResultList_id" onchange="showResult('validResultList_id')" multiple="multiple" size="8"></select>
+        <select id="invalidResultList_id" onchange="showResult('invalidResultList_id')" multiple="multiple" size="8"></select>
+        <select id="brResultList_id" onchange="showResult('brResultList_id')" multiple="multiple" size="8"></select>
     </div>
     <br>
     <br>
@@ -75,7 +76,7 @@
     </div>
     <br>
     <div>
-        <input type="button" onclick="submitRestoredResults()" value="submit to valid side" />
+        <input type="button" onclick="submitNewMessageText()" value="Submit new message" />
     </div>
 </fieldset>
 
@@ -171,8 +172,8 @@ function removeOption(SelectId, OptionValue)
 
 Dim width,height
 width=CreateObject("HtmlFile").ParentWindow.Screen.AvailWidth
-Window.MoveTo width-500,300
-Window.ResizeTo 500,500
+Window.MoveTo width-700,100
+Window.ResizeTo 700,700
 
 Dim ws, Fso
 Set ws=CreateObject("wscript.shell")
@@ -188,12 +189,14 @@ uSortedResultsTxt = ws.CurrentDirectory&"\sortedResult.txt"
 uValidResultTxt = ws.CurrentDirectory&"\validResult.txt"
 uInvalidResultTxt = ws.CurrentDirectory&"\invalidResult.txt"
 
-Dim countResultData, countNoResultData, brResultCount, iCompNum, countExcelRow
+Dim countResultData, countNoResultData, brResultCount, iCompNum, countExcelRow, seqOfShowingResult, listOfShowingResult
 countResultData = 0
 countNoResultData = 0
 brResultCount = 0
 iCompNum = 0
 countExcelRow = 0
+seqOfShowingResult = 0
+listOfShowingResult = ""
 
 Dim testFlag, inputFlag, listFlag, getResultDoneFlag, checkResultNumTooMany, checkResultNumToofew
 testFlag = False
@@ -210,7 +213,7 @@ iTmpResultCount = 0
 Dim aAllPostName(), aAllUserText(), aAllOptName(), aAllMessageText(), aAllPureResults(), aAllIsValid(), aAllSortedResults()
 Dim aAllRecords(13)
 Dim brResultData()
-ReDim brResultData(3,0)
+ReDim brResultData(4,0)
 
 Dim aTmpUserText_333, aTmpPureResults_333, aTmpSortedResults_333
 Dim aTmpUserText_444, aTmpPureResults_444, aTmpSortedResults_444
@@ -1186,6 +1189,10 @@ Function saveResultToArray(sMessageText, sPureResult, sUserText, iPostNum, sOptN
 
     addOption slistId, iPostNum&"楼 "&sUserText, iTmpResultCount
 
+    If InStr(aAllSortedResults(iTmpResultCount), "True") Then
+        addOption "brResultList_id", iPostNum&"楼 "&sUserText, iTmpResultCount
+    End If
+
     iTmpResultCount = iTmpResultCount + 1
 
     Dim oTxt
@@ -1202,30 +1209,22 @@ Function saveResultToArray(sMessageText, sPureResult, sUserText, iPostNum, sOptN
     Set oTxt = Nothing
 End Function
 
-Function showResult(isValid)
-    Dim slistId
-    If isValid Then
-        slistId = "validResultList_id"
-    Else
-        slistId = "invalidResultList_id"
-    End If
+Function showResult(slistId)
+    seqOfShowingResult = document.getElementById(slistId).value
+    listOfShowingResult = slistId
 
-    Dim iSeq
-    iSeq = document.getElementById(slistId).value
-
-    setInnerHtmlById "showResult_post_id", aAllPostName(iSeq)
-    setInnerHtmlById "showResult_user_id", aAllUserText(iSeq)
-    setValueById "showResult_opt_id", aAllOptName(iSeq)
-    setInnerHtmlById "showResult_msg_id", aAllMessageText(iSeq)
-    setInnerHtmlById "showResult_rst_id", aAllPureResults(iSeq)
+    setInnerHtmlById "showResult_post_id", aAllPostName(seqOfShowingResult)
+    setInnerHtmlById "showResult_user_id", aAllUserText(seqOfShowingResult)
+    setValueById "showResult_opt_id", aAllOptName(seqOfShowingResult)
+    setInnerHtmlById "showResult_msg_id", aAllMessageText(seqOfShowingResult)
+    setInnerHtmlById "showResult_rst_id", aAllPureResults(seqOfShowingResult)
 End Function
 
-Function submitRestoredResults()
-    Dim iSeq, iPostNum, sUserText, sOptName, sNewMessageText, aTmp, sNewPureResult, isValid
-    iSeq = document.getElementById("invalidResultList_id").value
+Function submitNewMessageText()
+    Dim iPostNum, sUserText, sOptName, sNewMessageText, aTmp, sNewPureResult, isValid
 
-    iPostNum = aAllPostName(iSeq)
-    sUserText = aAllUserText(iSeq)
+    iPostNum = aAllPostName(seqOfShowingResult)
+    sUserText = aAllUserText(seqOfShowingResult)
     sOptName = document.getElementById("showResult_opt_id").value
     sNewMessageText = document.getElementById("showResult_msg_id").value
 
@@ -1234,12 +1233,21 @@ Function submitRestoredResults()
     isValid = aTmp(1)
 
     If isValid Then
-        aAllPureResults(iSeq) = sNewPureResult
-        aAllOptName(iSeq) = sOptName
-        aAllIsValid(iSeq) = isValid
-        aAllSortedResults(iSeq) = getAvgAndSortedResults(sOptName, sNewPureResult, isValid)
-        addOption "validResultList_id", iPostNum&"楼 "&sUserText, iSeq
-        removeOption "invalidResultList_id", iSeq
+        aAllPureResults(seqOfShowingResult) = sNewPureResult
+        aAllOptName(seqOfShowingResult) = sOptName
+        aAllIsValid(seqOfShowingResult) = isValid
+        aAllSortedResults(seqOfShowingResult) = getAvgAndSortedResults(sOptName, sNewPureResult, isValid)
+
+        If listOfShowingResult = "invalidResultList_id" Then
+            addOption "validResultList_id", iPostNum&"楼 "&sUserText, seqOfShowingResult
+            removeOption "invalidResultList_id", seqOfShowingResult
+        ELseIf listOfShowingResult = "brResultList_id" Then
+            removeOption "brResultList_id", seqOfShowingResult
+        End If
+
+        If InStr(aAllSortedResults(seqOfShowingResult), "True") Then
+            addOption "brResultList_id", iPostNum&"楼 "&sUserText, seqOfShowingResult
+        End If
     Else
         MsgBox("is invalid result!")
     End If
@@ -1611,11 +1619,11 @@ End Function
 
                 If isBestBr Then
                     ExcelSheet.Cells(countExcelRow, 3).Interior.Color = RGB(255,192,0)
-                    saveBrResult sOptName, aUserText(i), False, aPureResults(i)
+                    saveBrResult sOptName, aUserText(i), aSplitSortedResults(1), False, aPureResults(i)
                 End If
                 If isAvgBr Then
                     ExcelSheet.Cells(countExcelRow, 4).Interior.Color = RGB(255,192,0)
-                    saveBrResult sOptName, aUserText(i), True, aPureResults(i)
+                    saveBrResult sOptName, aUserText(i), aSplitSortedResults(0), True, aPureResults(i)
                 End If
 
                 ExcelSheet.Cells(countExcelRow, 1).Value = rankNum
@@ -1630,12 +1638,13 @@ End Function
             countExcelRow = countExcelRow + 1
         End Function
 
-                Function saveBrResult(sOptName, sUserText, isAvg, sPureResult)
-                    ReDim Preserve brResultData(3,brResultCount)
+                Function saveBrResult(sOptName, sUserText, brResult, isAvg, sPureResult)
+                    ReDim Preserve brResultData(4,brResultCount)
                     brResultData(0,brResultCount) = sOptName
                     brResultData(1,brResultCount) = sUserText
-                    brResultData(2,brResultCount) = isAvg
-                    brResultData(3,brResultCount) = sPureResult
+                    brResultData(2,brResultCount) = brResult
+                    brResultData(3,brResultCount) = isAvg
+                    brResultData(4,brResultCount) = sPureResult
                     brResultCount = brResultCount + 1
                 End Function
 
@@ -1645,7 +1654,7 @@ End Function
 '****write BR into excel file.
 '*************************************************
 Function writeBrToExcel(newFilePath, haveNewBr)
-    Dim ExcelApp, ExcelBook, ExcelSheet, brLine, resultArray
+    Dim ExcelApp, ExcelBook, ExcelSheet, brLine, aSplitPureResults
     Set ExcelApp = CreateObject("Excel.Application")
     Set ExcelBook= ExcelApp.Workbooks.Open(newFilePath)
     Set ExcelSheet = ExcelBook.Sheets("Sheet2")
@@ -1662,23 +1671,21 @@ Function writeBrToExcel(newFilePath, haveNewBr)
             
     If haveNewBr Then
         For i = 0 To brResultCount-1
-            resultArray = Split(brResultData(3,i))
-            brLine = getBrLine(brResultData(0,i), brResultData(2,i))
+            aSplitPureResults = Split(brResultData(4,i))
+            brLine = getBrLine(brResultData(0,i), brResultData(3,i))
 
             For j = 1 To 10
                 ExcelSheet.Cells(brLine, j).Interior.Color = RGB(255,218,101)
             Next
 
+            ExcelSheet.Cells(brLine, 2).Value = brResultData(2,i)
             ExcelSheet.Cells(brLine, 4).Value = brResultData(1,i)
             ExcelSheet.Cells(brLine, 5).Value = iCompNum & "期"
 
-            If brResultData(2,i) Then
-                ExcelSheet.Cells(brLine, 2).Value = resultArray(0)
-                For j = 2 To UBound(resultArray)
-                    ExcelSheet.Cells(brLine, 4+j).Value = resultArray(j)
+            If brResultData(3,i) Then
+                For j = 0 To UBound(aSplitPureResults)
+                    ExcelSheet.Cells(brLine, j + 6).Value = aSplitPureResults(j)
                 Next
-            Else
-                ExcelSheet.Cells(brLine, 2).Value = resultArray(1)
             End If
         Next
     End If
