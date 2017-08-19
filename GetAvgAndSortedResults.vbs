@@ -1,70 +1,42 @@
 '*************************************************
 '****get avg and sorted results.
 '*************************************************
-Function getAvgAndSortedResults(sOptName, sPureResult, isValid)
-    If isValid Then
-        Dim aTmp, aPureResults, lenResults, iAvgResult, iEnd
-        aPureResults = Split(sPureResult)
-        aTmp = sortIntArray(aPureResults)
-        lenResults = safeUBound(aTmp, "getAvgAndSortedResults", 1)
+Sub getSortedResult(sPureResult, optInfo, resultInfo)
+    Dim aTmp, aPureResults, iAvgResult, iBestResult, iEnd
+    aPureResults = sortIntArray(Split(sPureResult))
 
-        If lenResults = 4 Then
-            iEnd = 3
-        Else
-            iEnd = 2
-        End If
+    iBestResult = aPureResults(0)
 
-        If aTmp(iEnd) <> 9999.99 Then
-            iAvgResult = Round(((0 + aTmp(iEnd-2) + aTmp(iEnd-1) + aTmp(iEnd)) / 3), 2)
-            iAvgResult = FormatNumber(iAvgResult, 2, , , 0)
-        Else
-            iAvgResult = 9999.99
-        End If
-
-        Dim sBrFlag
-        sBrFlag = compareToRecord(sOptName, iAvgResult, aTmp(0))
-
-        getAvgAndSortedResults = iAvgResult & " " & joinArrayWithSpace(aTmp) & " " & sBrFlag
+    If optInfo.NeedNum = 5 Then
+        iEnd = 3
     Else
-        getAvgAndSortedResults = ""
+        iEnd = 2
     End If
-End Function
 
-Function loadAllRecords()
-    Dim oTxt, count
-    Set oTxt = Fso.OpenTextFile(uRecordTxt, 1)
-    count = 0
+    If aPureResults(iEnd) <> 9999.99 Then
+        iAvgResult = Round(((0 + aPureResults(iEnd-2) + aPureResults(iEnd-1) + aPureResults(iEnd)) / 3), 2)
+        iAvgResult = FormatNumber(iAvgResult, 2, , , 0)
+    Else
+        iAvgResult = 9999.99
+    End If
 
-    Do Until oTxt.AtEndOfStream
-        aAllRecords(count) = oTxt.ReadLine
-        count = count + 1
-    Loop
+    Call compareToRecord(optInfo, resultInfo, iAvgResult, iBestResult)
 
-    oTxt.Close
-    Set oTxt = Nothing
-End Function
+    resultInfo.BestResult = iBestResult
+    resultInfo.AvgResult = iAvgResult
+    resultInfo.SortedResults = joinArrayWithSpace(aPureResults)
+End Sub
 
-Function compareToRecord(sOptName, iAvgResult, iBestResult)
-    Dim iOptCount, aTmpRecord, iAvgRecord, iBestRecord, isAvgBr, isBestBr
-    iOptCount = getSeqInAllOptName(sOptName)
-    aTmpRecord = Split(aAllRecords(iOptCount))
-    iAvgRecord = aTmpRecord(2)
-    iBestRecord = aTmpRecord(1)
-    isAvgBr = False
-    isBestBr = False
+Sub compareToRecord(optInfo, resultInfo, iAvgResult, iBestResult)
+    Dim iAvgRecord, iBestRecord
+    iBestRecord = optInfo.BestRecord
+    iAvgRecord = optInfo.AvgRecord
 
-    If sOptName <> "333fm" Then
-        iAvgRecord = formatResultStr(iAvgRecord)
+    If optInfo.Seq <> OPT_SEQ_3fm Then
         iBestRecord = formatResultStr(iBestRecord)
+        iAvgRecord = formatResultStr(iAvgRecord)
     End If
 
-    If iAvgResult - iAvgRecord <= 0 Then
-        isAvgBr = True
-    End If
-
-    If iBestResult - iBestRecord <= 0 Then
-        isBestBr = True
-    End If
-
-    compareToRecord = isAvgBr & " " & isBestBr
-End Function
+    If iBestResult - iBestRecord <= 0 Then resultInfo.IsBestBr = True
+    If iAvgResult - iAvgRecord <= 0 Then resultInfo.IsAvgBr = True
+End Sub

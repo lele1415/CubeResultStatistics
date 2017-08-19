@@ -18,46 +18,6 @@ uValidResultTxt = CrtPath & "\tmpFiles\validResult.txt"
 uInvalidResultTxt = CrtPath & "\tmpFiles\invalidResult.txt"
 uAllResultFolder = CrtPath & "\allResults\"
 
-Dim countResultData, countNoResultData, brResultCount, iCompNum, countExcelRow, seqOfShowingResult, listOfShowingResult
-countResultData = 0
-countNoResultData = 0
-brResultCount = 0
-iCompNum = 0
-countExcelRow = 0
-seqOfShowingResult = 0
-listOfShowingResult = ""
-
-Dim testFlag, inputFlag, listFlag, getResultDoneFlag, checkResultNumTooMany, checkResultNumToofew
-testFlag = False
-inputFlag = False
-listFlag = False
-getResultDoneFlag = False
-
-Dim aMessageText, aUserText, aPostNum
-
-Dim iStartPostNum, iOriginDataArrayLength, iTmpResultCount
-iStartPostNum = 0
-iTmpResultCount = 0
-
-Dim aAllPostName(), aAllUserText(), aAllOptName(), aAllMessageText(), aAllPureResults(), aAllIsValid(), aAllSortedResults()
-Dim aAllRecords(13)
-Dim brResultData()
-ReDim brResultData(4,0)
-
-Dim aTmpUserText_333, aTmpPureResults_333, aTmpSortedResults_333
-Dim aTmpUserText_444, aTmpPureResults_444, aTmpSortedResults_444
-Dim aTmpUserText_555, aTmpPureResults_555, aTmpSortedResults_555
-Dim aTmpUserText_222, aTmpPureResults_222, aTmpSortedResults_222
-Dim aTmpUserText_333bf, aTmpPureResults_333bf, aTmpSortedResults_333bf
-Dim aTmpUserText_333oh, aTmpPureResults_333oh, aTmpSortedResults_333oh
-Dim aTmpUserText_333fm, aTmpPureResults_333fm, aTmpSortedResults_333fm
-Dim aTmpUserText_py, aTmpPureResults_py, aTmpSortedResults_py
-Dim aTmpUserText_mega, aTmpPureResults_mega, aTmpSortedResults_mega
-Dim aTmpUserText_sq, aTmpPureResults_sq, aTmpSortedResults_sq
-Dim aTmpUserText_clock, aTmpPureResults_clock, aTmpSortedResults_clock
-Dim aTmpUserText_sk, aTmpPureResults_sk, aTmpSortedResults_sk
-Dim aTmpUserText_666, aTmpPureResults_666, aTmpSortedResults_666
-Dim aTmpUserText_777, aTmpPureResults_777, aTmpSortedResults_777
 
 Function getAllOptName()
     tmpArray = Array("333","444","555","222","333bf","333oh","333fm","mega","py","sq","clock","sk","666","777")

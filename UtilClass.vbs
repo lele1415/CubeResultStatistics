@@ -34,18 +34,74 @@ End Class
 
 
 
+Class OptionInfo
+    Private mFullName, mSeq, mNeedNum, mBestRecord, mAvgRecord
+
+    Private Sub Class_Initialize
+        mFullName = ""
+        mSeq = ""
+        mNeedNum = ""
+        mBestRecord = ""
+        mAvgRecord = ""
+    End Sub
+
+    Public Property Let FullName(value)
+        mFullName = value
+    End Property
+
+    Public Property Let Seq(value)
+        mSeq = value
+    End Property
+
+    Public Property Let NeedNum(value)
+        mNeedNum = value
+    End Property
+
+    Public Property Let BestRecord(value)
+        mBestRecord = value
+    End Property
+
+    Public Property Let AvgRecord(value)
+        mAvgRecord = value
+    End Property
+
+    Public Property Get FullName
+        FullName = mFullName
+    End Property
+
+    Public Property Get Seq
+        Seq = mSeq
+    End Property
+
+    Public Property Get NeedNum
+        NeedNum = mNeedNum
+    End Property
+
+    Public Property Get BestRecord
+        BestRecord = mBestRecord
+    End Property
+
+    Public Property Get AvgRecord
+        AvgRecord = mAvgRecord
+    End Property
+End Class
+
+
+
 Class ValidResultInfo
-    Private mPostNum, mResultOwner, mResultText, mResultOpt, mPureResults, mSortedResults, mBestResult, mAvgResult
+    Private mPostNum, mResultOwner, mResultText, mOptSeq, mPureResults, mSortedResults, mBestResult, mAvgResult, mIsBestBr, mIsAvgBr
 
     Private Sub Class_Initialize
         mPostNum = ""
         mResultOwner = ""
         mResultText = ""
-        mResultOpt = ""
+        mOptSeq = ""
         mPureResults = ""
         mSortedResults = ""
         mBestResult = ""
         mAvgResult = ""
+        mIsBestBr = False
+        mIsAvgBr = False
     End Sub
 
     Public Property Let PostNum(value)
@@ -60,8 +116,8 @@ Class ValidResultInfo
         mResultText = value
     End Property
 
-    Public Property Let ResultOpt(value)
-        mResultOpt = value
+    Public Property Let OptSeq(value)
+        mOptSeq = value
     End Property
 
     Public Property Let PureResults(value)
@@ -80,6 +136,14 @@ Class ValidResultInfo
         mAvgResult = value
     End Property
 
+    Public Property Let IsBestBr(value)
+        mIsBestBr = value
+    End Property
+
+    Public Property Let IsAvgBr(value)
+        mIsAvgBr = value
+    End Property
+
     Public Property Get PostNum
         PostNum = mPostNum
     End Property
@@ -92,8 +156,8 @@ Class ValidResultInfo
         ResultText = mResultText
     End Property
 
-    Public Property Get ResultOpt
-        ResultOpt = mResultOpt
+    Public Property Get OptSeq
+        OptSeq = mOptSeq
     End Property
 
     Public Property Get PureResults
@@ -111,18 +175,26 @@ Class ValidResultInfo
     Public Property Get AvgResult
         AvgResult = mAvgResult
     End Property
+
+    Public Property Get IsBestBr
+        IsBestBr = mIsBestBr
+    End Property
+
+    Public Property Get IsAvgBr
+        IsAvgBr = mIsAvgBr
+    End Property
 End Class
 
 
 
 Class InvalidResultInfo
-    Private mPostNum, mResultOwner, mResultText, mResultOpt, mPureResults
+    Private mPostNum, mResultOwner, mResultText, mOptSeq, mPureResults
 
     Private Sub Class_Initialize
         mPostNum = ""
         mResultOwner = ""
         mResultText = ""
-        mResultOpt = ""
+        mOptSeq = ""
         mPureResults = ""
     End Sub
 
@@ -138,8 +210,8 @@ Class InvalidResultInfo
         mResultText = value
     End Property
 
-    Public Property Let ResultOpt(value)
-        mResultOpt = value
+    Public Property Let OptSeq(value)
+        mOptSeq = value
     End Property
 
     Public Property Let PureResults(value)
@@ -158,8 +230,8 @@ Class InvalidResultInfo
         ResultText = mResultText
     End Property
 
-    Public Property Get ResultOpt
-        ResultOpt = mResultOpt
+    Public Property Get OptSeq
+        OptSeq = mOptSeq
     End Property
 
     Public Property Get PureResults

@@ -59,6 +59,9 @@
 '//  
 '//  20170718
 '//      1. 优化：getPureResult, getAllResultInfo
+'//  
+'//  20170723
+'//      1. 优化：getPagesCode, getPureResult, getAllResultInfo
 -->
 
 <Html>
@@ -83,44 +86,44 @@
 <br>
 <fieldset>
     <div>
-        <select id="validResultList_id" onchange="showResult('validResultList_id')" multiple="multiple" size="8"></select>
-        <select id="invalidResultList_id" onchange="showResult('invalidResultList_id')" multiple="multiple" size="8"></select>
-        <select id="brResultList_id" onchange="showResult('brResultList_id')" multiple="multiple" size="8"></select>
+        <select id="validResultList_id" onclick="showResultInfo('validResultList_id')" multiple="multiple" size="8"></select>
+        <select id="invalidResultList_id" onclick="showResultInfo('invalidResultList_id')" multiple="multiple" size="8"></select>
+        <select id="brResultList_id" onclick="showResultInfo('brResultList_id')" multiple="multiple" size="8"></select>
     </div>
     <br>
     <br>
     <div>
-        <textarea id="showResult_post_id" rows="1" cols="5"></textarea>
-        <textarea id="showResult_user_id" rows="1" cols="20"></textarea>
-        <select id="showResult_opt_id">
-            <option value="unknow"></option>
-            <option value="333">333</option>
-            <option value="444">444</option>
-            <option value="555">555</option>
-            <option value="222">222</option>
-            <option value="333bf">333bf</option>
-            <option value="333oh">333oh</option>
-            <option value="333fm">333fm</option>
-            <option value="mega">mega</option>
-            <option value="py">py</option>
-            <option value="sq">sq</option>
-            <option value="clock">clock</option>
-            <option value="sk">sk</option>
-            <option value="666">666</option>
-            <option value="777">777</option>
+        <textarea id="showResult_post_num" rows="1" cols="5"></textarea>
+        <textarea id="showResult_post_user" rows="1" cols="20"></textarea>
+        <select id="showResult_opt_name">
+            <option value=""></option>
+            <option value="0">三阶</option>
+            <option value="1">四阶</option>
+            <option value="2">五阶</option>
+            <option value="3">二阶</option>
+            <option value="4">三盲</option>
+            <option value="5">三单</option>
+            <option value="6">最少步</option>
+            <option value="7">五魔</option>
+            <option value="8">金字塔</option>
+            <option value="9">SQ1</option>
+            <option value="10">魔表</option>
+            <option value="11">斜转</option>
+            <option value="12">六阶</option>
+            <option value="13">七阶</option>
         </select>
     </div>
     <br>
     <div>
-         <textarea id="showResult_msg_id" rows="3" cols="40"></textarea>
+         <textarea id="showResult_result_text" rows="3" cols="40"></textarea>
     </div>
     <br>
     <div>
-        <textarea id="showResult_rst_id" rows="3" cols="40"></textarea>
+        <textarea id="showResult_pure_results" rows="3" cols="40"></textarea>
     </div>
     <br>
     <div>
-        <input type="button" onclick="submitNewMessageText()" value="Submit new message" />
+        <input type="button" onclick="submitNewResultInfo()" value="Submit new result" />
     </div>
 </fieldset>
 
@@ -132,8 +135,8 @@
 
 
 
-<Script Language="JavaScript" src="Statistics.js"></Script>
-<!-- <Script Language="VBScript" src="Statistics.vbs"></Script> -->
+<Script Language="JavaScript" src="GetPagesCode.js"></Script>
+<Script Language="JavaScript" src="ShowAllResultInfo.js"></Script>
 <Script Language="VBScript" src="Util.vbs"></Script>
 <Script Language="VBScript" src="UtilClass.vbs"></Script>
 <Script Language="VBScript" src="UtilStrFun.vbs"></Script>
@@ -142,10 +145,8 @@
 <Script Language="VBScript" src="getAllPostInfo.vbs"></Script>
 <Script Language="VBScript" src="getAllResultInfo.vbs"></Script>
 <Script Language="VBScript" src="GetPureResult.vbs"></Script>
-<Script Language="VBScript" src="SaveResultToArray.vbs"></Script>
 <Script Language="VBScript" src="GetAvgAndSortedResults.vbs"></Script>
-<Script Language="VBScript" src="SortAllResults.vbs"></Script>
-<Script Language="VBScript" src="WriteReslutsToExcel.vbs"></Script>
-<Script Language="VBScript" src="WriteBrToExcel.vbs"></Script>
+<Script Language="VBScript" src="ShowAllResultInfo.vbs"></Script>
+
 </Body>
 </Html>

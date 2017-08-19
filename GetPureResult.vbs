@@ -3,36 +3,24 @@
 '*************************************************
 Dim aResultHeadword : aResultHeadword = Array("成绩列表","详细时间")
 
-Function getPureResult(sMessageText, sOptName)
-    Dim aPickedResult, iNeedNum, aPureResult, isValid
-    aPickedResult = pickMachedResults(sMessageText, sOptName)
+Function getPureResult(sResultText, iOptSeq)
+    Dim aPickedResult, aPureResult, isValid
+    aPickedResult = pickMachedResults(sResultText, iOptSeq)
     If Not isArray(aPickedResult) Then getPureResult = "" : Exit Function
 
-    iNeedNum = getNeedNumOfResult(sOptName)
-    isValid = checkResultsNum(aPickedResult, iNeedNum)
+    isValid = checkResultsNum(aPickedResult, vaOptInfo.V(iOptSeq).NeedNum)
     getPureResult = Array(joinArrayWithSpace(aPickedResult), isValid)
 End Function
 
-        Function getNeedNumOfResult(sOptName)
-            If (sOptName = OPT_3bf) Or _
-                    (sOptName = OPT_3fm) Or _
-                    (sOptName = OPT_666) Or _
-                    (sOptName = OPT_777) Then
-                getNeedNumOfResult = 3
-            Else
-                getNeedNumOfResult = 5
-            End If
-        End Function
-
-        Function pickMachedResults(sMessageText, sOptName)
+        Function pickMachedResults(sResultText, iOptSeq)
             Dim aTmpResult, sTmp, sTmpResult
-            'MsgBox("sMessageText="&sMessageText&Vblf&_
-                    '"replaceCharacterInResultStr(sMessageText)="&replaceCharacterInResultStr(sMessageText))
-            aTmpResult = Split(replaceCharacterInResultStr(cutResultStrByKeyword(sMessageText)))
+            'MsgBox("sResultText="&sResultText&Vblf&_
+                    '"replaceCharacterInResultStr(sResultText)="&replaceCharacterInResultStr(sResultText))
+            aTmpResult = Split(replaceCharacterInResultStr(cutResultStrByKeyword(sResultText)))
             If Not isArray(aTmpResult) Then pickMachedResults = "" : Exit Function
 
             Dim formatFun
-            If sOptName = "333fm" Then
+            If iOptSeq = OPT_SEQ_3fm Then
                 formatFun = "formatResultStrForFm"
             Else
                 formatFun = "formatResultStr"
@@ -49,14 +37,14 @@ End Function
             pickMachedResults = Split(Trim(sTmpResult))
         End Function
 
-        Function cutResultStrByKeyword(sMessageText)
+        Function cutResultStrByKeyword(sResultText)
             Dim iKeywordInStr, sTmp, sKeyword
-            sTmp = sMessageText
+            sTmp = sResultText
             For i = 0 To UBound(aResultHeadword)
                 sKeyword = aResultHeadword(i)
-                iKeywordInStr = InStr(sMessageText, sKeyword)
+                iKeywordInStr = InStr(sResultText, sKeyword)
                 If iKeywordInStr > 0 Then
-                    sTmp = safeMid(sMessageText, iKeywordInStr + Len(sKeyword), 0, "cutResultStrByKeyword")
+                    sTmp = safeMid(sResultText, iKeywordInStr + Len(sKeyword), 0, "cutResultStrByKeyword")
                     Exit For
                 End If
             Next
