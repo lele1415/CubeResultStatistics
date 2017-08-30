@@ -146,13 +146,16 @@ End Function
                 End Sub
 
                 Sub checkIsBr(ExcelSheet, oResult)
-                    If oResult.IsBestBr Then
-                        ExcelSheet.Cells(iExcelRow, 3).Interior.Color = RGB(255,192,0)
+                    If oResult.IsBestBr Or oResult.IsAvgBr Then
                         vaAllBrResults.Append(oResult)
-                    End If
-                    If oResult.IsAvgBr Then
-                        ExcelSheet.Cells(iExcelRow, 4).Interior.Color = RGB(255,192,0)
-                        vaAllBrResults.Append(oResult)
+
+                        If oResult.IsBestBr Then
+                            ExcelSheet.Cells(iExcelRow, 3).Interior.Color = RGB(255,192,0)
+                        End If
+
+                        If oResult.IsAvgBr Then
+                            ExcelSheet.Cells(iExcelRow, 4).Interior.Color = RGB(255,192,0)
+                        End If
                     End If
                 End Sub
 
@@ -170,9 +173,11 @@ Sub writeBrToExcel(ExcelApp, ExcelBook, ExcelSheet, haveNewBr)
             iBaseLine = (oResult.ResultOptSeq + 1) * 4
 
             If oResult.IsBestBr Then
-                Call writeBrLine(ExcelSheet, iBaseLine, oResult.BestResult, oResult.ResultOwner, "")
-            Else
-                Call writeBrLine(ExcelSheet, iBaseLine + 1, oResult.AvgResult, oResult.ResultOwner, oResult.PureResults)
+                Call writeBrLine(ExcelSheet, iBaseLine, oResult.ResultOptSeq, oResult.BestResult, oResult.ResultOwner, "")
+            End If
+
+            If oResult.IsAvgBr Then
+                Call writeBrLine(ExcelSheet, iBaseLine + 1, oResult.ResultOptSeq, oResult.AvgResult, oResult.ResultOwner, oResult.PureResults)
             End If
         Next
     End If
@@ -191,13 +196,13 @@ End Sub
             Next
         End Sub
 
-        Sub writeBrLine(ExcelSheet, iLine, iResult, sResultOwner, sPureResult)
+        Sub writeBrLine(ExcelSheet, iLine, iOptSeq, iResult, sResultOwner, sPureResult)
             Dim j
             For j = 1 To 10
                 ExcelSheet.Cells(iLine, j).Interior.Color = RGB(255,218,101)
             Next
 
-            ExcelSheet.Cells(iLine, 2).Value = iResult
+            ExcelSheet.Cells(iLine, 2).Value = revertResult(iResult, iOptSeq)
             ExcelSheet.Cells(iLine, 4).Value = sResultOwner
             ExcelSheet.Cells(iLine, 5).Value = iCompNum & "期"
 
@@ -205,7 +210,7 @@ End Sub
                 Dim aTmp
                 aTmp = Split(sPureResult)
                 For j = 0 To UBound(aTmp)
-                    ExcelSheet.Cells(iLine, j + 6).Value = aTmp(j)
+                    ExcelSheet.Cells(iLine, j + 6).Value = revertResult(aTmp(j), iOptSeq)
                 Next
             End If
         End Sub
@@ -218,11 +223,11 @@ Sub saveAllBrResultToTxt()
         iOptSeq = oBrResult.ResultOptSeq
 
         If oBrResult.IsBestBr Then
-            vaOptInfo.V(iOptSeq).BestRecord = revertResult(oBrResult.BestResult, iOptSeq)
+            vaOptInfo.V(iOptSeq).BestRecord = oBrResult.BestResult
         End If
 
         If oBrResult.IsAvgBr Then
-            vaOptInfo.V(iOptSeq).AvgRecord = revertResult(oBrResult.AvgResult, iOptSeq)
+            vaOptInfo.V(iOptSeq).AvgRecord = oBrResult.AvgResult
         End If
     Next
 
@@ -233,7 +238,7 @@ Sub saveAllBrResultToTxt()
 
     For i = 0 To vaOptInfo.Bound
         Set oOptInfo = vaOptInfo.V(i)
-        oTxt.WriteLine(oOptInfo.FullName & " " & oOptInfo.BestRecord & " " & oOptInfo.AvgRecord)
+        oTxt.WriteLine(oOptInfo.FullName & " " & revertResult(oOptInfo.BestRecord, i) & " " & revertResult(oOptInfo.AvgRecord, i))
     Next
 
     oTxt.Close
