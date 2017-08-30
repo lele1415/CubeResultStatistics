@@ -301,10 +301,11 @@ Function revertResult(iResult, optSeq)
                 secNum = "0" & secNum
             End If
             sRevert = minNum & ":" & secNum
-        ElseIf sRevert < 1.00 Then
-            sRevert = "0" & sRevert
         Else
             sRevert = FormatNumber(sRevert, 2, , , 0)
+            If sRevert < 1.00 Then
+                sRevert = "0" & sRevert
+            End If
         End If
     End If
         
