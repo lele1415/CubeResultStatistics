@@ -4,37 +4,35 @@
 Dim aResultHeadword : aResultHeadword = Array("成绩列表","详细时间")
 
 Function getPureResult(sResultText, iOptSeq)
-    Dim aPickedResult, aPureResult, isValid, iNeedNum
+    Dim svaPickedResult, isValid, iNeedNum
     iNeedNum = vaOptInfo.V(iOptSeq).NeedNum
-    aPickedResult = pickMachedResults(sResultText, iOptSeq, iNeedNum)
-    If Not isArray(aPickedResult) Then getPureResult = "" : Exit Function
+    Set svaPickedResult = pickMachedResults(sResultText, iOptSeq)
+    If svaPickedResult.Bound = -1 Then getPureResult = "" : Exit Function
 
-    isValid = checkResultsNum(aPickedResult, iNeedNum)
-    getPureResult = Array(joinArrayWithSpace(aPickedResult), isValid)
+    isValid = checkResultsNum(svaPickedResult.Bound, iNeedNum)
+    getPureResult = Array(svaPickedResult.ToString(), isValid)
 End Function
 
-        Function pickMachedResults(sResultText, iOptSeq, iNeedNum)
-            Dim aTmpResult, sTmp, sTmpResult
+        Function pickMachedResults(sResultText, iOptSeq)
+            Dim aTmpResult, sTmp
             'MsgBox("sResultText="&sResultText&Vblf&_
                     '"replaceCharacterInResultStr(sResultText)="&replaceCharacterInResultStr(sResultText))
             aTmpResult = Split(replaceCharacterInResultStr(cutResultStrByKeyword(sResultText)))
             If Not isArray(aTmpResult) Then pickMachedResults = "" : Exit Function
 
-            Dim i, iMached
-            iMached = 0
+            Dim i, svaObj
+            Set svaObj = New SimpleVariableArray
+
             For i = 0 To UBound(aTmpResult)
                 sTmp = formatResultStr(aTmpResult(i), iOptSeq)
                 
                 If IsNumeric(sTmp) Then
-                    sTmpResult = sTmpResult & " " & sTmp
-                    iMached = iMached + 1
+                    svaObj.Append(sTmp)
                 End If
-
-                If iMached = iNeedNum Then Exit For
             Next
             'MsgBox(sTmpResult)
 
-            pickMachedResults = Split(Trim(sTmpResult))
+            Set pickMachedResults = svaObj
         End Function
 
         Function cutResultStrByKeyword(sResultText)
@@ -51,9 +49,9 @@ End Function
             cutResultStrByKeyword = sTmp
         End Function
 
-        Function checkResultsNum(aPickedResult, iNeedNum)
+        Function checkResultsNum(iBound, iNeedNum)
             Dim isValid
-            If safeUBound(aPickedResult, "checkResultsNum", 1) + 1 = iNeedNum Then
+            If iBound + 1 = iNeedNum Then
                 isValid = True
             Else
                 isValid = False

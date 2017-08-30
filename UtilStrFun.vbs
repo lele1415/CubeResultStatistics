@@ -264,6 +264,11 @@ Function formatResultStrForFm(sStr)
         Exit Function
     End If
 
+    If Len(sStr) < 2 Then
+        formatResultStrForFm = ""
+        Exit Function
+    End If
+
     Dim iPointInStr, iColonInStr
     iPointInStr = InStr(sStr, ".")
     iColonInStr = InStr(sStr, ":")

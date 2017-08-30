@@ -271,6 +271,46 @@ End Class
 
 
 
+Class SimpleVariableArray
+    Private mBound, mArray()
+
+    Private Sub Class_Initialize
+        mBound = -1
+    End Sub
+
+    Public Property Get Bound
+        Bound = mBound
+    End Property
+
+    Public Sub Append(value)
+        mBound = mBound + 1
+        ReDim Preserve mArray(mBound)
+
+        If isObject(value) Then
+            Set mArray(mBound) = value
+        ELse
+            mArray(mBound) = value
+        End If
+    End Sub
+
+    Public Property Get InnerArray
+        InnerArray = mArray
+    End Property
+
+    Public Function ToString()
+        If mBound = -1 Then ToString = "" : Exit Function
+
+        Dim i, sTmp
+        For i = 0 To mBound
+            sTmp = sTmp & " " & mArray(i)
+        Next
+
+        ToString = Trim(sTmp)
+    End Function
+End Class
+
+
+
 Class VariableArray
     Private mBound, mArray()
 
