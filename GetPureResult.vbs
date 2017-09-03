@@ -6,19 +6,19 @@ Dim aResultHeadword : aResultHeadword = Array("成绩列表","详细时间")
 Function getPureResult(sResultText, iOptSeq)
     Dim svaPickedResult, isValid, iNeedNum
     iNeedNum = vaOptInfo.V(iOptSeq).NeedNum
-    Set svaPickedResult = pickMachedResults(sResultText, iOptSeq)
-    If svaPickedResult.Bound = -1 Then getPureResult = "" : Exit Function
+    Set svaPickedResult = pickMatchedResults(sResultText, iOptSeq)
+    If svaPickedResult.Bound = -1 Then getPureResult = Array("", False) : Exit Function
 
     isValid = checkResultsNum(svaPickedResult.Bound, iNeedNum)
     getPureResult = Array(svaPickedResult.ToString(), isValid)
 End Function
 
-        Function pickMachedResults(sResultText, iOptSeq)
+        Function pickMatchedResults(sResultText, iOptSeq)
             Dim aTmpResult, sTmp
             'MsgBox("sResultText="&sResultText&Vblf&_
                     '"replaceCharacterInResultStr(sResultText)="&replaceCharacterInResultStr(sResultText))
             aTmpResult = Split(replaceCharacterInResultStr(cutResultStrByKeyword(sResultText)))
-            If Not isArray(aTmpResult) Then pickMachedResults = "" : Exit Function
+            If Not isArray(aTmpResult) Then pickMatchedResults = "" : Exit Function
 
             Dim i, svaObj
             Set svaObj = New SimpleVariableArray
@@ -32,7 +32,7 @@ End Function
             Next
             'MsgBox(sTmpResult)
 
-            Set pickMachedResults = svaObj
+            Set pickMatchedResults = svaObj
         End Function
 
         Function cutResultStrByKeyword(sResultText)
