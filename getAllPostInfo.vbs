@@ -37,7 +37,7 @@ Sub getAllPostInfo()
 
     Call saveOriginMsgTxt()
 
-    MsgBox("getAllPostInfo done!")
+    'MsgBox("getAllPostInfo done!")
     Call getAllResultInfo()
 End Sub
 

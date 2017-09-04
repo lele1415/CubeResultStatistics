@@ -82,6 +82,8 @@ Function getAllResultInfo()
     Call loadAllOptInfo()
     Call vaAllValidResultInfo.ResetArray()
     Call vaAllInvalidResultInfo.ResetArray()
+    Call vaAllValidResultInfo.SetPreBound(vaAllPostInfo.Bound)
+    Call vaAllInvalidResultInfo.SetPreBound(vaAllPostInfo.Bound)
     Dim i, optName
     For i = 0 To vaAllPostInfo.Bound
         Call setInnerHtml(ID_CRT_POSTNUM, vaAllPostInfo.V(i).PostNum)
@@ -89,13 +91,14 @@ Function getAllResultInfo()
     Next
     Call saveValidResultInfoToTxt()
     Call saveInValidResultInfoToTxt()
-    MsgBox("Get all result info done!")
+    'MsgBox("Get all result info done!")
     Call showAllResultInfo()
 
     MsgBox("getAllResultInfo done!")
 End Function
 
         Sub loadAllOptInfo()
+            Call vaOptInfo.SetPreBound(14)
             Call addOptInfo(OPT_FULL_NAME_333, OPT_SEQ_333, 5)
             Call addOptInfo(OPT_FULL_NAME_444, OPT_SEQ_444, 5)
             Call addOptInfo(OPT_FULL_NAME_555, OPT_SEQ_555, 5)
@@ -284,7 +287,7 @@ End Function
             If resultText = "" Then Call addInvalidResultInfo(postNum, postUser, optSeq, "", "") : Exit Sub
 
             '//check the same owner and opt
-            If checkOwnerAndOptIsExist(postUser, optSeq) Then Exit Sub
+            'If checkOwnerAndOptIsExist(postUser, optSeq) Then Exit Sub
 
             '//get pure results
             Dim aPureResultInfo, pureResults, isValid
@@ -305,6 +308,7 @@ End Function
             Call getSortedResult(pureResults, optSeq, oNew)
 
             Call vaAllValidResultInfo.Append(oNew)
+            Call vaOptInfo.V(optSeq).CountPlus()
         End Sub
 
         Function getResultText(aPostMsg, minSeq, maxSeq)

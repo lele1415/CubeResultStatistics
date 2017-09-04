@@ -35,7 +35,7 @@ End Class
 
 
 Class OptionInfo
-    Private mFullName, mSeq, mNeedNum, mBestRecord, mAvgRecord
+    Private mFullName, mSeq, mNeedNum, mBestRecord, mAvgRecord, mCount
 
     Private Sub Class_Initialize
         mFullName = ""
@@ -43,6 +43,7 @@ Class OptionInfo
         mNeedNum = ""
         mBestRecord = ""
         mAvgRecord = ""
+        mCount = -1
     End Sub
 
     Public Property Let FullName(value)
@@ -65,6 +66,10 @@ Class OptionInfo
         mAvgRecord = value
     End Property
 
+    Public Sub CountPlus()
+        mCount = mCount + 1
+    End Sub
+
     Public Property Get FullName
         FullName = mFullName
     End Property
@@ -83,6 +88,10 @@ Class OptionInfo
 
     Public Property Get AvgRecord
         AvgRecord = mAvgRecord
+    End Property
+
+    Public Property Get Count
+        Count = mCount
     End Property
 End Class
 
@@ -241,81 +250,21 @@ End Class
 
 
 
-'Class OptName
-'    Private mOfficialName, mOtherNames()
-'
-'    Public Property Let OfficialName(value)
-'        mOfficialName = value
-'    End Property
-'
-'    Public Property Let OtherNames(newArray)
-'        If Not isArray(newArray) Then
-'            MsgBox("Error: Let PureResults(newArray) newArray is not array")
-'            Exit Property
-'        End If
-'        Dim i
-'        For i = 0 To UBound(newArray)
-'            ReDim Preserve mOtherNames(i)
-'            mOtherNames(i) = newArray(i)
-'        Next
-'    End Property
-'
-'    Public Property Get OfficialName
-'        OfficialName = mOfficialName
-'    End Property
-'
-'    Public Property Get OtherNames
-'        OtherNames = mOtherNames
-'    End Property
-'End Class
-
-
-
-Class SimpleVariableArray
-    Private mBound, mArray()
-
-    Private Sub Class_Initialize
-        mBound = -1
-    End Sub
-
-    Public Property Get Bound
-        Bound = mBound
-    End Property
-
-    Public Sub Append(value)
-        mBound = mBound + 1
-        ReDim Preserve mArray(mBound)
-
-        If isObject(value) Then
-            Set mArray(mBound) = value
-        ELse
-            mArray(mBound) = value
-        End If
-    End Sub
-
-    Public Property Get InnerArray
-        InnerArray = mArray
-    End Property
-
-    Public Function ToString()
-        If mBound = -1 Then ToString = "" : Exit Function
-
-        Dim i, sTmp
-        For i = 0 To mBound
-            sTmp = sTmp & " " & mArray(i)
-        Next
-
-        ToString = Trim(sTmp)
-    End Function
-End Class
-
-
-
 Class VariableArray
-    Private mBound, mArray()
+    Private mPreBound, mBound, mArray()
 
     Private Sub Class_Initialize
+        mPreBound = -1
         mBound = -1
+    End Sub
+
+    Public Sub SetPreBound(sValue)
+        If isNumeric(sValue) Then
+            If sValue > mBound Then
+                ReDim Preserve mArray(sValue)
+                mPreBound = sValue
+            End If
+        End If
     End Sub
 
     Public Property Get Bound
@@ -361,7 +310,10 @@ Class VariableArray
 
     Public Sub Append(value)
         mBound = mBound + 1
-        ReDim Preserve mArray(mBound)
+        If mBound > mPreBound Then
+            ReDim Preserve mArray(mBound)
+            mPreBound = mBound
+        End If
 
         If isObject(value) Then
             Set mArray(mBound) = value
@@ -453,6 +405,7 @@ Class VariableArray
 
         mBound = mBound - 1
         ReDim Preserve mArray(mBound)
+        mPreBound = mPreBound - 1
     End Sub
 
     Public Sub MoveToTop(seq)
@@ -564,6 +517,17 @@ Class VariableArray
             Next
         Next
     End Sub
+
+    Public Function ToStringWithSpace()
+        If mBound = -1 Then ToStringWithSpace = "" : Exit Function
+
+        Dim i, sTmp
+        For i = 0 To mBound
+            sTmp = sTmp & " " & mArray(i)
+        Next
+
+        ToStringWithSpace = Trim(sTmp)
+    End Function
 
     Public Function ToString()
         If mBound <> -1 Then

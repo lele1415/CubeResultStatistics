@@ -51,42 +51,79 @@ End Function
         Set vaAllResults_sk = New VariableArray
         Set vaAllResults_666 = New VariableArray
         Set vaAllResults_777 = New VariableArray
+        Call vaAllResults_333.SetPreBound(vaOptInfo.V(0).Count)
+        Call vaAllResults_444.SetPreBound(vaOptInfo.V(1).Count)
+        Call vaAllResults_555.SetPreBound(vaOptInfo.V(2).Count)
+        Call vaAllResults_222.SetPreBound(vaOptInfo.V(3).Count)
+        Call vaAllResults_3bf.SetPreBound(vaOptInfo.V(4).Count)
+        Call vaAllResults_3oh.SetPreBound(vaOptInfo.V(5).Count)
+        Call vaAllResults_3fm.SetPreBound(vaOptInfo.V(6).Count)
+        Call vaAllResults_mega.SetPreBound(vaOptInfo.V(7).Count)
+        Call vaAllResults_py.SetPreBound(vaOptInfo.V(8).Count)
+        Call vaAllResults_sq.SetPreBound(vaOptInfo.V(9).Count)
+        Call vaAllResults_clk.SetPreBound(vaOptInfo.V(10).Count)
+        Call vaAllResults_sk.SetPreBound(vaOptInfo.V(11).Count)
+        Call vaAllResults_666.SetPreBound(vaOptInfo.V(12).Count)
+        Call vaAllResults_777.SetPreBound(vaOptInfo.V(13).Count)
 
-        Dim i, obj
+        Dim i, resultObj
         For i = 0 To vaAllValidResultInfo.Bound
-            Set obj = vaAllValidResultInfo.V(i)
-            Select Case obj.ResultOptSeq
+            Set resultObj = vaAllValidResultInfo.V(i)
+            Select Case resultObj.ResultOptSeq
                 Case OPT_SEQ_333
-                    vaAllResults_333.Append(obj)
+                    Call appendResultObj(vaAllResults_333, resultObj)
                 Case OPT_SEQ_444
-                    vaAllResults_444.Append(obj)
+                    Call appendResultObj(vaAllResults_444, resultObj)
                 Case OPT_SEQ_555
-                    vaAllResults_555.Append(obj)
+                    Call appendResultObj(vaAllResults_555, resultObj)
                 Case OPT_SEQ_222
-                    vaAllResults_222.Append(obj)
+                    Call appendResultObj(vaAllResults_222, resultObj)
                 Case OPT_SEQ_3bf
-                    vaAllResults_3bf.Append(obj)
+                    Call appendResultObj(vaAllResults_3bf, resultObj)
                 Case OPT_SEQ_3oh
-                    vaAllResults_3oh.Append(obj)
+                    Call appendResultObj(vaAllResults_3oh, resultObj)
                 Case OPT_SEQ_3fm
-                    vaAllResults_3fm.Append(obj)
+                    Call appendResultObj(vaAllResults_3fm, resultObj)
                 Case OPT_SEQ_mega
-                    vaAllResults_mega.Append(obj)
+                    Call appendResultObj(vaAllResults_mega, resultObj)
                 Case OPT_SEQ_py
-                    vaAllResults_py.Append(obj)
+                    Call appendResultObj(vaAllResults_py, resultObj)
                 Case OPT_SEQ_sq
-                    vaAllResults_sq.Append(obj)
+                    Call appendResultObj(vaAllResults_sq, resultObj)
                 Case OPT_SEQ_clk
-                    vaAllResults_clk.Append(obj)
+                    Call appendResultObj(vaAllResults_clk, resultObj)
                 Case OPT_SEQ_sk
-                    vaAllResults_sk.Append(obj)
+                    Call appendResultObj(vaAllResults_sk, resultObj)
                 Case OPT_SEQ_666
-                    vaAllResults_666.Append(obj)
+                    Call appendResultObj(vaAllResults_666, resultObj)
                 Case OPT_SEQ_777
-                    vaAllResults_777.Append(obj)
+                    Call appendResultObj(vaAllResults_777, resultObj)
             End Select
         Next
     End Function
+
+            Sub appendResultObj(vaObj, resultObj)
+                If Not checkOwnerExists(vaObj, resultObj.ResultOwner) Then
+                    vaObj.Append(resultObj)
+                End If
+            End Sub
+
+            Function checkOwnerExists(vaObj, sOwner)
+                If vaObj.Bound = -1 Then
+                    checkOwnerExists = False
+                    Exit Function
+                End If
+
+                Dim i, oResult
+                For i = 0 To vaObj.Bound
+                    Set oResult = vaObj.V(i)
+                    If oResult.ResultOwner = sOwner Then
+                        checkOwnerExists = True
+                        Exit Function
+                    End If
+                Next
+                checkOwnerExists = False
+            End Function
 
     Function sortByAvgResult(vaObj, bCompartByAvg)
         If vaObj.Bound < 1 Then

@@ -4,13 +4,13 @@
 Dim aResultHeadword : aResultHeadword = Array("成绩列表","详细时间")
 
 Function getPureResult(sResultText, iOptSeq)
-    Dim svaPickedResult, isValid, iNeedNum
+    Dim vaPickedResult, isValid, iNeedNum
     iNeedNum = vaOptInfo.V(iOptSeq).NeedNum
-    Set svaPickedResult = pickMatchedResults(sResultText, iOptSeq)
-    If svaPickedResult.Bound = -1 Then getPureResult = Array("", False) : Exit Function
+    Set vaPickedResult = pickMatchedResults(sResultText, iOptSeq)
+    If vaPickedResult.Bound = -1 Then getPureResult = Array("", False) : Exit Function
 
-    isValid = checkResultsNum(svaPickedResult.Bound, iNeedNum)
-    getPureResult = Array(svaPickedResult.ToString(), isValid)
+    isValid = checkResultsNum(vaPickedResult.Bound, iNeedNum)
+    getPureResult = Array(vaPickedResult.ToStringWithSpace(), isValid)
 End Function
 
         Function pickMatchedResults(sResultText, iOptSeq)
@@ -20,19 +20,20 @@ End Function
             aTmpResult = Split(replaceCharacterInResultStr(cutResultStrByKeyword(sResultText)))
             If Not isArray(aTmpResult) Then pickMatchedResults = "" : Exit Function
 
-            Dim i, svaObj
-            Set svaObj = New SimpleVariableArray
+            Dim i, vaObj
+            Set vaObj = New VariableArray
+            Call vaObj.SetPreBound(4)
 
             For i = 0 To UBound(aTmpResult)
                 sTmp = formatResultStr(aTmpResult(i), iOptSeq)
                 
                 If IsNumeric(sTmp) Then
-                    svaObj.Append(sTmp)
+                    vaObj.Append(sTmp)
                 End If
             Next
             'MsgBox(sTmpResult)
 
-            Set pickMatchedResults = svaObj
+            Set pickMatchedResults = vaObj
         End Function
 
         Function cutResultStrByKeyword(sResultText)
