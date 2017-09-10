@@ -3,8 +3,38 @@
 '*************************************************
 Dim iExcelRow
 Dim vaAllBrResults : Set vaAllBrResults = New VariableArray
+Dim uPostInfoTxtPath : uPostInfoTxtPath = CrtPath & "\tmpFiles\ResultInfo.txt"
 
-Function writeReslutsToExcel()
+Sub saveAllResult()
+    saveValidResultInfoToTxt()
+    writeReslutsToExcel()
+End Sub
+
+        Sub saveValidResultInfoToTxt()
+            initTxtFile(uPostInfoTxtPath)
+            Dim oTxt, i, obj
+            Set oTxt = Fso.OpenTextFile(uPostInfoTxtPath, 8, False, True)
+
+            For i = 0 To vaAllValidResultInfo.Bound
+                Set obj = vaAllValidResultInfo.V(i)
+                oTxt.WriteLine(obj.PostNum)
+                oTxt.WriteLine(obj.ResultOwner)
+                oTxt.WriteLine(getOptFullNameBySeq(obj.ResultOptSeq))
+                oTxt.WriteLine(obj.ResultText)
+                oTxt.WriteLine(obj.PureResults)
+                oTxt.WriteLine(obj.SortedResults)
+                oTxt.WriteLine(obj.BestResult)
+                oTxt.WriteLine(obj.AvgResult)
+                oTxt.WriteLine(obj.IsBestBr)
+                oTxt.WriteLine(obj.IsAvgBr)
+                oTxt.WriteLine()
+            Next
+
+            oTxt.Close
+            Set oTxt = Nothing
+        End Sub
+
+Sub writeReslutsToExcel()
     Dim oldFilePath, newFilePath
     If iCompNum = 0 Then iCompNum = InputBox("input iCompNum")
 
@@ -12,7 +42,7 @@ Function writeReslutsToExcel()
     newFilePath = uAllResultFolder & iCompNum & ".xlsx"
     If Not Fso.FileExists(oldFilePath) Or Fso.FileExists(newFilePath) Then
         Msgbox(oldFilePath & Vblf & "not exist" & Vblf & " or" & Vblf & newFilePath & Vblf & "already exist")
-        Exit Function
+        Exit Sub
     End If
 
     Fso.CopyFile oldFilePath, newFilePath, False
@@ -60,9 +90,9 @@ Function writeReslutsToExcel()
     Set ExcelApp = Nothing
 
     Msgbox("Write done!")
-End Function
+End Sub
 
-        Function writeAllProjectResult(ExcelSheet, vaObj, sOptSeq)
+        Sub writeAllProjectResult(ExcelSheet, vaObj, sOptSeq)
             Dim iRankNum, isAvgBr, isBestBr
             iRankNum = 0
             iExcelRow = iExcelRow + 1
@@ -91,7 +121,7 @@ End Function
             Next
 
             iExcelRow = iExcelRow + 1
-        End Function
+        End Sub
 
                 Sub writeTitleForOpt(ExcelSheet, sOptName)
                     For i = 1 To 9

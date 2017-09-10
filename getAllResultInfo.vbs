@@ -3,8 +3,6 @@
 '*************************************************
 Dim vaAllValidResultInfo : Set vaAllValidResultInfo = New VariableArray
 Dim vaAllInvalidResultInfo : Set vaAllInvalidResultInfo = New VariableArray
-Dim uPostInfoTxtPath : uPostInfoTxtPath = CrtPath & "\tmpFiles\ResultInfo.txt"
-Dim uNoPostInfoTxtPath : uNoPostInfoTxtPath = CrtPath & "\tmpFiles\NoResultInfo.txt"
 Dim aAllRecords(13)
 
 Const ID_CRT_POSTNUM = "crt_postNum"
@@ -89,9 +87,6 @@ Function getAllResultInfo()
         Call setInnerHtml(ID_CRT_POSTNUM, vaAllPostInfo.V(i).PostNum)
         Call getOptName(vaAllPostInfo.V(i))
     Next
-    Call saveValidResultInfoToTxt()
-    Call saveInValidResultInfoToTxt()
-    'MsgBox("Get all result info done!")
     Call showAllResultInfo()
 
     MsgBox("getAllResultInfo done!")
@@ -164,49 +159,6 @@ End Function
             End If
         End Function
 
-        Sub saveValidResultInfoToTxt()
-            initTxtFile(uPostInfoTxtPath)
-            Dim oTxt, i, obj
-            Set oTxt = Fso.OpenTextFile(uPostInfoTxtPath, 8, False, True)
-
-            For i = 0 To vaAllValidResultInfo.Bound
-                Set obj = vaAllValidResultInfo.V(i)
-                oTxt.WriteLine(obj.PostNum)
-                oTxt.WriteLine(obj.ResultOwner)
-                oTxt.WriteLine(getOptFullNameBySeq(obj.ResultOptSeq))
-                oTxt.WriteLine(obj.ResultText)
-                oTxt.WriteLine(obj.PureResults)
-                oTxt.WriteLine(obj.SortedResults)
-                oTxt.WriteLine(obj.BestResult)
-                oTxt.WriteLine(obj.AvgResult)
-                oTxt.WriteLine(obj.IsBestBr)
-                oTxt.WriteLine(obj.IsAvgBr)
-                oTxt.WriteLine()
-            Next
-
-            oTxt.Close
-            Set oTxt = Nothing
-        End Sub
-
-        Sub saveInValidResultInfoToTxt()
-            initTxtFile(uNoPostInfoTxtPath)
-            Dim oTxt, i, obj
-            Set oTxt = Fso.OpenTextFile(uNoPostInfoTxtPath, 8, False, True)
-
-            For i = 0 To vaAllInvalidResultInfo.Bound
-                Set obj = vaAllInvalidResultInfo.V(i)
-                oTxt.WriteLine(obj.PostNum)
-                oTxt.WriteLine(obj.ResultOwner)
-                oTxt.WriteLine(getOptFullNameBySeq(obj.ResultOptSeq))
-                oTxt.WriteLine(obj.ResultText)
-                oTxt.WriteLine(obj.PureResults)
-                oTxt.WriteLine()
-            Next
-
-            oTxt.Close
-            Set oTxt = Nothing
-        End Sub
-
         Sub getOptName(object)
             Dim aTmp, i, optSeqLast, optSeqNext, seqLast, seqNext, optCount
             optSeqLast = ""
@@ -214,7 +166,10 @@ End Function
             optCount = 0
             aTmp = Split(object.PostMsg, " ")
             For i = 0 To UBound(aTmp)
-                If Len(aTmp(i)) <= 8 And InStr(aTmp(i), ".") = 0 Then
+                If Len(aTmp(i)) <= 8 _
+                        And Len(aTmp(i)) > 1 _
+                        And InStr(aTmp(i), ".") = 0 _
+                        And InStr(aTmp(i), "'") = 0 Then
                     Call replaceCharForOptName(aTmp(i))
                     optSeqNext = checkOptNameGroup(aTmp(i))
                     seqNext = i
