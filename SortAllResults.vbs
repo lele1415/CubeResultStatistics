@@ -103,12 +103,12 @@ End Function
     End Function
 
             Sub appendResultObj(vaObj, resultObj)
-                If Not checkOwnerExists(vaObj, resultObj.ResultOwner) Then
+                If Not checkOwnerExists(vaObj, resultObj) Then
                     vaObj.Append(resultObj)
                 End If
             End Sub
 
-            Function checkOwnerExists(vaObj, sOwner)
+            Function checkOwnerExists(vaObj, resultObj)
                 If vaObj.Bound = -1 Then
                     checkOwnerExists = False
                     Exit Function
@@ -117,8 +117,13 @@ End Function
                 Dim i, oResult
                 For i = 0 To vaObj.Bound
                     Set oResult = vaObj.V(i)
-                    If oResult.ResultOwner = sOwner Then
-                        checkOwnerExists = True
+                    If oResult.ResultOwner = resultObj.ResultOwner Then
+                        If oResult.PostNum - resultObj.PostNum > 0 Then
+                            Call vaObj.PopBySeq(i)
+                            checkOwnerExists = False
+                        Else
+                            checkOwnerExists = True
+                        End If
                         Exit Function
                     End If
                 Next
