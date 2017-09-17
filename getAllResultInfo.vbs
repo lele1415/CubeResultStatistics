@@ -167,7 +167,6 @@ End Function
             aTmp = Split(object.PostMsg, " ")
             For i = 0 To UBound(aTmp)
                 If Len(aTmp(i)) <= 8 _
-                        And Len(aTmp(i)) > 1 _
                         And InStr(aTmp(i), ".") = 0 _
                         And InStr(aTmp(i), "'") = 0 Then
                     Call replaceCharForOptName(aTmp(i))

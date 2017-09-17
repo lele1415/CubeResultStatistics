@@ -1,6 +1,9 @@
 '*************************************************
 '****get data array.
 '*************************************************
+Const ID_IGNORE_POST_NUM = "ignore_post_num"
+Const ID_IGNORE_POST_OWNER = "ignore_post_owner"
+
 Dim vaAllPostInfo : Set vaAllPostInfo = New VariableArray
 Dim aHeadStr : aHeadStr = Array("post_no&quot;:", "alog-group=""p_author""", "j_d_post_content  clearfix")
 Dim aEndStr : aEndStr = Array(",", "</a>", "</div><br></cc>")
@@ -13,8 +16,8 @@ Dim aIgnoredResultOwner
 Sub getAllPostInfo()
     Call vaAllPostInfo.ResetArray()
     '//these post nums will be ignored
-    aIgnoredPostNum = Split(getElementValue("exceptPostNum_id"), " ")
-    aIgnoredResultOwner = Split(getElementValue("except_name_id"), " ")
+    aIgnoredPostNum = Split(getElementValue(ID_IGNORE_POST_NUM), " ")
+    aIgnoredResultOwner = Split(getElementValue(ID_IGNORE_POST_OWNER), " ")
 
     '//read text of page code
     Dim oTxt, sReadLine
@@ -87,7 +90,7 @@ End Sub
         Function checkIsValidResultOwner(name)
             Dim i
             For i = 0 To UBound(aIgnoredResultOwner)
-                If name = aIgnoredResultOwner(i) Then
+                If InStr(name, aIgnoredResultOwner(i)) > 0 Then
                     checkIsValidResultOwner = False
                     Exit Function
                 End If
