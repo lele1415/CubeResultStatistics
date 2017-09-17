@@ -44,6 +44,8 @@ End Sub
         End Sub
 
 Sub showResultInfo(selectId)
+    Call clearAllSelectedOption(selectId)
+
     mCrtShowSelectId = selectId
     mCrtShowSeq = document.getElementById(selectId).value
 
@@ -77,6 +79,25 @@ Sub showResultInfo(selectId)
 
     Call setInnerHtmlById(ID_TEXT_RESULT_TEXT, obj.ResultText)
     Call setInnerHtmlById(ID_TEXT_PURE_RESULTS, obj.PureResults)
+End Sub
+
+Sub addNewResultInfo()
+    Call clearAllSelectedOption("")
+    Call clearAllResultInfoText()
+    mCrtShowSelectId = ""
+End Sub
+
+Sub removeValidResult()
+    If mCrtShowSelectId = ID_SELECT_VALID_RESULTS Then
+        Dim oResult
+        Set oResult = vaAllValidResultInfo.V(mCrtShowSeq)
+        Call vaAllInvalidResultInfo.Append(oResult)
+        Call addOption(ID_SELECT_INVALID_RESULTS, oResult.PostNum&"楼 "&oResult.ResultOwner, vaAllInvalidResultInfo.Bound)
+
+        Call vaAllValidResultInfo.PopBySeq(mCrtShowSeq)
+        Call removeOption(ID_SELECT_VALID_RESULTS, mCrtShowSeq)
+        Call clearAllResultInfoText()
+    End If
 End Sub
 
 Sub clearAllResultInfoText()
@@ -118,29 +139,28 @@ Sub submitNewResultInfo()
         Case ID_SELECT_VALID_RESULTS
             Set oVRI = vaAllValidResultInfo.V(mCrtShowSeq)
             Call updateOldValidResultInfo(oVRI, iNewPostNum, sNewPostUser, iNewOptSeq, sNewResultText, sNewPureResult)
-
-            If oVRI.IsBestBr Or oVRI.IsAvgBr Then
-                Call addOption(ID_SELECT_BR_RESULTS, iNewPostNum&"楼 "&sNewPostUser, mCrtShowSeq)
-            End If
+            Call checkAndAddBrOption(oVRI, iNewPostNum, sNewPostUser, mCrtShowSeq)
+            Call updateNewResult(oVRI)
 
         Case ID_SELECT_INVALID_RESULTS
             Set oVRI = New ValidResultInfo
             Call createNewValidResultInfo(oVRI, iNewPostNum, sNewPostUser, iNewOptSeq, sNewResultText, sNewPureResult)
-
             Call addOption(ID_SELECT_VALID_RESULTS, iNewPostNum&"楼 "&sNewPostUser, vaAllValidResultInfo.Bound)
             Call removeOption(ID_SELECT_INVALID_RESULTS, mCrtShowSeq)
-
-            If oVRI.IsBestBr Or oVRI.IsAvgBr Then
-                Call addOption(ID_SELECT_BR_RESULTS, iNewPostNum&"楼 "&sNewPostUser, vaAllValidResultInfo.Bound)
-            End If
+            Call checkAndAddBrOption(oVRI, iNewPostNum, sNewPostUser, vaAllValidResultInfo.Bound)
 
         Case ID_SELECT_BR_RESULTS
             Set oVRI = vaAllValidResultInfo.V(mCrtShowSeq)
             Call updateOldValidResultInfo(oVRI, iNewPostNum, sNewPostUser, iNewOptSeq, sNewResultText, sNewPureResult)
+            Call checkAndRemoveBrOption(oVRI, mCrtShowSeq)
+            Call updateNewResult(oVRI)
 
-            If Not(oVRI.IsBestBr Or oVRI.IsAvgBr) Then
-                Call removeOption(ID_SELECT_BR_RESULTS, mCrtShowSeq)
-            End If
+        Case ""
+            Set oVRI = New ValidResultInfo
+            Call createNewValidResultInfo(oVRI, iNewPostNum, sNewPostUser, iNewOptSeq, sNewResultText, sNewPureResult)
+            Call addOption(ID_SELECT_VALID_RESULTS, iNewPostNum&"楼 "&sNewPostUser, vaAllValidResultInfo.Bound)
+            Call checkAndAddBrOption(oVRI, iNewPostNum, sNewPostUser, vaAllValidResultInfo.Bound)
+            Call updateNewResult(oVRI)
     End Select
 End Sub
 
@@ -165,6 +185,26 @@ End Sub
 
             Call vaAllValidResultInfo.Append(obj)
             'Call vaAllInvalidResultInfo.PopBySeq(mCrtShowSeq)
+        End Sub
+
+        Sub checkAndAddBrOption(obj, iNewPostNum, sNewPostUser, optionValue)
+            If obj.IsBestBr Or obj.IsAvgBr Then
+                Call addOption(ID_SELECT_BR_RESULTS, iNewPostNum&"楼 "&sNewPostUser, optionValue)
+            End If
+        End Sub
+
+        Sub checkAndRemoveBrOption(obj, optionValue)
+            If Not(obj.IsBestBr Or obj.IsAvgBr) Then
+                Call removeOption(ID_SELECT_BR_RESULTS, optionValue)
+            End If
+        End Sub
+
+        Sub updateNewResult(obj)
+            Call setInnerHtmlById(ID_TEXT_BEST_RESULT, obj.BestResult)
+            Call setInnerHtmlById(ID_TEXT_IS_BEST_BR, obj.IsBestBr)
+            Call setInnerHtmlById(ID_TEXT_AVG_RESULT, obj.AvgResult)
+            Call setInnerHtmlById(ID_TEXT_IS_AVG_BR, obj.IsAvgBr)
+            Call setInnerHtmlById(ID_TEXT_PURE_RESULTS, obj.PureResults)
         End Sub
 
 Sub selectAnotherInvalidResult(which)

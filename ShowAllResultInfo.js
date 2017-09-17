@@ -1,3 +1,7 @@
+var ID_VALID_RESULTS = "valid_results"
+var ID_INVALID_RESULTS = "invalid_results"
+var ID_BR_RESULTS = "br_results"
+
 function addOption(SelectId, OptionName, iSeq) 
 {
     var option = option_creat(OptionName, OptionName);
@@ -13,15 +17,19 @@ function removeOption(SelectId, OptionValue)
         for(var i=0;i<lenOfChild;i++){
             if (parentNode.childNodes[i].value == OptionValue) {
                 parentNode.removeChild(parentNode.childNodes[i]);
-                if (i < lenOfChild - 1) {
-                    parentNode.childNodes[i].selected = true;
-                    showResultInfo(SelectId);
-                } else if (i > 0) {
-                    parentNode.childNodes[i - 1].selected = true;
-                    showResultInfo(SelectId);
-                } else {
-                    clearAllResultInfoText();
+
+                if (SelectId != ID_VALID_RESULTS) {
+                    if (i < lenOfChild - 1) {
+                        parentNode.childNodes[i].selected = true;
+                        showResultInfo(SelectId);
+                    } else if (i > 0) {
+                        parentNode.childNodes[i - 1].selected = true;
+                        showResultInfo(SelectId);
+                    } else {
+                        clearAllResultInfoText();
+                    }
                 }
+                
                 break;
             }
         }   
@@ -47,6 +55,26 @@ function selectAnotherOption(SelectId, OptionValue, which)
                 break;
             }
         }   
+    }
+}
+
+function clearAllSelectedOption(exceptSelectId) {
+    if (exceptSelectId != ID_VALID_RESULTS) {
+        clearSelectedOption(ID_VALID_RESULTS);
+    }
+    if (exceptSelectId != ID_INVALID_RESULTS) {
+        clearSelectedOption(ID_INVALID_RESULTS);
+    }
+    if (exceptSelectId != ID_BR_RESULTS) {
+        clearSelectedOption(ID_BR_RESULTS);
+    }
+}
+
+function clearSelectedOption(selectId) {
+    var parentNode = document.getElementById(selectId);
+    var index = parentNode.selectedIndex;
+    if (index >= 0) {
+        parentNode.childNodes[index].selected = false;
     }
 }
 

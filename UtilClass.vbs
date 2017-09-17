@@ -404,8 +404,6 @@ Class VariableArray
         End If
 
         mBound = mBound - 1
-        ReDim Preserve mArray(mBound)
-        mPreBound = mPreBound - 1
     End Sub
 
     Public Sub MoveToTop(seq)

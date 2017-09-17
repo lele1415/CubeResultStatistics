@@ -104,8 +104,11 @@
         <select id="valid_results" onclick="showResultInfo('valid_results')" multiple="multiple" size="8"></select>
         <select id="invalid_results" onclick="showResultInfo('invalid_results')" multiple="multiple" size="8"></select>
         <select id="br_results" onclick="showResultInfo('br_results')" multiple="multiple" size="8"></select>
+        <br>
+        <input type=button onclick="addNewResultInfo()" value="add new result" />
+        <br>
+        <input type=button onclick="removeValidResult()" value="remove valid result" />
     </div>
-    <br>
     <br>
     <div>
         <textarea id="showResult_post_num" rows="1" cols="5"></textarea>
