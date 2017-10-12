@@ -1,6 +1,9 @@
 '*************************************************
 '****sort all results.
 '*************************************************
+Const ID_SORT_RESULTS_STATUS = "sort_results_status"
+Const ID_BUTTON_SAVE_ALL_RESULTS = "save_all_results"
+
 Dim vaAllResults_333
 Dim vaAllResults_444
 Dim vaAllResults_555
@@ -15,7 +18,15 @@ Dim vaAllResults_clk
 Dim vaAllResults_sk
 Dim vaAllResults_666
 Dim vaAllResults_777
-Function sortAllResults()
+
+Sub onClickSortAllResults()
+    Call setInnerHtml(ID_SORT_RESULTS_STATUS, "正在排序...")
+    idTimer = window.setTimeout("sortAllResults()", 0, "VBScript")
+End Sub
+
+Sub sortAllResults()
+    window.clearTimeout(idTimer)
+
     Call sortByOptName()
 
     Call sortByAvgResult(vaAllResults_333, true)
@@ -33,10 +44,11 @@ Function sortAllResults()
     Call sortByAvgResult(vaAllResults_666, true)
     Call sortByAvgResult(vaAllResults_777, true)
 
-    MsgBox("OK")
-End Function
+    Call enableElementAfterSortAllResults()
+    Call setInnerHtml(ID_SORT_RESULTS_STATUS, "已完成")
+End Sub
 
-    Function sortByOptName()
+    Sub sortByOptName()
         Set vaAllResults_333 = New VariableArray
         Set vaAllResults_444 = New VariableArray
         Set vaAllResults_555 = New VariableArray
@@ -100,7 +112,7 @@ End Function
                     Call appendResultObj(vaAllResults_777, resultObj)
             End Select
         Next
-    End Function
+    End Sub
 
             Sub appendResultObj(vaObj, resultObj)
                 If Not checkOwnerExists(vaObj, resultObj) Then
@@ -130,9 +142,9 @@ End Function
                 checkOwnerExists = False
             End Function
 
-    Function sortByAvgResult(vaObj, bCompartByAvg)
+    Sub sortByAvgResult(vaObj, bCompartByAvg)
         If vaObj.Bound < 1 Then
-            Exit Function
+            Exit Sub
         End If
 
         Dim i, j, oResult1, oResult2, iCompareResult
@@ -177,7 +189,7 @@ End Function
                 Next
             Next
         End If
-    End Function
+    End Sub
 
             Function compareAllResults(sSortedResults1, sSortedResults2)
                 Dim k, aTmp1, aTmp2, iDiff
@@ -197,4 +209,8 @@ End Function
                 
                 compareAllResults = 0
             End Function
+
+    Sub enableElementAfterSortAllResults()
+        Call enableElement(ID_BUTTON_SAVE_ALL_RESULTS)
+    End Sub
 

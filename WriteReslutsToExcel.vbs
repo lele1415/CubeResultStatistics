@@ -1,13 +1,24 @@
 '*************************************************
 '****write final result into excel file.
 '*************************************************
+Const ID_SAVE_RESULTS_STATUS = "save_results_status"
+
 Dim iExcelRow
 Dim vaAllBrResults : Set vaAllBrResults = New VariableArray
 Dim uPostInfoTxtPath : uPostInfoTxtPath = CrtPath & "\tmpFiles\ResultInfo.txt"
 
+Sub onClickSaveAllResult()
+    Call setInnerHtml(ID_SAVE_RESULTS_STATUS, "正在保存...")
+    idTimer = window.setTimeout("saveAllResult()", 0, "VBScript")
+End Sub
+
 Sub saveAllResult()
+    window.clearTimeout(idTimer)
+
     saveValidResultInfoToTxt()
     writeReslutsToExcel()
+
+    Call setInnerHtml(ID_SAVE_RESULTS_STATUS, "已完成")
 End Sub
 
         Sub saveValidResultInfoToTxt()

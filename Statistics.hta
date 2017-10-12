@@ -10,80 +10,106 @@ Version: v3.3
 </Head>
 <Body bgcolor="#FFFFFF">
 
+<style type="text/css">
+<!-- 
+body {
+    font-family: sans-serif; font-size: 17;
+}
+.select{border:1px solid #aaa; font-size: 15;}
+.input_text{border:1px solid #aaa; font-size: 15;}
+.input_button{border:1px solid #aaa; background:none; font-size: 15;}
+.textarea{font-size: 15;}
+-->
+</style>
+
 <fieldset>
-    <div>周赛链接: <input type="text" id="url"></div>
-    <div><input type="button" id="getCode_id" onclick="getPagesCode()" value="Get code" /></div>
-    <div>已获取<b id="PageNum_id">0</b>页</div>
+    周赛链接: <input type="text" id="url" size="60" />
+    <br>
+    <input type="button" class="input_button" id="getCode_id" onclick="getPagesCode()" value="获取网页源码" />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    已获取<b id="crt_page_num">0</b>/<b id="max_page_num">0</b>页
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <b id="get_page_code_status"></b>
+
 </fieldset>
 <br>
 <fieldset>
-    <div>排除楼层: <input type="text" id="ignore_post_num" value="1 2 3 4" /></div>
-    <div>排除ID: <input type="text" id="ignore_post_owner" value="菜姨惠 Destroy绝影 东方神秘力量" /></div>
+    排除楼层: <input id="ignore_post_num" type="text" class="input_text" size="60" value="1 2 3 4" />
     <br>
-    <div><input type="button" id="getCode_id" onclick="getAllPostInfo()" value="Get results" /></div>
+    排除ID: <input id="ignore_post_owner" type="text" class="input_text" size="60" value="菜姨惠 Destroy绝影 东方神秘力量" />
+    <br>
+    <input id="getCode_id" type="button" class="input_button" onclick="onClickGetAllPostInfo()" value="获取所有成绩" />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    当前楼层 <b id="crt_post_num">0</b>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <b id="get_function"></b>
 </fieldset>
 <br>
 <fieldset>
     <div>
-        <select id="valid_results" onclick="showResultInfo('valid_results')" multiple="multiple" size="8"></select>
-        <select id="invalid_results" onclick="showResultInfo('invalid_results')" multiple="multiple" size="8"></select>
-        <select id="br_results" onclick="showResultInfo('br_results')" multiple="multiple" size="8"></select>
+        <select id="valid_results" class="select" onclick="showResultInfo('valid_results')" multiple="multiple" size="8" disabled /></select>
+        <select id="invalid_results" class="select" onclick="showResultInfo('invalid_results')" multiple="multiple" size="8" disabled /></select>
+        <select id="br_results" class="select" onclick="showResultInfo('br_results')" multiple="multiple" size="8" disabled /></select>
         <br>
-        <input type=button onclick="addNewResultInfo()" value="add new result" />
+        <input id="add_new_result_info" type=button class="input_button" onclick="addNewResultInfo()" value="添加新成绩" disabled />
         <br>
-        <input type=button onclick="removeValidResult()" value="remove valid result" />
+        <input id="remove_valid_result" type=button class="input_button" onclick="removeValidResult()" value="去掉该有效成绩" disabled />
     </div>
     <br>
     <div>
-        <textarea id="showResult_post_num" rows="1" cols="5"></textarea>
-        <textarea id="showResult_post_user" rows="1" cols="20"></textarea>
-        <select id="showResult_opt_name">
+        <textarea id="show_result_post_num" class="textarea" rows="1" cols="5" disabled ></textarea>
+        <textarea id="show_result_post_user" class="textarea" rows="1" cols="20" disabled ></textarea>
+        <select id="show_result_opt_name" class="select" disabled >
             <option value=""></option>
-            <option value="0">三阶</option>
-            <option value="1">四阶</option>
-            <option value="2">五阶</option>
-            <option value="3">二阶</option>
-            <option value="4">三盲</option>
-            <option value="5">三单</option>
-            <option value="6">最少步</option>
-            <option value="7">五魔</option>
-            <option value="8">金字塔</option>
-            <option value="9">SQ1</option>
-            <option value="10">魔表</option>
-            <option value="11">斜转</option>
-            <option value="12">六阶</option>
-            <option value="13">七阶</option>
+            <option value="0">333</option>
+            <option value="1">444</option>
+            <option value="2">555</option>
+            <option value="3">222</option>
+            <option value="4">3bf</option>
+            <option value="5">3oh</option>
+            <option value="6">3fm</option>
+            <option value="7">mega</option>
+            <option value="8">py</option>
+            <option value="9">sq1</option>
+            <option value="10">clock</option>
+            <option value="11">sk</option>
+            <option value="12">666</option>
+            <option value="13">777</option>
         </select>
     </div>
     <div>
-        <textarea id="showResult_best_result" rows="1" cols="7"></textarea>
-        <textarea id="showResult_is_best_br" rows="1" cols="5"></textarea>
-        <textarea id="showResult_avg_result" rows="1" cols="7"></textarea>
-        <textarea id="showResult_is_avg_br" rows="1" cols="5"></textarea>
+        <textarea id="show_result_best_result" class="textarea" rows="1" cols="7" disabled ></textarea>
+        <textarea id="show_result_is_best_br" class="textarea" rows="1" cols="5" disabled ></textarea>
+        <textarea id="show_result_avg_result" class="textarea" rows="1" cols="7" disabled ></textarea>
+        <textarea id="show_result_is_avg_br" class="textarea" rows="1" cols="5" disabled ></textarea>
     </div>
     <br>
     <div>
-         <textarea id="showResult_result_text" rows="3" cols="40"></textarea>
+         <textarea id="show_result_result_text" class="textarea" rows="8" cols="70" disabled ></textarea>
     </div>
     <br>
     <div>
-        <textarea id="showResult_pure_results" rows="3" cols="40"></textarea>
+        <textarea id="show_result_pure_results" class="textarea" rows="3" cols="70" disabled ></textarea>
     </div>
     <br>
     <div>
-        <input type="button" onclick="submitNewResultInfo()" value="Submit new result" />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <input type="button" onclick="selectAnotherInvalidResult(0)" value="↓" />
+        <input id="submit_new_result_info" type="button" class="input_button" onclick="submitNewResultInfo()" value="提交新成绩" disabled />
         &nbsp;&nbsp;
-        <input type="button" onclick="selectAnotherInvalidResult(1)" value="↑" />
+        <input id="select_next_invalid_result" type="button" class="input_button" onclick="selectNextInvalidResult()" value="下一个" disabled />
+        &nbsp;&nbsp;
+        <input id="select_last_invalid_result" type="button" class="input_button" onclick="selectLastInvalidResult()" value="上一个" disabled />
     </div>
 </fieldset>
 
-<br>楼层: <b id="crt_postNum"></b>
-S
-<br> <input type="button" onclick="sortAllResults()" value="Sort results" />
+<br>
+<input id="sort_all_results" type="button" class="input_button" onclick="onClickSortAllResults()" value="成绩排序" disabled />
 
-<br> <input type="button" onclick="saveAllResult()" value="Save results" />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<b id="sort_results_status"></b>
+<br>
+<input id="save_all_results" type="button" class="input_button" onclick="onClickSaveAllResult()" value="保存成绩" disabled />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<b id="save_results_status"></b>
 
 
 

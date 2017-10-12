@@ -1,7 +1,11 @@
-Dim width,height
-width=CreateObject("HtmlFile").ParentWindow.Screen.AvailWidth
-Window.MoveTo width-700,100
-Window.ResizeTo 700,700
+Const WINDOW_WIDTH = 600
+Const WINDOW_HEIGHT = 930
+Sub Window_OnLoad
+    Dim ScreenWidth : ScreenWidth = CreateObject("HtmlFile").ParentWindow.Screen.AvailWidth
+    Dim ScreenHeight : ScreenHeight = CreateObject("HtmlFile").ParentWindow.Screen.AvailHeight
+    Window.MoveTo (ScreenWidth - WINDOW_WIDTH) * 29 / 30 ,(ScreenHeight - WINDOW_HEIGHT) \ 3
+    Window.ResizeTo WINDOW_WIDTH, WINDOW_HEIGHT
+End Sub
 
 Dim ws, Fso
 Set ws=CreateObject("wscript.shell")
@@ -120,4 +124,8 @@ End Sub
 
 Sub setInnerHtml(elementId, text)
     document.getElementById(elementId).innerHTML = text
+End Sub
+
+Sub enableElement(elementId)
+    document.getElementById(elementId).disabled = ""
 End Sub

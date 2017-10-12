@@ -3,6 +3,9 @@
 '****get code from Pages, and write into text file.
 '*************************************************
 Const ID_URL = "url"
+Const ID_GET_PAGE_CODE_STATUS = "get_page_code_status"
+Const ID_CRT_PAGE_NUM = "crt_page_num"
+Const ID_MAX_PAGE_NUM = "max_page_num"
 
 Dim iCrtPageNum : iCrtPageNum = 1
 Dim iMaxPageNum : iMaxPageNum = 0
@@ -12,6 +15,7 @@ Dim bGetCodeDone : bGetCodeDone = False
 Dim rootUrl
 
 Sub getPagesCode()
+    Call setInnerHtml(ID_GET_PAGE_CODE_STATUS, "正在获取...")
     rootUrl = getElementValue(ID_URL)
 
     Call initTxtFile(uPagesCodeFile)
@@ -33,18 +37,20 @@ Sub getPagesCode()
     Call oTxtPagesCode.Close
     Set oTxtPagesCode = Nothing
     Call checkCompNum()
-    Msgbox("Done!")
+    Call setInnerHtml(ID_GET_PAGE_CODE_STATUS, "已完成！")
 End Sub
 
         Sub receiveCode(sCode)
             Call oTxtPagesCode.Write(sCode)
-            Call setInnerHtml("PageNum_id", iCrtPageNum)
 
             If iMaxPageNum = 0 Then
                 iMaxPageNum = cutStrWithHeadEndStr(sCode, "total_page"":", "};")
                 Dim sTitle : sTitle = cutStrWithHeadEndStr(sCode, "<title>", "</title>")
                 iCompNum = cutStrWithHeadEndStr(sTitle, "第", "期")
             End If
+
+            Call setInnerHtml(ID_CRT_PAGE_NUM, iCrtPageNum)
+            Call setInnerHtml(ID_MAX_PAGE_NUM, iMaxPageNum)
 
             bGetCodeDone = True
         End Sub

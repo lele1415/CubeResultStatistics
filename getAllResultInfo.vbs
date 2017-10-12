@@ -5,22 +5,26 @@ Dim vaAllValidResultInfo : Set vaAllValidResultInfo = New VariableArray
 Dim vaAllInvalidResultInfo : Set vaAllInvalidResultInfo = New VariableArray
 Dim aAllRecords(13)
 
-Const ID_CRT_POSTNUM = "crt_postNum"
+Const ID_CRT_POST_NUM = "crt_post_num"
 
-'Dim OptName_333 : Set OptName_333 = New OptName ： OptName_333.OfficialName = "三阶" : OptName_333.OtherNames = Array()
-'Dim OptName_444 : Set OptName_444 = New OptName ： OptName_444.OfficialName = "四阶" : OptName_444.OtherNames = Array()
-'Dim OptName_555 : Set OptName_555 = New OptName ： OptName_555.OfficialName = "五阶" : OptName_555.OtherNames = Array()
-'Dim OptName_222 : Set OptName_222 = New OptName ： OptName_222.OfficialName = "二阶" : OptName_222.OtherNames = Array()
-'Dim OptName_3bf : Set OptName_3bf = New OptName ： OptName_3bf.OfficialName = "三盲" : OptName_3bf.OtherNames = Array()
-'Dim OptName_3oh : Set OptName_3oh = New OptName ： OptName_3oh.OfficialName = "三单" : OptName_3oh.OtherNames = Array()
-'Dim OptName_3fm : Set OptName_3fm = New OptName ： OptName_3fm.OfficialName = "最少步" : OptName_3fm.OtherNames = Array()
-'Dim OptName_mega : Set OptName_mega = New OptName ： OptName_mega.OfficialName = "五魔" : OptName_mega.OtherNames = Array()
-'Dim OptName_py : Set OptName_py = New OptName ： OptName_py.OfficialName = "金字塔" : OptName_py.OtherNames = Array()
-'Dim OptName_sq : Set OptName_sq = New OptName ： OptName_sq.OfficialName = "SQ-1" : OptName_sq.OtherNames = Array()
-'Dim OptName_clk : Set OptName_clk = New OptName ： OptName_clk.OfficialName = "魔表" : OptName_clk.OtherNames = Array()
-'Dim OptName_sk : Set OptName_sk = New OptName ： OptName_sk.OfficialName = "斜转" : OptName_sk.OtherNames = Array()
-'Dim OptName_666 : Set OptName_666 = New OptName ： OptName_666.OfficialName = "六阶" : OptName_666.OtherNames = Array()
-'Dim OptName_777 : Set OptName_777 = New OptName ： OptName_777.OfficialName = "七阶" : OptName_777.OtherNames = Array()
+Const ID_SELECT_VALID_RESULTS = "valid_results"
+Const ID_SELECT_INVALID_RESULTS = "invalid_results"
+Const ID_SELECT_BR_RESULTS = "br_results"
+Const ID_BUTTON_ADD_NEW_RESULT_INFO = "add_new_result_info"
+Const ID_BUTTON_REMOVE_VALID_RESULT = "remove_valid_result"
+Const ID_TEXTAREA_SHOW_RESULT_POST_NUM = "show_result_post_num"
+Const ID_TEXTAREA_SHOW_RESULT_POST_USER = "show_result_post_user"
+Const ID_TEXTAREA_SHOW_RESULT_OPT_NAME = "show_result_opt_name"
+Const ID_TEXTAREA_SHOW_RESULT_BEST_RESULT = "show_result_best_result"
+Const ID_TEXTAREA_SHOW_RESULT_IS_BEST_BR = "show_result_is_best_br"
+Const ID_TEXTAREA_SHOW_RESULT_AVG_RESULT = "show_result_avg_result"
+Const ID_TEXTAREA_SHOW_RESULT_IS_AVG_BR = "show_result_is_avg_br"
+Const ID_TEXTAREA_SHOW_RESULT_RESULT_TEXT = "show_result_result_text"
+Const ID_TEXTAREA_SHOW_RESULT_PURE_RESULTS = "show_result_pure_results"
+Const ID_BUTTON_SUBMIT_NEW_RESULT_INFO = "submit_new_result_info"
+Const ID_BUTTON_SELECT_NEXT_INVALID_RESULT = "select_next_invalid_result"
+Const ID_BUTTON_SELECT_LAST_INVALID_RESULT = "select_last_invalid_result"
+Const ID_BUTTON_SORT_ALL_RESULTS = "sort_all_results"
 
 Const OPT_FULL_NAME_333 = "三阶"
 Const OPT_FULL_NAME_444 = "四阶"
@@ -53,6 +57,8 @@ Const OPT_SEQ_666 = 12
 Const OPT_SEQ_777 = 13
 
 Dim vaOptInfo : Set vaOptInfo = New VariableArray
+Dim oCrtPostInfo, iCrtPostInfoSeq, iMaxPostInfoSeq
+iCrtPostInfoSeq = 0
 
 Dim aOptName_333, aOptName_24567, aOptName_other
 aOptName_333 = Array(Array(OPT_SEQ_333, "333", "3阶", "3速"), _
@@ -75,22 +81,25 @@ aOptName_other = Array(Array(OPT_SEQ_3oh, "oh"), _
                         Array(OPT_SEQ_clk, "表", "魔表", "clock", "clk"), _
                         Array(OPT_SEQ_sk, "sk", "斜转", "skewb"))
 
-Function getAllResultInfo()
+Sub getAllResultInfo()
+    Call setInnerHtml(ID_GET_FUNCTION, "正在获取...")
     Call loadAllRecords()
     Call loadAllOptInfo()
     Call vaAllValidResultInfo.ResetArray()
     Call vaAllInvalidResultInfo.ResetArray()
     Call vaAllValidResultInfo.SetPreBound(vaAllPostInfo.Bound)
     Call vaAllInvalidResultInfo.SetPreBound(vaAllPostInfo.Bound)
-    Dim i, optName
-    For i = 0 To vaAllPostInfo.Bound
-        Call setInnerHtml(ID_CRT_POSTNUM, vaAllPostInfo.V(i).PostNum)
-        Call getOptName(vaAllPostInfo.V(i))
-    Next
-    Call showAllResultInfo()
 
-    MsgBox("getAllResultInfo done!")
-End Function
+    iMaxPostInfoSeq = vaAllPostInfo.Bound
+    Call getNextResultInfo()
+End Sub
+
+        Sub getNextResultInfo()
+            Set oCrtPostInfo = vaAllPostInfo.V(iCrtPostInfoSeq)
+            Call setInnerHtml(ID_CRT_POST_NUM, oCrtPostInfo.PostNum)
+            iCrtPostInfoSeq = iCrtPostInfoSeq + 1
+            idTimer = window.setTimeout("getOptName()", 0, "VBScript")
+        End Sub
 
         Sub loadAllOptInfo()
             Call vaOptInfo.SetPreBound(14)
@@ -159,12 +168,14 @@ End Function
             End If
         End Function
 
-        Sub getOptName(object)
+        Sub getOptName()
+            window.clearTimeout(idTimer)
+
             Dim aPostMsgLine, iMaxLine, iOptSeqLast, iOptSeqNext, aOptLastLocation, aOptNextLocation
             iOptSeqLast = ""
             aOptLastLocation = Array(0, 0)
             aOptNextLocation = Array(0, 0)
-            aPostMsgLine = Split(object.PostMsg, VbCrlf)
+            aPostMsgLine = Split(oCrtPostInfo.PostMsg, VbCrlf)
             iMaxLine = UBound(aPostMsgLine)
 
             Dim i, j, aPostMsgWord()
@@ -183,7 +194,7 @@ End Function
                         If iOptSeqNext <> "" Then
                             aOptNextLocation = Array(i, j)
                             If iOptSeqLast <> "" Then
-                                Call addValidResultInfo(object, iOptSeqLast, iMaxLine, aPostMsgWord, aOptLastLocation, aOptNextLocation)
+                                Call addValidResultInfo(iOptSeqLast, iMaxLine, aPostMsgWord, aOptLastLocation, aOptNextLocation)
                             End If
                             iOptSeqLast = iOptSeqNext
                             aOptLastLocation = aOptNextLocation
@@ -194,9 +205,17 @@ End Function
             Next
 
             If iOptSeqLast <> "" Then
-                Call addValidResultInfo(object, iOptSeqLast, iMaxLine, aPostMsgWord, aOptLastLocation, Array(iMaxLine, UBound(aPostMsgWord(iMaxLine)) + 1))
+                Call addValidResultInfo(iOptSeqLast, iMaxLine, aPostMsgWord, aOptLastLocation, Array(iMaxLine, UBound(aPostMsgWord(iMaxLine)) + 1))
             Else
-                Call addInvalidResultInfo(object, "", object.PostMsg, "")
+                Call addInvalidResultInfo("", oCrtPostInfo.PostMsg, "")
+            End If
+
+            If iCrtPostInfoSeq <= iMaxPostInfoSeq Then
+                Call getNextResultInfo()
+            Else
+                Call showAllResultInfo()
+                Call enableElementAfterGetResultInfo()
+                Call setInnerHtml(ID_GET_FUNCTION, "已完成")
             End If
         End Sub
 
@@ -236,7 +255,7 @@ End Function
             checkOptNameStr = ""
         End Function
 
-        Sub addValidResultInfo(oPostInfo, optSeq, iMaxLine, aPostMsgWord, aOptLastLocation, aOptNextLocation)
+        Sub addValidResultInfo(optSeq, iMaxLine, aPostMsgWord, aOptLastLocation, aOptNextLocation)
             Dim resultText
             resultText = ""
 
@@ -247,7 +266,7 @@ End Function
             '    resultText = getResultText(aPostMsgWord, Array(0, -1), aOptLastLocation)
             'End If
 
-            If resultText = "" Then Call addInvalidResultInfo(oPostInfo, optSeq, "", "") : Exit Sub
+            If resultText = "" Then Call addInvalidResultInfo(optSeq, "", "") : Exit Sub
 
             '//check the same owner and opt
             'If checkOwnerAndOptIsExist(postUser, optSeq) Then Exit Sub
@@ -258,12 +277,12 @@ End Function
             pureResults = aPureResultInfo(0)
             isValid = aPureResultInfo(1)
 
-            If Not isValid Then Call addInvalidResultInfo(oPostInfo, optSeq, resultText, pureResults) : Exit Sub
+            If Not isValid Then Call addInvalidResultInfo(optSeq, resultText, pureResults) : Exit Sub
 
 
             Dim oNew : Set oNew = New ValidResultInfo
-            oNew.PostNum = oPostInfo.PostNum
-            oNew.ResultOwner = oPostInfo.PostUser
+            oNew.PostNum = oCrtPostInfo.PostNum
+            oNew.ResultOwner = oCrtPostInfo.PostUser
             oNew.ResultOptSeq = optSeq
             oNew.ResultText = resultText
             oNew.PureResults = pureResults
@@ -324,10 +343,10 @@ End Function
             getResultText = LTrim(sTmp)
         End Function
 
-        Sub addInvalidResultInfo(oPostInfo, optSeq, resultText, pureResults)
+        Sub addInvalidResultInfo(optSeq, resultText, pureResults)
             Dim oNew : Set oNew = New InvalidResultInfo
-            oNew.PostNum = oPostInfo.PostNum
-            oNew.ResultOwner = oPostInfo.PostUser
+            oNew.PostNum = oCrtPostInfo.PostNum
+            oNew.ResultOwner = oCrtPostInfo.PostUser
             oNew.ResultOptSeq = optSeq
             oNew.ResultText = resultText
             oNew.PureResults = pureResults
@@ -351,4 +370,25 @@ End Function
 
             checkOwnerAndOptIsExist = False
         End Function
+
+        Sub enableElementAfterGetResultInfo()
+            Call enableElement(ID_SELECT_VALID_RESULTS)
+            Call enableElement(ID_SELECT_INVALID_RESULTS)
+            Call enableElement(ID_SELECT_BR_RESULTS)
+            Call enableElement(ID_BUTTON_ADD_NEW_RESULT_INFO)
+            Call enableElement(ID_BUTTON_REMOVE_VALID_RESULT)
+            Call enableElement(ID_TEXTAREA_SHOW_RESULT_POST_NUM)
+            Call enableElement(ID_TEXTAREA_SHOW_RESULT_POST_USER)
+            Call enableElement(ID_TEXTAREA_SHOW_RESULT_OPT_NAME)
+            Call enableElement(ID_TEXTAREA_SHOW_RESULT_BEST_RESULT)
+            Call enableElement(ID_TEXTAREA_SHOW_RESULT_IS_BEST_BR)
+            Call enableElement(ID_TEXTAREA_SHOW_RESULT_AVG_RESULT)
+            Call enableElement(ID_TEXTAREA_SHOW_RESULT_IS_AVG_BR)
+            Call enableElement(ID_TEXTAREA_SHOW_RESULT_RESULT_TEXT)
+            Call enableElement(ID_TEXTAREA_SHOW_RESULT_PURE_RESULTS)
+            Call enableElement(ID_BUTTON_SUBMIT_NEW_RESULT_INFO)
+            Call enableElement(ID_BUTTON_SELECT_NEXT_INVALID_RESULT)
+            Call enableElement(ID_BUTTON_SELECT_LAST_INVALID_RESULT)
+            Call enableElement(ID_BUTTON_SORT_ALL_RESULTS)
+        End Sub
         
