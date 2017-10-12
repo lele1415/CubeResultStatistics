@@ -114,7 +114,7 @@ Function getElementValue(elementId)
     getElementValue = document.getElementById(elementId).value
 End Function
 
-Sub setElementValue(value)
+Sub setElementValue(elementId, value)
     document.getElementById(elementId).value = value
 End Sub
 

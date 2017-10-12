@@ -68,7 +68,7 @@ End Function
 
 Sub removeHtmlStr(sOrigin)
     Dim iImgStart, iImgLen, iDivStart, iDivLen
-    sOrigin = RePlace(sOrigin, "<br>", " ")
+    sOrigin = RePlace(sOrigin, "<br>", VbCrlf)
     sOrigin = RePlace(sOrigin, "&#39;", "'")
     sOrigin = RePlace(sOrigin, "</a>", "")
     sOrigin = RePlace(sOrigin, "</div>", "")

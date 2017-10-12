@@ -77,7 +77,7 @@ Sub showResultInfo(selectId)
         Call setInnerHtmlById(ID_TEXT_IS_AVG_BR, "")
     End If
 
-    Call setInnerHtmlById(ID_TEXT_RESULT_TEXT, obj.ResultText)
+    Call setElementValue(ID_TEXT_RESULT_TEXT, obj.ResultText)
     Call setInnerHtmlById(ID_TEXT_PURE_RESULTS, obj.PureResults)
 End Sub
 

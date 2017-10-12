@@ -160,35 +160,43 @@ End Function
         End Function
 
         Sub getOptName(object)
-            Dim aTmp, i, optSeqLast, optSeqNext, seqLast, seqNext, optCount
-            optSeqLast = ""
-            seqLast = 0
-            optCount = 0
-            aTmp = Split(object.PostMsg, " ")
-            For i = 0 To UBound(aTmp)
-                If Len(aTmp(i)) <= 8 _
-                        And InStr(aTmp(i), ".") = 0 _
-                        And InStr(aTmp(i), "'") = 0 Then
-                    Call replaceCharForOptName(aTmp(i))
-                    optSeqNext = checkOptNameGroup(aTmp(i))
-                    seqNext = i
+            Dim aPostMsgLine, iMaxLine, iOptSeqLast, iOptSeqNext, aOptLastLocation, aOptNextLocation
+            iOptSeqLast = ""
+            aOptLastLocation = Array(0, 0)
+            aOptNextLocation = Array(0, 0)
+            aPostMsgLine = Split(object.PostMsg, VbCrlf)
+            iMaxLine = UBound(aPostMsgLine)
 
-                    If optSeqNext <> "" Then
-                        optCount = optCount + 1
-                        If optSeqLast <> "" Then
-                            Call addValidResultInfo(object.PostNum, object.PostUser, optSeqLast, aTmp, seqLast, seqNext - 1, optCount)
+            Dim i, j, aPostMsgWord()
+            For i = 0 To iMaxLine
+                ReDim Preserve aPostMsgWord(i)
+                aPostMsgWord(i) = Split(aPostMsgLine(i), " ")
+                For j = 0 To UBound(aPostMsgWord(i))
+                    Dim sWord
+                    sWord = aPostMsgWord(i)(j)
+                    If Len(sWord) <= 8 _
+                            And InStr(sWord, ".") = 0 _
+                            And InStr(sWord, "'") = 0 Then
+                        Call replaceCharForOptName(sWord)
+                        iOptSeqNext = checkOptNameGroup(sWord)
+
+                        If iOptSeqNext <> "" Then
+                            aOptNextLocation = Array(i, j)
+                            If iOptSeqLast <> "" Then
+                                Call addValidResultInfo(object, iOptSeqLast, iMaxLine, aPostMsgWord, aOptLastLocation, aOptNextLocation)
+                            End If
+                            iOptSeqLast = iOptSeqNext
+                            aOptLastLocation = aOptNextLocation
                         End If
-                        optSeqLast = optSeqNext
-                        seqLast = seqNext
-                    End If
 
-                End If
+                    End If
+                Next
             Next
 
-            If optSeqLast <> "" Then
-                Call addValidResultInfo(object.PostNum, object.PostUser, optSeqLast, aTmp, seqLast, UBound(aTmp), optCount)
+            If iOptSeqLast <> "" Then
+                Call addValidResultInfo(object, iOptSeqLast, iMaxLine, aPostMsgWord, aOptLastLocation, Array(iMaxLine, UBound(aPostMsgWord(iMaxLine)) + 1))
             Else
-                Call addInvalidResultInfo(object.PostNum, object.PostUser, "", object.PostMsg, "")
+                Call addInvalidResultInfo(object, "", object.PostMsg, "")
             End If
         End Sub
 
@@ -228,33 +236,34 @@ End Function
             checkOptNameStr = ""
         End Function
 
-        Sub addValidResultInfo(postNum, postUser, optSeq, aPostMsg, seqLast, seqNext, optCount)
+        Sub addValidResultInfo(oPostInfo, optSeq, iMaxLine, aPostMsgWord, aOptLastLocation, aOptNextLocation)
             Dim resultText
+            resultText = ""
 
-            If seqLast < seqNext Then
-                resultText = getResultText(aPostMsg, seqLast + 1, seqNext)
+            'If (aOptLastLocation(0) <> aOptNextLocation(0)) Or (aOptLastLocation(1) <> aOptNextLocation(1)) Then
+                resultText = getResultText(aPostMsgWord, aOptLastLocation, aOptNextLocation)
             '//opt name is at last position
-            ElseIf (seqLast = UBound(aPostMsg)) And (optCount = 1) Then
-                resultText = getResultText(aPostMsg, 0, seqLast - 1)
-            End If
+            'ElseIf (aOptLastLocation(0) = iMaxLine) And (aOptLastLocation(1) = UBound(aPostMsgWord(iMaxLine))) Then
+            '    resultText = getResultText(aPostMsgWord, Array(0, -1), aOptLastLocation)
+            'End If
 
-            If resultText = "" Then Call addInvalidResultInfo(postNum, postUser, optSeq, "", "") : Exit Sub
+            If resultText = "" Then Call addInvalidResultInfo(oPostInfo, optSeq, "", "") : Exit Sub
 
             '//check the same owner and opt
             'If checkOwnerAndOptIsExist(postUser, optSeq) Then Exit Sub
 
             '//get pure results
             Dim aPureResultInfo, pureResults, isValid
-            aPureResultInfo = getPureResult(resultText, optSeq)
+            aPureResultInfo = getPureResult(Replace(resultText, VbCrlf, " "), optSeq)
             pureResults = aPureResultInfo(0)
             isValid = aPureResultInfo(1)
 
-            If Not isValid Then Call addInvalidResultInfo(postNum, postUser, optSeq, resultText, pureResults) : Exit Sub
+            If Not isValid Then Call addInvalidResultInfo(oPostInfo, optSeq, resultText, pureResults) : Exit Sub
 
 
             Dim oNew : Set oNew = New ValidResultInfo
-            oNew.PostNum = postNum
-            oNew.ResultOwner = postUser
+            oNew.PostNum = oPostInfo.PostNum
+            oNew.ResultOwner = oPostInfo.PostUser
             oNew.ResultOptSeq = optSeq
             oNew.ResultText = resultText
             oNew.PureResults = pureResults
@@ -265,19 +274,60 @@ End Function
             Call vaOptInfo.V(optSeq).CountPlus()
         End Sub
 
-        Function getResultText(aPostMsg, minSeq, maxSeq)
-            Dim i, sTmp
+        Function getResultText(aPostMsgWord, aOptLastLocation, aOptNextLocation)
+            Dim iLineHead, iWordHead, iLineEnd, iWordEnd, sTmp, aWord, iHead, iEnd
+            iLineHead = aOptLastLocation(0)
+            iWordHead = aOptLastLocation(1)
+            iLineEnd = aOptNextLocation(0)
+            iWordEnd = aOptNextLocation(1)
             sTmp = ""
-            For i = minSeq To maxSeq
-                sTmp = sTmp & " " & aPostMsg(i)
+
+            If iWordHead < UBound(aPostMsgWord(iLineHead)) Then
+                iWordHead = iWordHead + 1
+            Else
+                iLineHead = iLineHead + 1
+                iWordHead = 0
+            End If
+
+            If iWordEnd > 0 Then
+                iWordEnd = iWordEnd - 1
+            Else
+                iLineEnd = iLineEnd - 1
+                iWordEnd = UBound(aPostMsgWord(iLineEnd))
+            End If
+
+            Dim i, j
+            For i = iLineHead To iLineEnd
+                aWord = aPostMsgWord(i)
+                If i = iLineHead Then
+                    iHead = iWordHead
+                    isAnotherLine = False
+                Else
+                    iHead = 0
+                    isAnotherLine = True
+                End If
+
+                If i = iLineEnd Then
+                    iEnd = iWordEnd
+                Else
+                    iEnd = UBound(aWord)
+                End If
+
+                For j = iHead To iEnd
+                    If isAnotherLine And (j = 0) Then
+                        sTmp = sTmp & VbCrlf & aWord(j)
+                    Else
+                        sTmp = sTmp & " " & aWord(j)
+                    End If
+                Next
             Next
             getResultText = LTrim(sTmp)
         End Function
 
-        Sub addInvalidResultInfo(postNum, postUser, optSeq, resultText, pureResults)
+        Sub addInvalidResultInfo(oPostInfo, optSeq, resultText, pureResults)
             Dim oNew : Set oNew = New InvalidResultInfo
-            oNew.PostNum = postNum
-            oNew.ResultOwner = postUser
+            oNew.PostNum = oPostInfo.PostNum
+            oNew.ResultOwner = oPostInfo.PostUser
             oNew.ResultOptSeq = optSeq
             oNew.ResultText = resultText
             oNew.PureResults = pureResults
