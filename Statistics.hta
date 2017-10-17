@@ -19,81 +19,145 @@ body {
 .input_text{border:1px solid #aaa; font-size: 15;}
 .input_button{border:1px solid #aaa; background:none; font-size: 15;}
 .textarea{font-size: 15;}
+
+.div_float_left {
+    line-height:30px;
+    float:left;
+    padding:5px;          
+}
+
+.div_clear_left { clear: left; }
 -->
 </style>
 
 <fieldset>
-    周赛链接: <input type="text" id="url" size="60" />
-    <br>
-    <input type="button" class="input_button" id="getCode_id" onclick="getPagesCode()" value="获取网页源码" />
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    已获取<b id="crt_page_num">0</b>/<b id="max_page_num">0</b>页
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <b id="get_page_code_status"></b>
-
+    <div class="div_clear_left">
+        周赛链接
+        <input type="text" id="url" size="60" />
+    </div>
+    <div class="div_clear_left">
+        <div class="div_float_left">
+            <input type="button" class="input_button" id="getCode_id" onclick="getPagesCode()" value="获取网页源码" />
+        </div>
+        <div class="div_float_left">
+            已获取<b id="crt_page_num">0</b>/<b id="max_page_num">0</b>页
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <b id="get_page_code_status"></b>
+        </div>
+    </div>
 </fieldset>
 <br>
 <fieldset>
-    排除楼层: <input id="ignore_post_num" type="text" class="input_text" size="60" value="1 2 3 4" />
-    <br>
-    排除ID: <input id="ignore_post_owner" type="text" class="input_text" size="60" value="菜姨惠 Destroy绝影 东方神秘力量" />
-    <br>
-    <input id="getCode_id" type="button" class="input_button" onclick="onClickGetAllPostInfo()" value="获取所有成绩" />
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    当前楼层 <b id="crt_post_num">0</b>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <b id="get_function"></b>
+    <div class="div_clear_left">
+        排除楼层
+        <input id="ignore_post_num" type="text" class="input_text" size="60" value="1 2 3 4" />
+    </div>
+    <div class="div_clear_left">
+        排除ID
+        <input id="ignore_post_owner" type="text" class="input_text" size="60" value="菜姨惠 Destroy绝影 东方神秘力量" />
+    </div>
+    <div class="div_clear_left">
+        <div class="div_float_left">
+            <input id="getCode_id" type="button" class="input_button" onclick="onClickGetAllPostInfo()" value="获取所有成绩" />
+        </div>
+        <div class="div_float_left">
+            当前楼层 <b id="crt_post_num">0</b>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <b id="get_function"></b>
+        </div>
+    </div>
 </fieldset>
 <br>
 <fieldset>
-    <div>
-        <select id="valid_results" class="select" onclick="showResultInfo('valid_results')" multiple="multiple" size="8" disabled /></select>
-        <select id="invalid_results" class="select" onclick="showResultInfo('invalid_results')" multiple="multiple" size="8" disabled /></select>
-        <select id="no_opt_results" class="select" onclick="showResultInfo('no_opt_results')" multiple="multiple" size="8" disabled /></select>
-        <select id="br_results" class="select" onclick="showResultInfo('br_results')" multiple="multiple" size="8" disabled /></select>
-        <br>
+    <div class="div_clear_left">
+        <div class="div_float_left">
+            有效成绩
+            <br><select id="valid_results" class="select" onclick="showResultInfo('valid_results')" multiple="multiple" size="8" disabled /></select>
+        </div>
+        <div class="div_float_left">
+            无效成绩
+            <br><select id="invalid_results" class="select" onclick="showResultInfo('invalid_results')" multiple="multiple" size="8" disabled /></select>
+        </div>
+        <div class="div_float_left">
+            无项目成绩
+            <br><select id="no_opt_results" class="select" onclick="showResultInfo('no_opt_results')" multiple="multiple" size="8" disabled /></select>
+        </div>
+        <div class="div_float_left">
+            BR成绩
+            <br><select id="br_results" class="select" onclick="showResultInfo('br_results')" multiple="multiple" size="8" disabled /></select>
+        </div>
+    </div>
+</fieldset>
+<br>
+<fieldset>
+    <div class="div_clear_left">
         <input id="add_new_result_info" type=button class="input_button" onclick="addNewResultInfo()" value="添加新成绩" disabled />
-        <br>
         <input id="remove_valid_result" type=button class="input_button" onclick="removeValidResult()" value="去掉该有效成绩" disabled />
     </div>
-    <br>
-    <div>
-        <textarea id="show_result_post_num" class="textarea" rows="1" cols="5" disabled ></textarea>
-        <textarea id="show_result_post_user" class="textarea" rows="1" cols="20" disabled ></textarea>
-        <select id="show_result_opt_name" class="select" disabled >
-            <option value=""></option>
-            <option value="0">333</option>
-            <option value="1">444</option>
-            <option value="2">555</option>
-            <option value="3">222</option>
-            <option value="4">3bf</option>
-            <option value="5">3oh</option>
-            <option value="6">3fm</option>
-            <option value="7">mega</option>
-            <option value="8">py</option>
-            <option value="9">sq1</option>
-            <option value="10">clock</option>
-            <option value="11">sk</option>
-            <option value="12">666</option>
-            <option value="13">777</option>
-        </select>
+    <div class="div_clear_left">
+        <div class="div_float_left">
+            楼层
+            <br><textarea id="show_result_post_num" class="textarea" rows="1" cols="5" disabled ></textarea>
+        </div>
+        <div class="div_float_left">
+            ID
+            <br><textarea id="show_result_post_user" class="textarea" rows="1" cols="20" disabled ></textarea>
+        </div>
+        <div class="div_float_left">
+            项目名
+            <br><select id="show_result_opt_name" class="select" disabled >
+                <option value=""></option>
+                <option value="0">333</option>
+                <option value="1">444</option>
+                <option value="2">555</option>
+                <option value="3">222</option>
+                <option value="4">3bf</option>
+                <option value="5">3oh</option>
+                <option value="6">3fm</option>
+                <option value="7">mega</option>
+                <option value="8">py</option>
+                <option value="9">sq1</option>
+                <option value="10">clock</option>
+                <option value="11">sk</option>
+                <option value="12">666</option>
+                <option value="13">777</option>
+            </select>
+        </div>
     </div>
-    <div>
-        <textarea id="show_result_best_result" class="textarea" rows="1" cols="7" disabled ></textarea>
-        <textarea id="show_result_is_best_br" class="textarea" rows="1" cols="5" disabled ></textarea>
-        <textarea id="show_result_avg_result" class="textarea" rows="1" cols="7" disabled ></textarea>
-        <textarea id="show_result_is_avg_br" class="textarea" rows="1" cols="5" disabled ></textarea>
+    <div class="div_clear_left">
+        <div class="div_float_left">
+            单次最好
+            <br><textarea id="show_result_best_result" class="textarea" rows="1" cols="7" disabled ></textarea>
+        </div>
+        <div class="div_float_left">
+            是否单次BR
+            <br><textarea id="show_result_is_best_br" class="textarea" rows="1" cols="5" disabled ></textarea>
+        </div>
+        <div class="div_float_left">
+            平均成绩
+            <br><textarea id="show_result_avg_result" class="textarea" rows="1" cols="7" disabled ></textarea>
+        </div>
+        <div class="div_float_left">
+            是否平均BR
+            <br><textarea id="show_result_is_avg_br" class="textarea" rows="1" cols="5" disabled ></textarea>
+        </div>
     </div>
     <br>
-    <div>
-         <textarea id="show_result_result_text" class="textarea" rows="8" cols="70" disabled ></textarea>
+    <div class="div_clear_left">
+        <div class="div_float_left">
+            回复信息
+            <br><textarea id="show_result_result_text" class="textarea" rows="7" cols="60" disabled ></textarea>
+        </div>
     </div>
     <br>
-    <div>
-        <textarea id="show_result_pure_results" class="textarea" rows="3" cols="70" disabled ></textarea>
+    <div class="div_clear_left">
+        <div class="div_float_left">
+            成绩
+            <br><textarea id="show_result_pure_results" class="textarea" rows="2" cols="60" disabled ></textarea>
+        </div>
     </div>
     <br>
-    <div>
+    <div class="div_clear_left">
         <input id="submit_new_result_info" type="button" class="input_button" onclick="submitNewResultInfo()" value="提交新成绩" disabled />
         &nbsp;&nbsp;
         <input id="select_next_invalid_result" type="button" class="input_button" onclick="selectNextInvalidResult()" value="下一个" disabled />
@@ -101,16 +165,25 @@ body {
         <input id="select_prev_invalid_result" type="button" class="input_button" onclick="selectPrevInvalidResult()" value="上一个" disabled />
     </div>
 </fieldset>
-
 <br>
-<input id="sort_all_results" type="button" class="input_button" onclick="onClickSortAllResults()" value="成绩排序" disabled />
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<b id="sort_results_status"></b>
-<br>
-<input id="save_all_results" type="button" class="input_button" onclick="onClickSaveAllResult()" value="保存成绩" disabled />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<b id="save_results_status"></b>
+<fieldset>
+    <div class="div_clear_left">
+        <div class="div_float_left">
+            <input id="sort_all_results" type="button" class="input_button" onclick="onClickSortAllResults()" value="成绩排序" disabled />
+        </div>
+        <div class="div_float_left">
+            <b id="sort_results_status"></b>
+        </div>
+    </div>
+    <div class="div_clear_left">
+        <div class="div_float_left">
+            <input id="save_all_results" type="button" class="input_button" onclick="onClickSaveAllResult()" value="保存成绩" disabled />
+        </div>
+        <div class="div_float_left">
+            <b id="save_results_status"></b>
+        </div>
+    </div>
+</fieldset>
 
 
 

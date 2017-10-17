@@ -1,5 +1,5 @@
-Const WINDOW_WIDTH = 600
-Const WINDOW_HEIGHT = 930
+Const WINDOW_WIDTH = 700
+Const WINDOW_HEIGHT = 1000
 Sub Window_OnLoad
     Dim ScreenWidth : ScreenWidth = CreateObject("HtmlFile").ParentWindow.Screen.AvailWidth
     Dim ScreenHeight : ScreenHeight = CreateObject("HtmlFile").ParentWindow.Screen.AvailHeight
