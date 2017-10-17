@@ -30,7 +30,7 @@ End Sub
                 Set obj = vaAllValidResultInfo.V(i)
                 oTxt.WriteLine(obj.PostNum)
                 oTxt.WriteLine(obj.ResultOwner)
-                oTxt.WriteLine(getOptFullNameBySeq(obj.ResultOptSeq))
+                oTxt.WriteLine(vaOptInfo.V(obj.ResultOptSeq).FullName)
                 oTxt.WriteLine(obj.ResultText)
                 oTxt.WriteLine(obj.PureResults)
                 oTxt.WriteLine(obj.SortedResults)

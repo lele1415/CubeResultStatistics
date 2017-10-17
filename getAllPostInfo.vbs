@@ -37,7 +37,7 @@ Sub getAllPostInfo()
 
         If iSeq > 0 Then
             Call searchInfo(sReadLine)
-            '//post num maybe in the same line with last post msg
+            '//post num maybe in the same line with prev post msg
             If iSeq = 0 Then Call searchInfo(sReadLine)
         Else
             Call searchInfo(sReadLine)

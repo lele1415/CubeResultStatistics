@@ -198,7 +198,7 @@ Sub selectNextInvalidResult()
     Call selectAnotherOption(ID_SELECT_INVALID_RESULTS, mCrtShowInvalidSeq, 0)
 End Sub
 
-Sub selectLastInvalidResult()
+Sub selectPrevInvalidResult()
     Dim mCrtShowInvalidSeq
     mCrtShowInvalidSeq = document.getElementById(ID_SELECT_INVALID_RESULTS).value
     If mCrtShowInvalidSeq = "" Then Exit Sub

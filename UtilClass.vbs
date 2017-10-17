@@ -97,6 +97,28 @@ End Class
 
 
 
+Class OptLocationInfo
+    Private mOptSeq, mOptLocation
+
+    Public Property Let OptSeq(value)
+        mOptSeq = value
+    End Property
+
+    Public Property Get OptSeq()
+        OptSeq = mOptSeq
+    End Property
+
+    Public Property Let OptLocation(value)
+        mOptLocation = value
+    End Property
+
+    Public Property Get OptLocation()
+        OptLocation = mOptLocation
+    End Property
+End Class
+
+
+
 Class ValidResultInfo
     Private mPostNum, mResultOwner, mResultText, mResultOptSeq, mPureResults, mSortedResults, mBestResult, mAvgResult, mIsBestBr, mIsAvgBr
 
