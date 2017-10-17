@@ -119,7 +119,7 @@ End Class
 
 
 
-Class ValidResultInfo
+Class ResultInfo
     Private mPostNum, mResultOwner, mResultText, mResultOptSeq, mPureResults, mSortedResults, mBestResult, mAvgResult, mIsBestBr, mIsAvgBr
 
     Private Sub Class_Initialize
@@ -213,60 +213,6 @@ Class ValidResultInfo
 
     Public Property Get IsAvgBr
         IsAvgBr = mIsAvgBr
-    End Property
-End Class
-
-
-
-Class InvalidResultInfo
-    Private mPostNum, mResultOwner, mResultText, mResultOptSeq, mPureResults
-
-    Private Sub Class_Initialize
-        mPostNum = ""
-        mResultOwner = ""
-        mResultText = ""
-        mResultOptSeq = ""
-        mPureResults = ""
-    End Sub
-
-    Public Property Let PostNum(value)
-        mPostNum = value
-    End Property
-
-    Public Property Let ResultOwner(value)
-        mResultOwner = value
-    End Property
-
-    Public Property Let ResultText(value)
-        mResultText = value
-    End Property
-
-    Public Property Let ResultOptSeq(value)
-        mResultOptSeq = value
-    End Property
-
-    Public Property Let PureResults(value)
-        mPureResults = value
-    End Property
-
-    Public Property Get PostNum
-        PostNum = mPostNum
-    End Property
-
-    Public Property Get ResultOwner
-        ResultOwner = mResultOwner
-    End Property
-
-    Public Property Get ResultText
-        ResultText = mResultText
-    End Property
-
-    Public Property Get ResultOptSeq
-        ResultOptSeq = mResultOptSeq
-    End Property
-
-    Public Property Get PureResults
-        PureResults = mPureResults
     End Property
 End Class
 

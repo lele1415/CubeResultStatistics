@@ -4,26 +4,31 @@
 Dim mCrtShowSelectId, mCrtShowSeq
 
 Sub showAllResultInfo()
-    Call addValidResultInfoToList(vaAllValidResultInfo, ID_SELECT_VALID_RESULTS)
-    Call addInvalidResultInfoToList(vaAllInvalidResultInfo, ID_SELECT_INVALID_RESULTS)
+    Call addValidResultInfoToList(vaAllValidResultInfo)
+    Call addInvalidResultInfoToList(vaAllInvalidResultInfo)
 End Sub
 
-        Sub addValidResultInfoToList(vaObj, selectId)
+        Sub addValidResultInfoToList(vaObj)
             Dim i, optionName
             For i = 0 To vaObj.Bound
                 optionName = vaObj.V(i).PostNum & "楼 " & vaObj.V(i).ResultOwner
-                Call addOption(selectId, optionName, i)
+                Call addOption(ID_SELECT_VALID_RESULTS, optionName, i)
                 If vaObj.V(i).IsBestBr Or vaObj.V(i).IsAvgBr Then
                     Call addOption(ID_SELECT_BR_RESULTS, optionName, i)
                 End If
             Next
         End Sub
 
-        Sub addInvalidResultInfoToList(vaObj, selectId)
-            Dim i, optionName
+        Sub addInvalidResultInfoToList(vaObj)
+            Dim i, optionName, oResult
             For i = 0 To vaObj.Bound
-                optionName = vaObj.V(i).PostNum & "楼 " & vaObj.V(i).ResultOwner
-                Call addOption(selectId, optionName, i)
+                Set oResult = vaObj.V(i)
+                optionName = oResult.PostNum & "楼 " & oResult.ResultOwner
+                If oResult.ResultOptSeq <> "" Then
+                    Call addOption(ID_SELECT_INVALID_RESULTS, optionName, i)
+                Else
+                    Call addOption(ID_SELECT_NO_OPT_RESULTS, optionName, i)
+                End If
             Next
         End Sub
 
@@ -41,25 +46,22 @@ Sub showResultInfo(selectId)
             Set obj = vaAllValidResultInfo.V(mCrtShowSeq)
         Case ID_SELECT_INVALID_RESULTS
             Set obj = vaAllInvalidResultInfo.V(mCrtShowSeq)
+        Case ID_SELECT_NO_OPT_RESULTS
+            Set obj = vaAllInvalidResultInfo.V(mCrtShowSeq)
         Case ID_SELECT_BR_RESULTS
             Set obj = vaAllValidResultInfo.V(mCrtShowSeq)
+        Case Else
+            Exit Sub
     End Select
 
     Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_POST_NUM, obj.PostNum)
     Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_POST_USER, obj.ResultOwner)
     Call setValueById(ID_TEXTAREA_SHOW_RESULT_OPT_NAME, obj.ResultOptSeq)
 
-    If selectId <> ID_SELECT_INVALID_RESULTS Then
-        Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_BEST_RESULT, obj.BestResult)
-        Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_IS_BEST_BR, obj.IsBestBr)
-        Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_AVG_RESULT, obj.AvgResult)
-        Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_IS_AVG_BR, obj.IsAvgBr)
-    Else
-        Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_BEST_RESULT, "")
-        Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_IS_BEST_BR, "")
-        Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_AVG_RESULT, "")
-        Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_IS_AVG_BR, "")
-    End If
+    Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_BEST_RESULT, obj.BestResult)
+    Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_IS_BEST_BR, obj.IsBestBr)
+    Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_AVG_RESULT, obj.AvgResult)
+    Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_IS_AVG_BR, obj.IsAvgBr)
 
     Call setElementValue(ID_TEXTAREA_SHOW_RESULT_RESULT_TEXT, obj.ResultText)
     Call setInnerHtmlById(ID_TEXTAREA_SHOW_RESULT_PURE_RESULTS, obj.PureResults)
@@ -107,8 +109,13 @@ Sub submitNewResultInfo()
     sNewResultText = getValueById(ID_TEXTAREA_SHOW_RESULT_RESULT_TEXT)
 
     If iNewOptSeq = "" Then
-        MsgBox("optName is empty!")
-        Exit Sub
+        If mCrtShowSelectId = ID_SELECT_NO_OPT_RESULTS Then
+            Call handleNoOptResult(iNewPostNum, sNewPostUser, sNewResultText)
+            Exit Sub
+        Else
+            MsgBox("项目名为空！")
+            Exit Sub
+        End If
     End If
 
     Dim aTmp
@@ -127,10 +134,17 @@ Sub submitNewResultInfo()
             Call updateNewResult(oVRI)
 
         Case ID_SELECT_INVALID_RESULTS
-            Set oVRI = New ValidResultInfo
+            Set oVRI = New ResultInfo
             Call createNewValidResultInfo(oVRI, iNewPostNum, sNewPostUser, iNewOptSeq, sNewResultText, sNewPureResult)
             Call addOption(ID_SELECT_VALID_RESULTS, iNewPostNum&"楼 "&sNewPostUser, vaAllValidResultInfo.Bound)
             Call removeOption(ID_SELECT_INVALID_RESULTS, mCrtShowSeq)
+            Call checkAndAddBrOption(oVRI, iNewPostNum, sNewPostUser, vaAllValidResultInfo.Bound)
+
+        Case ID_SELECT_NO_OPT_RESULTS
+            Set oVRI = New ResultInfo
+            Call createNewValidResultInfo(oVRI, iNewPostNum, sNewPostUser, iNewOptSeq, sNewResultText, sNewPureResult)
+            Call addOption(ID_SELECT_VALID_RESULTS, iNewPostNum&"楼 "&sNewPostUser, vaAllValidResultInfo.Bound)
+            Call removeOption(ID_SELECT_NO_OPT_RESULTS, mCrtShowSeq)
             Call checkAndAddBrOption(oVRI, iNewPostNum, sNewPostUser, vaAllValidResultInfo.Bound)
 
         Case ID_SELECT_BR_RESULTS
@@ -140,13 +154,45 @@ Sub submitNewResultInfo()
             Call updateNewResult(oVRI)
 
         Case ""
-            Set oVRI = New ValidResultInfo
+            Set oVRI = New ResultInfo
             Call createNewValidResultInfo(oVRI, iNewPostNum, sNewPostUser, iNewOptSeq, sNewResultText, sNewPureResult)
             Call addOption(ID_SELECT_VALID_RESULTS, iNewPostNum&"楼 "&sNewPostUser, vaAllValidResultInfo.Bound)
             Call checkAndAddBrOption(oVRI, iNewPostNum, sNewPostUser, vaAllValidResultInfo.Bound)
             Call updateNewResult(oVRI)
     End Select
 End Sub
+
+        Sub handleNoOptResult(iNewPostNum, sNewPostUser, sNewResultText)
+            Dim oldValidCount, oldInvalidCount, newValidCount, newInvalidCount
+            oldValidCount = vaAllValidResultInfo.Bound
+            oldInvalidCount = vaAllInvalidResultInfo.Bound
+
+            Call getSingleResultInfo(iNewPostNum, sNewPostUser, sNewResultText)
+            
+            newValidCount = vaAllValidResultInfo.Bound
+            newInvalidCount = vaAllInvalidResultInfo.Bound
+
+            If (newValidCount > oldValidCount) Or (newInvalidCount > oldInvalidCount) Then
+                If newValidCount > oldValidCount Then
+                    Dim i
+                    For i = oldValidCount + 1 To newValidCount
+                        Call addOption(ID_SELECT_VALID_RESULTS, iNewPostNum&"楼 "&sNewPostUser, i)
+                        Call checkAndAddBrOption(vaAllValidResultInfo.V(i), iNewPostNum, sNewPostUser, i)
+                    Next
+                End If
+
+                If newInvalidCount > oldInvalidCount Then
+                    Dim j
+                    For j = oldInvalidCount + 1 To newInvalidCount
+                        Call addOption(ID_SELECT_INVALID_RESULTS, iNewPostNum&"楼 "&sNewPostUser, j)
+                    Next
+                End If
+
+                Call removeOption(ID_SELECT_NO_OPT_RESULTS, mCrtShowSeq)
+            Else
+                MsgBox("找不到项目名！")
+            End If
+        End Sub
 
         Sub updateOldValidResultInfo(obj, iNewPostNum, sNewPostUser, iNewOptSeq, sNewResultText, sNewPureResult)
             obj.PostNum = iNewPostNum

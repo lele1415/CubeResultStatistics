@@ -1,5 +1,6 @@
 var ID_VALID_RESULTS = "valid_results"
 var ID_INVALID_RESULTS = "invalid_results"
+var ID_NO_OPT_RESULTS = "no_opt_results"
 var ID_BR_RESULTS = "br_results"
 
 function addOption(SelectId, OptionName, iSeq) 
@@ -64,6 +65,9 @@ function clearAllSelectedOption(exceptSelectId) {
     }
     if (exceptSelectId != ID_INVALID_RESULTS) {
         clearSelectedOption(ID_INVALID_RESULTS);
+    }
+    if (exceptSelectId != ID_NO_OPT_RESULTS) {
+        clearSelectedOption(ID_NO_OPT_RESULTS);
     }
     if (exceptSelectId != ID_BR_RESULTS) {
         clearSelectedOption(ID_BR_RESULTS);
