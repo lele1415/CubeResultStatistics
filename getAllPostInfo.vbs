@@ -17,7 +17,7 @@ Const ID_GET_RESULT_STATUS = "get_result_status"
 
 Sub onClickGetAllPostInfo()
     Call setInnerHtml(ID_GET_RESULT_STATUS, "获取回复信息...")
-    idTimer = window.setTimeout("getAllPostInfo()", 0, "VBScript")
+    idTimer = window.setTimeout("getAllPostInfo()", 10, "VBScript")
 End Sub
 
 Sub getAllPostInfo()

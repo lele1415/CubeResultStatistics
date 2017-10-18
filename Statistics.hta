@@ -12,20 +12,17 @@ Version: v3.3
 
 <style type="text/css">
 <!-- 
-body {
-    font-family: sans-serif; font-size: 17;
-}
-.select{border:1px solid #aaa; font-size: 15;}
-.input_text{border:1px solid #aaa; font-size: 15;}
-.input_button{border:1px solid #aaa; background:none; font-size: 15;}
-.textarea{font-size: 15;}
+body { font-family: sans-serif; font-size: 17; }
 
-.div_float_left {
-    line-height:30px;
-    float:left;
-    padding:5px;          
-}
+.select { font-size: 15; }
+.input_text { font-size: 15; }
+.input_button { background:none; font-size: 15; }
 
+.textarea { font-size: 15; overflow: hidden; }
+.textarea_readonly { border:1px solid #aaa; font-size: 15; overflow: hidden; }
+.textarea_overflow { font-size: 15; }
+
+.div_float_left { line-height:30px; float:left; padding:5px; }
 .div_clear_left { clear: left; }
 -->
 </style>
@@ -127,33 +124,33 @@ body {
     <div class="div_clear_left">
         <div class="div_float_left">
             单次最好
-            <br><textarea id="show_result_best_result" class="textarea" rows="1" cols="7" disabled ></textarea>
+            <br><textarea id="show_result_best_result" class="textarea_readonly" rows="1" cols="7" readonly ></textarea>
         </div>
         <div class="div_float_left">
             是否单次BR
-            <br><textarea id="show_result_is_best_br" class="textarea" rows="1" cols="5" disabled ></textarea>
+            <br><textarea id="show_result_is_best_br" class="textarea_readonly" rows="1" cols="5" readonly ></textarea>
         </div>
         <div class="div_float_left">
             平均成绩
-            <br><textarea id="show_result_avg_result" class="textarea" rows="1" cols="7" disabled ></textarea>
+            <br><textarea id="show_result_avg_result" class="textarea_readonly" rows="1" cols="7" readonly ></textarea>
         </div>
         <div class="div_float_left">
             是否平均BR
-            <br><textarea id="show_result_is_avg_br" class="textarea" rows="1" cols="5" disabled ></textarea>
+            <br><textarea id="show_result_is_avg_br" class="textarea_readonly" rows="1" cols="5" readonly ></textarea>
         </div>
     </div>
     <br>
     <div class="div_clear_left">
         <div class="div_float_left">
             回复信息
-            <br><textarea id="show_result_result_text" class="textarea" rows="7" cols="60" disabled ></textarea>
+            <br><textarea id="show_result_result_text" class="textarea_overflow" rows="7" cols="60" disabled ></textarea>
         </div>
     </div>
     <br>
     <div class="div_clear_left">
         <div class="div_float_left">
             成绩
-            <br><textarea id="show_result_pure_results" class="textarea" rows="2" cols="60" disabled ></textarea>
+            <br><textarea id="show_result_pure_results" class="textarea_readonly" rows="2" cols="60" readonly ></textarea>
         </div>
     </div>
     <br>
