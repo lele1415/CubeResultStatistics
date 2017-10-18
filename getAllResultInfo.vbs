@@ -6,6 +6,7 @@ Dim vaAllInvalidResultInfo : Set vaAllInvalidResultInfo = New VariableArray
 Dim vaAllOptLocationInfo : Set vaAllOptLocationInfo = New VariableArray
 
 Const ID_CRT_POST_NUM = "crt_post_num"
+Const ID_MAX_POST_NUM = "max_post_num"
 
 Const ID_SELECT_VALID_RESULTS = "valid_results"
 Const ID_SELECT_INVALID_RESULTS = "invalid_results"
@@ -52,13 +53,15 @@ aOptName_other = Array(Array(OPT_SEQ_3oh, "oh"), _
                         Array(OPT_SEQ_sk, "sk", "斜转", "skewb"))
 
 Sub getAllResultInfo()
-    Call setInnerHtml(ID_GET_FUNCTION, "正在获取...")
+    iMaxPostInfoSeq = vaAllPostInfo.Bound
+
+    Call setInnerHtml(ID_GET_RESULT_STATUS, "获取成绩...")
+    Call setInnerHtml(ID_MAX_POST_NUM, vaAllPostInfo.V(iMaxPostInfoSeq).PostNum)
     Call vaAllValidResultInfo.ResetArray()
     Call vaAllInvalidResultInfo.ResetArray()
-    Call vaAllValidResultInfo.SetPreBound(vaAllPostInfo.Bound)
-    Call vaAllInvalidResultInfo.SetPreBound(vaAllPostInfo.Bound)
+    Call vaAllValidResultInfo.SetPreBound(iMaxPostInfoSeq)
+    Call vaAllInvalidResultInfo.SetPreBound(iMaxPostInfoSeq)
 
-    iMaxPostInfoSeq = vaAllPostInfo.Bound
     Call getNextResultInfo()
 End Sub
 
@@ -336,6 +339,6 @@ End Sub
         Sub completeGetAllResultInfo()
             Call showAllResultInfo()
             Call enableElementAfterGetResultInfo()
-            Call setInnerHtml(ID_GET_FUNCTION, "已完成")
+            Call setInnerHtml(ID_GET_RESULT_STATUS, "已完成")
         End Sub
         

@@ -13,16 +13,16 @@ Dim oTmp
 Dim aIgnoredPostNum
 Dim aIgnoredResultOwner
 
-Const ID_GET_FUNCTION = "get_function"
+Const ID_GET_RESULT_STATUS = "get_result_status"
 
 Sub onClickGetAllPostInfo()
+    Call setInnerHtml(ID_GET_RESULT_STATUS, "获取回复信息...")
     idTimer = window.setTimeout("getAllPostInfo()", 0, "VBScript")
 End Sub
 
 Sub getAllPostInfo()
     window.clearTimeout(idTimer)
 
-    Call setInnerHtml(ID_GET_FUNCTION, "获取回复信息...")
     Call vaAllPostInfo.ResetArray()
     '//these post nums will be ignored
     aIgnoredPostNum = Split(getElementValue(ID_IGNORE_POST_NUM), " ")
