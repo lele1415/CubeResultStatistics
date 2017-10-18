@@ -28,11 +28,29 @@ Const OPT_SEQ_sk = 11
 Const OPT_SEQ_666 = 12
 Const OPT_SEQ_777 = 13
 
+Dim vaIgnoreUsers : Set vaIgnoreUsers = New VariableArray
 Dim aAllRecords(13)
 Dim vaOptInfo : Set vaOptInfo = New VariableArray
 
+Call loadIgnoreUsers()
 Call loadAllRecords()
 Call loadAllOptInfo()
+
+Sub loadIgnoreUsers()
+    Dim oTxt
+    Set oTxt = Fso.OpenTextFile(uIgnoreUsersTxt, 1, False, True)
+
+    Dim sLine
+    Do Until oTxt.AtEndOfStream
+        sLine = Trim(oTxt.ReadLine)
+        If sLine <> "" Then
+            vaIgnoreUsers.Append(sLine)
+        End If
+    Loop
+
+    oTxt.Close
+    Set oTxt = Nothing
+End Sub
 
 Sub loadAllRecords()
     Dim oTxt, count
@@ -41,8 +59,8 @@ Sub loadAllRecords()
 
     Dim sLine
     Do Until oTxt.AtEndOfStream
-        sLine = oTxt.ReadLine
-        If Trim(sLine) <> "" Then
+        sLine = Trim(oTxt.ReadLine)
+        If sLine <> "" Then
             aAllRecords(count) = sLine
             count = count + 1
         End If

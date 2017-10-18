@@ -2,16 +2,18 @@
 '****get data array.
 '*************************************************
 Const ID_IGNORE_POST_NUM = "ignore_post_num"
-Const ID_IGNORE_POST_OWNER = "ignore_post_owner"
 
 Dim vaAllPostInfo : Set vaAllPostInfo = New VariableArray
 Dim aHeadStr : aHeadStr = Array("post_no&quot;:", "alog-group=""p_author""", "j_d_post_content  clearfix")
 Dim aEndStr : aEndStr = Array(",", "</a>", "</div><br></cc>")
 
-Dim iSeq : iSeq = 0
+Const GET_POST_NUM = 0
+Const GET_POST_USER = 1
+Const GET_POST_MSG = 2
+
+Dim iSeq : iSeq = GET_POST_NUM
 Dim oTmp
 Dim aIgnoredPostNum
-Dim aIgnoredResultOwner
 
 Const ID_GET_RESULT_STATUS = "get_result_status"
 
@@ -26,7 +28,6 @@ Sub getAllPostInfo()
     Call vaAllPostInfo.ResetArray()
     '//these post nums will be ignored
     aIgnoredPostNum = Split(getElementValue(ID_IGNORE_POST_NUM), " ")
-    aIgnoredResultOwner = Split(getElementValue(ID_IGNORE_POST_OWNER), " ")
 
     '//read text of page code
     Dim oTxt, sReadLine
@@ -35,10 +36,10 @@ Sub getAllPostInfo()
     Do Until oTxt.AtEndOfStream
         sReadLine = oTxt.ReadLine
 
-        If iSeq > 0 Then
+        If iSeq <> GET_POST_NUM Then
             Call searchInfo(sReadLine)
             '//post num maybe in the same line with prev post msg
-            If iSeq = 0 Then Call searchInfo(sReadLine)
+            If iSeq = GET_POST_NUM Then Call searchInfo(sReadLine)
         Else
             Call searchInfo(sReadLine)
         End If
@@ -55,34 +56,47 @@ End Sub
 
         Sub searchInfo(sOrigin)
             Dim sGet
-            '//get post num
-            If iSeq = 0 Then
-                sGet = cutStrWithHeadEndStr(sOrigin, aHeadStr(0), aEndStr(0))
-            '//get post user or msg
-            Else
-                sGet = cutStrWithElement(sOrigin, aHeadStr(iSeq), aEndStr(iSeq))
-            End If
-                
-            If sGet <> "" Then
-                If iSeq = 0 Then
+            Select Case iSeq
+                '//get post num
+                Case GET_POST_NUM
+                    sGet = cutStrWithHeadEndStr(sOrigin, aHeadStr(0), aEndStr(0))
+                    If sGet = "" Then Exit Sub
+
                     If Not checkIsValidPostNum(sGet) Then Exit Sub
+
                     '//new PostInfo
                     Set oTmp = New PostInfo
-                ElseIf iSeq = 1 Then
+                    oTmp.PostNum = sGet
+                '//get post user
+                Case GET_POST_USER
+                    sGet = cutStrWithElement(sOrigin, aHeadStr(iSeq), aEndStr(iSeq))
+                    If sGet = "" Then Exit Sub
+
+                    Call removeElement(sGet, "<img")
                     If Not checkIsValidResultOwner(sGet) Then Exit Sub
-                End If
 
-                Call receiveInfoStr(sGet, oTmp)
+                    oTmp.PostUser = sGet
+                '//get post msg
+                Case GET_POST_MSG
+                    sGet = cutStrWithElement(sOrigin, aHeadStr(iSeq), aEndStr(iSeq))
+                    If sGet = "" Then Exit Sub
 
-                '//already get a PostInfo
-                If iSeq = 2 Then
-                    Dim oNew : Set oNew = oTmp
-                    vaAllPostInfo.Append(oNew)
-                    Set oTmp = Nothing
-                End If
-                
-                Call seqPlus()
+                    sGet = LTrim(sGet)
+                    Call checkArrayForBubble(sGet)
+                    Call removeHtmlStr(sGet)
+
+                    oTmp.PostMsg = sGet
+            End Select
+
+
+            '//already get a PostInfo
+            If iSeq = GET_POST_MSG Then
+                Dim oNew : Set oNew = oTmp
+                vaAllPostInfo.Append(oNew)
+                Set oTmp = Nothing
             End If
+            
+            Call seqPlus()
         End Sub
 
         Function checkIsValidPostNum(num)
@@ -97,34 +111,21 @@ End Sub
         End Function
 
         Function checkIsValidResultOwner(name)
-            Dim i
-            For i = 0 To UBound(aIgnoredResultOwner)
-                If InStr(name, aIgnoredResultOwner(i)) > 0 Then
-                    checkIsValidResultOwner = False
-                    Exit Function
-                End If
-            Next
+            If vaIgnoreUsers.Bound > -1 Then
+                Dim i
+                For i = 0 To vaIgnoreUsers.Bound
+                    If StrComp(name, vaIgnoreUsers.V(i)) = 0 Then
+                        checkIsValidResultOwner = False
+                        Exit Function
+                    End If
+                Next
+            End If
             checkIsValidResultOwner = True
         End Function
 
         Sub seqPlus()
             iSeq = iSeq + 1
-            If iSeq = 3 Then iSeq = 0
-        End Sub
-
-        Sub receiveInfoStr(str, object)
-            Select Case iSeq
-                Case 0
-                    object.PostNum = str
-                Case 1
-                    Call removeElement(str, "<img")
-                    object.PostUser = str
-                Case 2
-                    str = LTrim(str)
-                    Call checkArrayForBubble(str)
-                    Call removeHtmlStr(str)
-                    object.PostMsg = str
-            End Select
+            If iSeq = 3 Then iSeq = GET_POST_NUM
         End Sub
 
         Sub checkArrayForBubble(sMsg)
