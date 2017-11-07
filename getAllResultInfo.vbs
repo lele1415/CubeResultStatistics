@@ -31,27 +31,6 @@ Const ID_BUTTON_SORT_ALL_RESULTS = "sort_all_results"
 Dim oCrtPostInfo, iCrtPostInfoSeq, iMaxPostInfoSeq
 iCrtPostInfoSeq = 0
 
-Dim aOptName_333, aOptName_24567, aOptName_other
-aOptName_333 = Array(Array(OPT_SEQ_333, "333", "3阶", "3速"), _
-                        Array(OPT_SEQ_3bf, "3盲", "333bf", "3bf", "3阶盲拧", "3bld") , _
-                        Array(OPT_SEQ_3oh, "3单", "333oh", "3oh", "3阶单手", "3one") , _
-                        Array(OPT_SEQ_3fm, "333fm", "3fm"))
-
-aOptName_24567 = Array(Array(OPT_SEQ_222, "222","2阶","2速"), _
-                        Array(OPT_SEQ_444, "444","4阶","4速"), _
-                        Array(OPT_SEQ_555, "555","5阶","5速"), _
-                        Array(OPT_SEQ_666, "666","6阶","6速"), _
-                        Array(OPT_SEQ_777, "777","7阶","7速"), _
-                        Array(OPT_SEQ_mega, "5魔", "5魔方"))
-
-aOptName_other = Array(Array(OPT_SEQ_3oh, "oh"), _
-                        Array(OPT_SEQ_3fm, "最少步", "最小步", "fm"), _
-                        Array(OPT_SEQ_mega, "mega", "megaminx"), _
-                        Array(OPT_SEQ_py, "塔", "金字塔", "py", "pyramid", "pyram"), _
-                        Array(OPT_SEQ_sq, "sq", "sq1", "sq-1"), _
-                        Array(OPT_SEQ_clk, "表", "魔表", "clock", "clk"), _
-                        Array(OPT_SEQ_sk, "sk", "斜转", "skewb"))
-
 Sub getAllResultInfo()
     iMaxPostInfoSeq = vaAllPostInfo.Bound
 

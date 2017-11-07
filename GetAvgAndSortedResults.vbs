@@ -2,6 +2,11 @@
 '****get avg and sorted results.
 '*************************************************
 Sub getSortedResult(sPureResult, iOptSeq, resultInfo)
+    If iOptSeq = 17 Then
+        resultInfo.BestResult = sPureResult
+        Exit Sub
+    End If
+
     Dim aTmp, aPureResults, iAvgResult, iBestResult, oOptInfo, iEnd
     aPureResults = sortIntArray(Split(sPureResult))
     iBestResult = aPureResults(0)
@@ -20,24 +25,25 @@ Sub getSortedResult(sPureResult, iOptSeq, resultInfo)
         iAvgResult = 9999.99
     End If
 
-    Call compareToRecord(oOptInfo, resultInfo, iAvgResult, iBestResult)
+    Call compareToBestRecord(oOptInfo.BestRecord, resultInfo, iBestResult)
+    If iOptSeq < 15 Then
+        Call compareToAvgRecord(oOptInfo.AvgRecord, resultInfo, iAvgResult)
+    End If
 
     resultInfo.BestResult = iBestResult
     resultInfo.AvgResult = iAvgResult
     resultInfo.SortedResults = joinArrayWithSpace(aPureResults)
 End Sub
 
-Sub compareToRecord(oOptInfo, resultInfo, iAvgResult, iBestResult)
-    Dim iAvgRecord, iBestRecord
-    iBestRecord = oOptInfo.BestRecord
-    iAvgRecord = oOptInfo.AvgRecord
-
+Sub compareToBestRecord(iBestRecord, resultInfo, iBestResult)
     If iBestResult - iBestRecord <= 0 Then
         resultInfo.IsBestBr = True
     Else
         resultInfo.IsBestBr = False
     End If
+End Sub
 
+Sub compareToAvgRecord(iAvgRecord, resultInfo, iAvgResult)
     If iAvgResult - iAvgRecord <= 0 Then
         resultInfo.IsAvgBr = True
     Else

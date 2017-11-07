@@ -72,19 +72,23 @@ Sub writeReslutsToExcel()
     ExcelSheet.Columns("B").ColumnWidth = 15
 
     Call writeAllProjectResult(ExcelSheet, vaAllResults_333, OPT_SEQ_333)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_222, OPT_SEQ_222)
     Call writeAllProjectResult(ExcelSheet, vaAllResults_444, OPT_SEQ_444)
     Call writeAllProjectResult(ExcelSheet, vaAllResults_555, OPT_SEQ_555)
-    Call writeAllProjectResult(ExcelSheet, vaAllResults_222, OPT_SEQ_222)
-    Call writeAllProjectResult(ExcelSheet, vaAllResults_3bf, OPT_SEQ_3bf)
-    Call writeAllProjectResult(ExcelSheet, vaAllResults_3oh, OPT_SEQ_3oh)
-    Call writeAllProjectResult(ExcelSheet, vaAllResults_3fm, OPT_SEQ_3fm)
-    Call writeAllProjectResult(ExcelSheet, vaAllResults_mega, OPT_SEQ_mega)
-    Call writeAllProjectResult(ExcelSheet, vaAllResults_py, OPT_SEQ_py)
-    Call writeAllProjectResult(ExcelSheet, vaAllResults_sq, OPT_SEQ_sq)
-    Call writeAllProjectResult(ExcelSheet, vaAllResults_clk, OPT_SEQ_clk)
-    Call writeAllProjectResult(ExcelSheet, vaAllResults_sk, OPT_SEQ_sk)
     Call writeAllProjectResult(ExcelSheet, vaAllResults_666, OPT_SEQ_666)
     Call writeAllProjectResult(ExcelSheet, vaAllResults_777, OPT_SEQ_777)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_3bf, OPT_SEQ_3bf)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_3fm, OPT_SEQ_3fm)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_3oh, OPT_SEQ_3oh)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_3wf, OPT_SEQ_3wf)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_mega, OPT_SEQ_mega)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_py, OPT_SEQ_py)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_clk, OPT_SEQ_clk)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_sk, OPT_SEQ_sk)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_sq, OPT_SEQ_sq)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_4bf, OPT_SEQ_4bf)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_5bf, OPT_SEQ_5bf)
+    Call writeAllProjectResult(ExcelSheet, vaAllResults_3mb, OPT_SEQ_3mb)
     
     If vaAllBrResults.Bound <> -1 Then
         Call writeBrToExcel(ExcelApp, ExcelBook, ExcelSheet, True)
@@ -123,7 +127,11 @@ End Sub
                 ExcelSheet.Cells(iExcelRow, 1).Value = iRankNum
                 ExcelSheet.Cells(iExcelRow, 2).Value = oResult.ResultOwner
                 ExcelSheet.Cells(iExcelRow, 3).Value = revertResult(oResult.BestResult, sOptSeq)
-                ExcelSheet.Cells(iExcelRow, 4).Value = revertResult(oResult.AvgResult, sOptSeq)
+                If sOptSeq < 15 Then
+                    ExcelSheet.Cells(iExcelRow, 4).Value = revertResult(oResult.AvgResult, sOptSeq)
+                Else
+                    ExcelSheet.Cells(iExcelRow, 4).Value = ""
+                End If
 
                 aTmp = Split(oResult.PureResults)
                 For k = 0 To UBound(aTmp)
