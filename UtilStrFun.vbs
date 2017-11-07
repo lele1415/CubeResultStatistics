@@ -192,6 +192,10 @@ Function formatResultStrForOthers(sStr)
         Exit Function
     End If
 
+    sStr = RePlace(sStr, "d", "")
+    sStr = RePlace(sStr, "n", "")
+    sStr = RePlace(sStr, "f", "")
+
     Dim iColonCount, iPointCount
     iColonCount = getCharCountInStr(sStr, ":")
     iPointCount = getCharCountInStr(sStr, ".")
