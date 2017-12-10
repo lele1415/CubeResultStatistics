@@ -25,11 +25,7 @@ End Function
             Call vaObj.SetPreBound(4)
 
             For i = 0 To UBound(aTmpResult)
-                sTmp = formatResultStr(aTmpResult(i), iOptSeq)
-                
-                If IsNumeric(sTmp) Then
-                    vaObj.Append(sTmp)
-                End If
+                Call formatResultStr(aTmpResult(i), iOptSeq, vaObj)
             Next
             'MsgBox(sTmpResult)
 

@@ -2,8 +2,8 @@
 '****get avg and sorted results.
 '*************************************************
 Sub getSortedResult(sPureResult, iOptSeq, resultInfo)
-    If iOptSeq = 17 Then
-        resultInfo.BestResult = sPureResult
+    If iOptSeq = OPT_SEQ_3mb Then
+        Call getResultFor3mb(sPureResult, resultInfo)
         Exit Sub
     End If
 
@@ -49,4 +49,14 @@ Sub compareToAvgRecord(iAvgRecord, resultInfo, iAvgResult)
     Else
         resultInfo.IsAvgBr = False
     End If
+End Sub
+
+Sub getResultFor3mb(sPureResult, resultInfo)
+    Dim aPureResults
+    aPureResults = sortIntArray(Split(sPureResult))
+
+    If aPureResults(0) <= aPureResults(1) Then
+        resultInfo.BestResult = 2 * aPureResults(0) - aPureResults(1)
+    End If
+    resultInfo.AvgResult = aPureResults(2)
 End Sub

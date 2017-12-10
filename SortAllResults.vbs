@@ -4,6 +4,10 @@
 Const ID_SORT_RESULTS_STATUS = "sort_results_status"
 Const ID_BUTTON_SAVE_ALL_RESULTS = "save_all_results"
 
+Const SORT_BY_AVG = 0
+Const SORT_BY_BEST = 1
+Const SORT_BY_BEST_ANTI = 2
+
 Dim vaAllResults_333
 Dim vaAllResults_222
 Dim vaAllResults_444
@@ -33,24 +37,24 @@ Sub sortAllResults()
 
     Call sortByOptName()
 
-    Call sortByAvgResult(vaAllResults_333, true)
-    Call sortByAvgResult(vaAllResults_222, true)
-    Call sortByAvgResult(vaAllResults_444, true)
-    Call sortByAvgResult(vaAllResults_555, true)
-    Call sortByAvgResult(vaAllResults_666, true)
-    Call sortByAvgResult(vaAllResults_777, true)
-    Call sortByAvgResult(vaAllResults_3bf, false)
-    Call sortByAvgResult(vaAllResults_3fm, true)
-    Call sortByAvgResult(vaAllResults_3oh, true)
-    Call sortByAvgResult(vaAllResults_3wf, true)
-    Call sortByAvgResult(vaAllResults_mega, true)
-    Call sortByAvgResult(vaAllResults_py, true)
-    Call sortByAvgResult(vaAllResults_clk, true)
-    Call sortByAvgResult(vaAllResults_sk, true)
-    Call sortByAvgResult(vaAllResults_sq, true)
-    Call sortByAvgResult(vaAllResults_4bf, false)
-    Call sortByAvgResult(vaAllResults_5bf, false)
-    Call sortByAvgResult(vaAllResults_3mb, false)
+    Call sortByAvgResult(vaAllResults_333, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_222, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_444, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_555, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_666, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_777, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_3bf, SORT_BY_BEST)
+    Call sortByAvgResult(vaAllResults_3fm, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_3oh, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_3wf, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_mega, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_py, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_clk, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_sk, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_sq, SORT_BY_AVG)
+    Call sortByAvgResult(vaAllResults_4bf, SORT_BY_BEST)
+    Call sortByAvgResult(vaAllResults_5bf, SORT_BY_BEST)
+    Call sortByAvgResult(vaAllResults_3mb, SORT_BY_BEST_ANTI)
 
     Call enableElementAfterSortAllResults()
     Call setInnerHtml(ID_SORT_RESULTS_STATUS, "已完成")
@@ -166,13 +170,13 @@ End Sub
                 checkOwnerExists = False
             End Function
 
-    Sub sortByAvgResult(vaObj, bCompartByAvg)
+    Sub sortByAvgResult(vaObj, iSortType)
         If vaObj.Bound < 1 Then
             Exit Sub
         End If
 
         Dim i, j, oResult1, oResult2, iCompareResult
-        If bCompartByAvg Then
+        If iSortType = SORT_BY_AVG Then
             For i = 0 To vaObj.Bound - 1
                 Set oResult1 = vaObj.V(i)
 
@@ -192,7 +196,7 @@ End Sub
                     End If
                 Next
             Next
-        Else
+        ElseIf iSortType = SORT_BY_BEST Then
             For i = 0 To vaObj.Bound - 1
                 Set oResult1 = vaObj.V(i)
                 
@@ -206,6 +210,26 @@ End Sub
                     ElseIf iCompareResult = 0 Then
                         iCompareResult = compareAllResults(oResult1.SortedResults, oResult2.SortedResults)
                         If iCompareResult > 0 Then
+                            Call vaObj.SwapTwoValues(i, j)
+                            Set oResult1 = vaObj.V(i)
+                        End If
+                    End If
+                Next
+            Next
+        ElseIf iSortType = SORT_BY_BEST_ANTI Then
+            For i = 0 To vaObj.Bound - 1
+                Set oResult1 = vaObj.V(i)
+                
+                For j = i + 1 To vaObj.Bound
+                    Set oResult2 = vaObj.V(j)
+                    iCompareResult = oResult1.BestResult - oResult2.BestResult
+
+                    If iCompareResult < 0 Then
+                        Call vaObj.SwapTwoValues(i, j)
+                        Set oResult1 = vaObj.V(i)
+                    ElseIf iCompareResult = 0 Then
+                        iCompareResult = compareAllResults(oResult1.SortedResults, oResult2.SortedResults)
+                        If iCompareResult < 0 Then
                             Call vaObj.SwapTwoValues(i, j)
                             Set oResult1 = vaObj.V(i)
                         End If

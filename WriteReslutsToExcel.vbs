@@ -124,17 +124,29 @@ End Sub
 
                 ExcelSheet.Cells(iExcelRow, 1).Value = iRankNum
                 ExcelSheet.Cells(iExcelRow, 2).Value = oResult.ResultOwner
-                ExcelSheet.Cells(iExcelRow, 3).Value = revertResult(oResult.BestResult, iOptSeq)
+
+                If iOptSeq <> OPT_SEQ_3mb Then
+                    ExcelSheet.Cells(iExcelRow, 3).Value = revertResult(oResult.BestResult, iOptSeq)
+                Else
+                    Dim aPureResults
+                    aPureResults = Split(oResult.PureResults, " ")
+                    ExcelSheet.Cells(iExcelRow, 3).Value = aPureResults(0) & "/" & aPureResults(1)
+                End If
+
                 If iOptSeq < 15 Then
+                    ExcelSheet.Cells(iExcelRow, 4).Value = revertResult(oResult.AvgResult, iOptSeq)
+                ElseIf iOptSeq = OPT_SEQ_3mb Then
                     ExcelSheet.Cells(iExcelRow, 4).Value = revertResult(oResult.AvgResult, iOptSeq)
                 Else
                     ExcelSheet.Cells(iExcelRow, 4).Value = ""
                 End If
 
-                aTmp = Split(oResult.PureResults)
-                For k = 0 To UBound(aTmp)
-                    ExcelSheet.Cells(iExcelRow, k + 5).Value = revertResult(aTmp(k), iOptSeq)
-                Next
+                If iOptSeq <> OPT_SEQ_3mb Then
+                    aTmp = Split(oResult.PureResults)
+                    For k = 0 To UBound(aTmp)
+                        ExcelSheet.Cells(iExcelRow, k + 5).Value = revertResult(aTmp(k), iOptSeq)
+                    Next
+                End If
             Next
 
             iExcelRow = iExcelRow + 1
@@ -142,7 +154,7 @@ End Sub
 
                 Sub writeTitleForOpt(ExcelSheet, iOptSeq)
                     Dim oOptInfo
-                    oOptInfo = vaOptInfo.V(iOptSeq)
+                    Set oOptInfo = vaOptInfo.V(iOptSeq)
 
                     For i = 1 To 9
                         If i = 1 Then

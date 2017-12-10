@@ -124,7 +124,7 @@ Sub loadAllOptInfo()
     Call addOptInfo(OPT_FULL_NAME_sq, OPT_SEQ_sq, 5)
     Call addOptInfo(OPT_FULL_NAME_4bf, OPT_SEQ_4bf, 3)
     Call addOptInfo(OPT_FULL_NAME_5bf, OPT_SEQ_5bf, 3)
-    Call addOptInfo(OPT_FULL_NAME_3mb, OPT_SEQ_3mb, 1)
+    Call addOptInfo(OPT_FULL_NAME_3mb, OPT_SEQ_3mb, 3)
 End Sub
 
         Sub addOptInfo(optFullName, optSeq, optNeedNum)
@@ -146,7 +146,7 @@ End Sub
 
                 Function checkColonAndFormat(iResult)
                     If InStr(iResult, ":") Then
-                        checkColonAndFormat = formatResultStr(iResult, "")
+                        checkColonAndFormat = formatBrStr(iResult)
                     Else
                         checkColonAndFormat = iResult
                     End If
