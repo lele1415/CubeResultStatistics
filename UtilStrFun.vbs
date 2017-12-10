@@ -165,6 +165,8 @@ Function replaceCharacterInResultStr(sStr)
                 sSimple = sSimple & "n"
             Case InStr("fF", sChar) > 0
                 sSimple = sSimple & "f"
+            Case InStr("sS", sChar) > 0
+                sSimple = sSimple & "s"
             Case Else
                 sSimple = sSimple & " "
         End Select
