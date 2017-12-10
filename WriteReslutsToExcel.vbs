@@ -105,12 +105,12 @@ Sub writeReslutsToExcel()
     Set ExcelApp = Nothing
 End Sub
 
-        Sub writeAllProjectResult(ExcelSheet, vaObj, sOptSeq)
+        Sub writeAllProjectResult(ExcelSheet, vaObj, iOptSeq)
             Dim iRankNum, isAvgBr, isBestBr
             iRankNum = 0
             iExcelRow = iExcelRow + 1
 
-            Call writeTitleForOpt(ExcelSheet, vaOptInfo.V(sOptSeq).FullName)
+            Call writeTitleForOpt(ExcelSheet, iOptSeq)
             
 
             Dim i, k, oResult, aTmp
@@ -119,28 +119,31 @@ End Sub
                 iExcelRow = iExcelRow + 1
                 iRankNum = iRankNum + 1
 
-                Call setStyleForResult(ExcelSheet, i, oResult)
+                Call setStyleForResult(ExcelSheet, i, oResult, iOptSeq)
                 Call checkIsBr(ExcelSheet, oResult)
 
                 ExcelSheet.Cells(iExcelRow, 1).Value = iRankNum
                 ExcelSheet.Cells(iExcelRow, 2).Value = oResult.ResultOwner
-                ExcelSheet.Cells(iExcelRow, 3).Value = revertResult(oResult.BestResult, sOptSeq)
-                If sOptSeq < 15 Then
-                    ExcelSheet.Cells(iExcelRow, 4).Value = revertResult(oResult.AvgResult, sOptSeq)
+                ExcelSheet.Cells(iExcelRow, 3).Value = revertResult(oResult.BestResult, iOptSeq)
+                If iOptSeq < 15 Then
+                    ExcelSheet.Cells(iExcelRow, 4).Value = revertResult(oResult.AvgResult, iOptSeq)
                 Else
                     ExcelSheet.Cells(iExcelRow, 4).Value = ""
                 End If
 
                 aTmp = Split(oResult.PureResults)
                 For k = 0 To UBound(aTmp)
-                    ExcelSheet.Cells(iExcelRow, k + 5).Value = revertResult(aTmp(k), sOptSeq)
+                    ExcelSheet.Cells(iExcelRow, k + 5).Value = revertResult(aTmp(k), iOptSeq)
                 Next
             Next
 
             iExcelRow = iExcelRow + 1
         End Sub
 
-                Sub writeTitleForOpt(ExcelSheet, sOptName)
+                Sub writeTitleForOpt(ExcelSheet, iOptSeq)
+                    Dim oOptInfo
+                    oOptInfo = vaOptInfo.V(iOptSeq)
+
                     For i = 1 To 9
                         If i = 1 Then
                             ExcelSheet.Cells(iExcelRow, i).HorizontalAlignment = 2
@@ -153,41 +156,61 @@ End Sub
                         ExcelSheet.Cells(iExcelRow, i).Font.Color = RGB(255,255,255)
                     Next
 
-                    ExcelSheet.Cells(iExcelRow, 1).Value = sOptName
+                    ExcelSheet.Cells(iExcelRow, 1).Value = oOptInfo.FullName
                     ExcelSheet.Cells(iExcelRow, 2).Value = "ID"
-                    ExcelSheet.Cells(iExcelRow, 3).Value = "最好成绩"
-                    ExcelSheet.Cells(iExcelRow, 4).Value = "平均成绩"
-                    ExcelSheet.Cells(iExcelRow, 5).Value = "r1"
-                    ExcelSheet.Cells(iExcelRow, 6).Value = "r2"
-                    ExcelSheet.Cells(iExcelRow, 7).Value = "r3"
-                    ExcelSheet.Cells(iExcelRow, 8).Value = "r4"
-                    ExcelSheet.Cells(iExcelRow, 9).Value = "r5"
+                    If iOptSeq <> OPT_SEQ_3mb Then
+                        ExcelSheet.Cells(iExcelRow, 3).Value = "最好成绩"
+                        If iOptSeq <> OPT_SEQ_4bf And _
+                                iOptSeq <> OPT_SEQ_5bf Then
+                            ExcelSheet.Cells(iExcelRow, 4).Value = "平均成绩"
+                        End If
+                        ExcelSheet.Cells(iExcelRow, 5).Value = "r1"
+                        ExcelSheet.Cells(iExcelRow, 6).Value = "r2"
+                        ExcelSheet.Cells(iExcelRow, 7).Value = "r3"
+                        If oOptInfo.NeedNum = 5 Then
+                            ExcelSheet.Cells(iExcelRow, 8).Value = "r4"
+                            ExcelSheet.Cells(iExcelRow, 9).Value = "r5"
+                        End If
+                    Else
+                        ExcelSheet.Cells(iExcelRow, 3).Value = "成功/总数"
+                        ExcelSheet.Cells(iExcelRow, 4).Value = "用时"
+                    End If
                 End Sub
 
-                Sub setStyleForResult(ExcelSheet, iCrtSeq, oResult)
-                    Dim j
-                    For j = 1 To 9
-                        If j = 2 Then
-                            ExcelSheet.Cells(iExcelRow, j).HorizontalAlignment = 2
+                Sub setStyleForResult(ExcelSheet, iCrtSeq, oResult, iOptSeq)
+                    Dim iColumnBold
+                    If iOptSeq = OPT_SEQ_3bf Or _
+                            iOptSeq = OPT_SEQ_4bf Or _
+                            iOptSeq = OPT_SEQ_5bf Or _
+                            iOptSeq = OPT_SEQ_3mb Then
+                        iColumnBold = 3
+                    Else
+                        iColumnBold = 4
+                    End If
+
+                    Dim col
+                    For col = 1 To 9
+                        If col = 2 Then
+                            ExcelSheet.Cells(iExcelRow, col).HorizontalAlignment = 2
                         Else
-                            ExcelSheet.Cells(iExcelRow, j).HorizontalAlignment = 4
+                            ExcelSheet.Cells(iExcelRow, col).HorizontalAlignment = 4
                         End If
 
-                        If j = 4 Then
-                            ExcelSheet.Cells(iExcelRow, j).Font.Bold = True
+                        If col = iColumnBold Then
+                            ExcelSheet.Cells(iExcelRow, col).Font.Bold = True
                         End If
 
-                        If j < 3 Then
-                            ExcelSheet.Cells(iExcelRow, j).Font.Color = RGB(247,83,9)
+                        If col < 3 Then
+                            ExcelSheet.Cells(iExcelRow, col).Font.Color = RGB(247,83,9)
                         Else
-                            ExcelSheet.Cells(iExcelRow, j).NumberFormat = "@"
-                            ExcelSheet.Cells(iExcelRow, j).Font.Color = RGB(0,0,0)
+                            ExcelSheet.Cells(iExcelRow, col).NumberFormat = "@"
+                            ExcelSheet.Cells(iExcelRow, col).Font.Color = RGB(0,0,0)
                         End If
 
                         If isEvenNum(iCrtSeq) Then
-                            ExcelSheet.Cells(iExcelRow, j).Interior.Color = RGB(255,255,255)
+                            ExcelSheet.Cells(iExcelRow, col).Interior.Color = RGB(255,255,255)
                         Else
-                            ExcelSheet.Cells(iExcelRow, j).Interior.Color = RGB(230,230,230)
+                            ExcelSheet.Cells(iExcelRow, col).Interior.Color = RGB(230,230,230)
                         End If
                     Next
                 End Sub
