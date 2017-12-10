@@ -103,8 +103,6 @@ Sub writeReslutsToExcel()
     Set ExcelSheet = Nothing
     Set ExcelBook = Nothing
     Set ExcelApp = Nothing
-
-    Msgbox("Write done!")
 End Sub
 
         Sub writeAllProjectResult(ExcelSheet, vaObj, sOptSeq)
