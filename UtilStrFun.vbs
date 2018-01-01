@@ -402,11 +402,11 @@ Function revertResult(iResult, optSeq)
         Else
             If StrComp(optSeq, OPT_SEQ_3mb) <> 0 Then
                 sRevert = FormatNumber(sRevert, 2, , , 0)
+                If sRevert < 1.00 Then
+                    sRevert = "0" & sRevert
+                End If
             Else
                 sRevert = FormatNumber(sRevert, 0, , , 0)
-            End If
-            If sRevert < 1.00 Then
-                sRevert = "0" & sRevert
             End If
         End If
     End If

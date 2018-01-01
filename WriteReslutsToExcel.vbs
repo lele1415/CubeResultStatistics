@@ -252,10 +252,21 @@ Sub writeBrToExcel(ExcelApp, ExcelBook, ExcelSheet, haveNewBr)
         Dim i, oResult, iBaseLine
         For i = 0 To vaAllBrResults.Bound
             Set oResult = vaAllBrResults.V(i)
-            iBaseLine = (oResult.ResultOptSeq + 1) * 4
+            If oResult.ResultOptSeq < 16 Then
+                iBaseLine = (oResult.ResultOptSeq + 1) * 4
+            Else
+                iBaseLine = 64 + (oResult.ResultOptSeq + 1 - 16) * 3
+            End If
 
             If oResult.IsBestBr Then
-                Call writeBrLine(ExcelSheet, iBaseLine, oResult.ResultOptSeq, oResult.BestResult, oResult.ResultOwner, "")
+                If oResult.ResultOptSeq <> OPT_SEQ_3mb Then
+                    Call writeBrLine(ExcelSheet, iBaseLine, oResult.ResultOptSeq, oResult.BestResult, oResult.ResultOwner, "")
+                Else
+                    Dim aPureResults, tmpBestResult
+                    aPureResults = Split(oResult.PureResults, " ")
+                    tmpBestResult = aPureResults(0) & "/" & aPureResults(1)
+                    Call writeBrLine(ExcelSheet, iBaseLine, oResult.ResultOptSeq, tmpBestResult, oResult.ResultOwner, oResult.AvgResult)
+                End If
             End If
 
             If oResult.IsAvgBr Then
@@ -284,7 +295,13 @@ End Sub
                 ExcelSheet.Cells(iLine, j).Interior.Color = RGB(255,218,101)
             Next
 
-            ExcelSheet.Cells(iLine, 2).Value = revertResult(iResult, iOptSeq)
+            Dim brResult
+            If iOptSeq <> OPT_SEQ_3mb Then
+                brResult = revertResult(iResult, iOptSeq)
+            Else
+                brResult = iResult
+            End If
+            ExcelSheet.Cells(iLine, 2).Value = brResult
             ExcelSheet.Cells(iLine, 4).Value = sResultOwner
             ExcelSheet.Cells(iLine, 5).Value = iCompNum & "期"
 

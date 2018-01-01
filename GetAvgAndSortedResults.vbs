@@ -2,15 +2,18 @@
 '****get avg and sorted results.
 '*************************************************
 Sub getSortedResult(sPureResult, iOptSeq, resultInfo)
+    Dim oOptInfo
+    Set oOptInfo = vaOptInfo.V(iOptSeq)
+
     If iOptSeq = OPT_SEQ_3mb Then
         Call getResultFor3mb(sPureResult, resultInfo)
+        Call compareToBestRecord(iOptSeq, oOptInfo, resultInfo, resultInfo.BestResult, resultInfo.AvgResult)
         Exit Sub
     End If
 
-    Dim aTmp, aPureResults, iAvgResult, iBestResult, oOptInfo, iEnd
+    Dim aTmp, aPureResults, iAvgResult, iBestResult, iEnd
     aPureResults = sortIntArray(Split(sPureResult))
     iBestResult = aPureResults(0)
-    Set oOptInfo = vaOptInfo.V(iOptSeq)
 
     If oOptInfo.NeedNum = 5 Then
         iEnd = 3
@@ -25,25 +28,44 @@ Sub getSortedResult(sPureResult, iOptSeq, resultInfo)
         iAvgResult = 9999.99
     End If
 
-    Call compareToBestRecord(oOptInfo.BestRecord, resultInfo, iBestResult)
-    If iOptSeq < 15 Then
-        Call compareToAvgRecord(oOptInfo.AvgRecord, resultInfo, iAvgResult)
-    End If
+    Call compareToBestRecord(iOptSeq, oOptInfo, resultInfo, iBestResult, iAvgResult)
+    Call compareToAvgRecord(iOptSeq, oOptInfo.AvgRecord, resultInfo, iAvgResult)
 
     resultInfo.BestResult = iBestResult
     resultInfo.AvgResult = iAvgResult
     resultInfo.SortedResults = joinArrayWithSpace(aPureResults)
 End Sub
 
-Sub compareToBestRecord(iBestRecord, resultInfo, iBestResult)
-    If iBestResult - iBestRecord <= 0 Then
-        resultInfo.IsBestBr = True
+Sub compareToBestRecord(iOptSeq, oOptInfo, resultInfo, iBestResult, iAvgResult)
+    Dim iBestRecord
+    iBestRecord = oOptInfo.BestRecord
+
+    If iOptSeq <> OPT_SEQ_3mb Then
+        If iBestResult - iBestRecord <= 0 Then
+            resultInfo.IsBestBr = True
+        Else
+            resultInfo.IsBestBr = False
+        End If
     Else
-        resultInfo.IsBestBr = False
+        If iBestResult - iBestRecord > 0 Then
+            resultInfo.IsBestBr = True
+        ElseIf iBestResult - iBestRecord = 0 Then
+            Dim iAvgRecord
+            iAvgRecord = oOptInfo.AvgRecord
+            If iAvgResult - iAvgRecord <= 0 Then
+                resultInfo.IsBestBr = True
+            Else
+                resultInfo.IsBestBr = False
+            End If
+        Else
+            resultInfo.IsBestBr = False
+        End If
     End If
 End Sub
 
-Sub compareToAvgRecord(iAvgRecord, resultInfo, iAvgResult)
+Sub compareToAvgRecord(iOptSeq, iAvgRecord, resultInfo, iAvgResult)
+    If iOptSeq >= 15 Then Exit Sub
+
     If iAvgResult - iAvgRecord <= 0 Then
         resultInfo.IsAvgBr = True
     Else
