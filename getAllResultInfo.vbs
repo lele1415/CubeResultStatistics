@@ -70,18 +70,24 @@ End Sub
         Sub getResultInfo()
             window.clearTimeout(idTimer)
 
-            Dim aPostMsgWord
-            aPostMsgWord = getPostMsgWordsArray(oCrtPostInfo.PostMsg)
-
-            Call checkPostMsgWords(aPostMsgWord)
-
-            If vaAllOptLocationInfo.Bound > 0 Then
-                Dim k
-                For k = vaAllOptLocationInfo.Bound To 1 Step -1
-                    Call handleResultText(oCrtPostInfo.PostNum, oCrtPostInfo.PostUser, aPostMsgWord, vaAllOptLocationInfo.V(k), vaAllOptLocationInfo.V(k - 1))
-                Next
-            Else
+            If oCrtPostInfo.PostMsg = "" Then
                 Call addInvalidResultInfo(oCrtPostInfo.PostNum, oCrtPostInfo.PostUser, "", oCrtPostInfo.PostMsg, "")
+            Else
+
+                Dim aPostMsgWord
+                aPostMsgWord = getPostMsgWordsArray(oCrtPostInfo.PostMsg)
+
+                Call checkPostMsgWords(aPostMsgWord)
+
+                If vaAllOptLocationInfo.Bound > 0 Then
+                    Dim k
+                    For k = vaAllOptLocationInfo.Bound To 1 Step -1
+                        Call handleResultText(oCrtPostInfo.PostNum, oCrtPostInfo.PostUser, aPostMsgWord, vaAllOptLocationInfo.V(k), vaAllOptLocationInfo.V(k - 1))
+                    Next
+                Else
+                    Call addInvalidResultInfo(oCrtPostInfo.PostNum, oCrtPostInfo.PostUser, "", oCrtPostInfo.PostMsg, "")
+                End If
+
             End If
 
             If iCrtPostInfoSeq <= iMaxPostInfoSeq Then
