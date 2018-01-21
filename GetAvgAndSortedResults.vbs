@@ -77,7 +77,7 @@ Sub getResultFor3mb(sPureResult, resultInfo)
     Dim aPureResults
     aPureResults = sortIntArray(Split(sPureResult))
 
-    If aPureResults(0) <= aPureResults(1) Then
+    If aPureResults(0) - aPureResults(1) <= 0 Then
         resultInfo.BestResult = 2 * aPureResults(0) - aPureResults(1)
     End If
     resultInfo.AvgResult = aPureResults(2)
