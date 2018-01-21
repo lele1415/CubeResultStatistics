@@ -391,9 +391,12 @@ Function revertResult(iResult, optSeq)
                 secNum = FormatNumber(sRevert - minNum * 60, 2, , , 0)
             Else
                 secNum = FormatNumber(sRevert - minNum * 60, 0, , , 0)
+                If secNum = "" Then secNum = 0
             End If
 
-            If secNum < 1.00 Then
+            If secNum = 0 Then
+                secNum = "00"
+            ElseIf secNum < 1.00 Then
                 secNum = "00" & secNum
             ElseIf secNum < 10.00 Then
                 secNum = "0" & secNum
