@@ -178,7 +178,7 @@ Function replaceCharacterInResultStr(sStr)
         sSimple = RePlace(sSimple, "  ", " ")
     Loop
 
-    replaceCharacterInResultStr = sSimple
+    replaceCharacterInResultStr = Trim(sSimple)
 End Function
 
 Function formatBrStr(sStr)
