@@ -230,8 +230,12 @@ Sub formatResultStrForOthers(sStr, vaObj)
     iLenOfStr = Len(sStr)
     iPointInStr = InStr(sStr, ".")
 
+    '//invalid result str of yy.z
+    If iLenOfStr - iPointInStr = 1 Then
+        sStr = sStr & "0"
+        iLenOfStr = iLenOfStr + 1
     '//invalid result str of .xx ???.x ???.
-    If iPointInStr = 1 Or (iLenOfStr - iPointInStr < 2) Then
+    ElseIf iPointInStr = 1 Or (iLenOfStr - iPointInStr < 2) Then
         Exit Sub
     End If
 
@@ -355,7 +359,7 @@ Sub formatResultStrFor3mb(sStr, vaObj)
     If iPointInStr > 0 Then
         sStr = safeMid(sStr, 1, iPointInStr - 1, "formatResultStrFor3mb 111")
     End If
-    
+
     Dim iLenOfStr, iColonInStr
     iLenOfStr = Len(sStr)
     iColonInStr = InStr(sStr, ":")
