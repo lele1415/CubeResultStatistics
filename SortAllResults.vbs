@@ -186,12 +186,12 @@ End Sub
 
                     If iCompareResult > 0 Then
                         Call vaObj.SwapTwoValues(i, j)
-                        Set oResult1 = vaObj.V(i)
+                        Set oResult1 = oResult2
                     ElseIf iCompareResult = 0 Then
                         iCompareResult = compareAllResults(oResult1.SortedResults, oResult2.SortedResults)
                         If iCompareResult > 0 Then
                             Call vaObj.SwapTwoValues(i, j)
-                            Set oResult1 = vaObj.V(i)
+                            Set oResult1 = oResult2
                         End If
                     End If
                 Next
@@ -206,12 +206,12 @@ End Sub
 
                     If iCompareResult > 0 Then
                         Call vaObj.SwapTwoValues(i, j)
-                        Set oResult1 = vaObj.V(i)
+                        Set oResult1 = oResult2
                     ElseIf iCompareResult = 0 Then
                         iCompareResult = compareAllResults(oResult1.SortedResults, oResult2.SortedResults)
                         If iCompareResult > 0 Then
                             Call vaObj.SwapTwoValues(i, j)
-                            Set oResult1 = vaObj.V(i)
+                            Set oResult1 = oResult2
                         End If
                     End If
                 Next
@@ -226,12 +226,12 @@ End Sub
 
                     If iCompareResult < 0 Then
                         Call vaObj.SwapTwoValues(i, j)
-                        Set oResult1 = vaObj.V(i)
+                        Set oResult1 = oResult2
                     ElseIf iCompareResult = 0 Then
-                        iCompareResult = compareAllResults(oResult1.SortedResults, oResult2.SortedResults)
-                        If iCompareResult < 0 Then
+                        iCompareResult = oResult1.AvgResult - oResult2.AvgResult
+                        If iCompareResult > 0 Then
                             Call vaObj.SwapTwoValues(i, j)
-                            Set oResult1 = vaObj.V(i)
+                            Set oResult1 = oResult2
                         End If
                     End If
                 Next

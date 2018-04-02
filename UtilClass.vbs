@@ -418,7 +418,7 @@ Class VariableArray
             Exit Sub
         End If
 
-        If seq = 0 Then Exit Sub
+        If seq = mBound Then Exit Sub
 
         Dim i, sValueToBeMove
         If isObject(mArray(seq)) Then

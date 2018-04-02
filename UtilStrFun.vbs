@@ -318,12 +318,26 @@ Sub formatResultStrFor3mb(sStr, vaObj)
     iSlashInStr = InStr(sStr, "/")
     If iSlashInStr > 0 Then
         If iSlashInStr = 1 Or Len(sStr) = iSlashInStr Then Exit Sub
-        Dim aTmp1
-        aTmp1 = Split(sStr, "/")
-        If UBound(aTmp1) <> 1 Then Exit Sub
-        If (Not IsNumeric(aTmp1(0))) Or (Not IsNumeric(aTmp1(1))) Then Exit Sub
-        Call vaObj.Append(aTmp1(0))
-        Call vaObj.Append(aTmp1(1))
+        Dim aTmp
+        aTmp = Split(sStr, "/")
+        If UBound(aTmp) <> 1 Then Exit Sub
+        If (Not IsNumeric(aTmp(0))) Or (Not IsNumeric(aTmp(1))) Then Exit Sub
+
+        Dim iSuccess, iTotal
+        If aTmp(0) < aTmp(1) Then
+            iSuccess = aTmp(0)
+            iTotal = aTmp(1)
+        Else
+            iSuccess = aTmp(1)
+            iTotal = aTmp(0)
+        End If
+
+        Call vaObj.Append(iSuccess)
+        Call vaObj.Append(iTotal)
+        If vaObj.Bound = 2 Then
+            Call vaObj.MoveToEnd(0)
+        End If
+
         Exit Sub
     End If
 
