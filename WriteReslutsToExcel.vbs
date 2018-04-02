@@ -278,7 +278,7 @@ End Sub
 
         Sub clearColorForBrSheet(ExcelSheet)
             Dim i, j
-            For i = 1 To 57
+            For i = 1 To 70
                 For j = 1 To 10
                     If i mod 4 = 0 Then
                         ExcelSheet.Cells(i, j).Interior.Color = RGB(230,230,230)
