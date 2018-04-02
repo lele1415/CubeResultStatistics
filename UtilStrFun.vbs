@@ -349,20 +349,21 @@ Sub formatResultStrFor3mb(sStr, vaObj)
         Exit Sub
     End If
 
-    Dim iLenOfStr, iPointInStr, iColonInStr
-    iLenOfStr = Len(sStr)
-    iPointInStr = InStr(sStr, ".")
-    iColonInStr = InStr(sStr, ":")
-
     '//cut ???:xx
+    Dim iPointInStr
+    iPointInStr = InStr(sStr, ".")
     If iPointInStr > 0 Then
         sStr = safeMid(sStr, 1, iPointInStr - 1, "formatResultStrFor3mb 111")
     End If
+    
+    Dim iLenOfStr, iColonInStr
+    iLenOfStr = Len(sStr)
+    iColonInStr = InStr(sStr, ":")
 
     '//if have colon
     If iColonCount = 1 Then
 
-        '//invalid result str of xx:.xx  :xx  ???:
+        '//invalid result str of :xx , ???:
         If iColonInStr = 1 Or _
                 (iLenOfStr - iColonInStr) <> 2 Then
             Exit Sub
