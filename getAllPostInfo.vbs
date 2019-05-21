@@ -5,7 +5,7 @@ Const ID_IGNORE_POST_NUM = "ignore_post_num"
 
 Dim vaAllPostInfo : Set vaAllPostInfo = New VariableArray
 Dim aHeadStr : aHeadStr = Array("post_no&quot;:", "alog-group=""p_author""", "j_d_post_content  clearfix")
-Dim aEndStr : aEndStr = Array(",", "</a>", "</div><br></cc>")
+Dim aEndStr : aEndStr = Array(",", "</a>", "</div><br>            </cc>")
 
 Const GET_POST_NUM = 0
 Const GET_POST_USER = 1
