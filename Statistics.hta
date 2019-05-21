@@ -34,7 +34,7 @@ body { font-family: sans-serif; font-size: 17; }
     </div>
     <div class="div_clear_left">
         <div class="div_float_left">
-            <input type="button" class="input_button" id="getCode_id" onclick="getPagesCode()" value="获取网页源码" />
+            <input type="button" class="input_button" onclick="getPagesCode()" value="获取网页源码" />
         </div>
         <div class="div_float_left">
             已获取<b id="crt_page_num">0</b>/<b id="max_page_num">0</b>页
@@ -51,7 +51,27 @@ body { font-family: sans-serif; font-size: 17; }
     </div>
     <div class="div_clear_left">
         <div class="div_float_left">
-            <input id="getCode_id" type="button" class="input_button" onclick="onClickGetAllPostInfo()" value="获取所有成绩" />
+            <input type="button" class="input_button" onclick="onClickGetAllPostInfo()" value="获取所有回复信息" />
+        </div>
+    </div>
+</fieldset>
+<br>
+<fieldset>
+    <div class="div_clear_left">
+        文件夹路径
+        <input id="qq_data_folder" type="text" class="input_text" size="60" value="" />
+    </div>
+    <div class="div_clear_left">
+        <div class="div_float_left">
+            <input type="button" class="input_button" onclick="onClickGetAllQqData()" value="获取所有群赛数据" />
+        </div>
+    </div>
+</fieldset>
+<br>
+<fieldset>
+    <div class="div_clear_left">
+        <div class="div_float_left">
+            <input type="button" class="input_button" onclick="getAllResultInfo()" value="获取所有成绩" />
         </div>
         <div class="div_float_left">
             当前楼层 <b id="crt_post_num">0</b>/<b id="max_post_num">0</b>楼
@@ -193,6 +213,7 @@ body { font-family: sans-serif; font-size: 17; }
 <Script Language="VBScript" src="Init.vbs"></Script>
 <Script Language="VBScript" src="GetPagesCode.vbs"></Script>
 <Script Language="VBScript" src="getAllPostInfo.vbs"></Script>
+<Script Language="VBScript" src="getAllQqData.vbs"></Script>
 <Script Language="VBScript" src="getAllResultInfo.vbs"></Script>
 <Script Language="VBScript" src="GetPureResult.vbs"></Script>
 <Script Language="VBScript" src="GetAvgAndSortedResults.vbs"></Script>

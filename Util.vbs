@@ -13,10 +13,11 @@ Set Fso=CreateObject("Scripting.FileSystemObject")
 
 Dim CrtPath : CrtPath = ws.CurrentDirectory
 
-Dim uSleepVbsPath, uPagesCodeFile, uOriginMsgTxtPath, uRecordTxt, uValidResultTxt
+Dim uSleepVbsPath, uPagesCodeFile, uOriginMsgTxtPath, uOriginQqTxtPath, uRecordTxt, uValidResultTxt
 uSleepVbsPath = CrtPath & "\sleep.vbs"
 uPagesCodeFile = CrtPath & "\tmpFiles\code.txt"
 uOriginMsgTxtPath = CrtPath & "\tmpFiles\OriginMsg.txt"
+uOriginQqTxtPath = CrtPath & "\tmpFiles\OriginQq.txt"
 uRecordTxt = CrtPath & "\tmpFiles\record.txt"
 uIgnoreUsersTxt = CrtPath & "\tmpFiles\ignoreUsers.txt"
 uValidResultTxt = CrtPath & "\tmpFiles\validResult.txt"
