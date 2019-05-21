@@ -224,6 +224,7 @@ Class VariableArray
     Private Sub Class_Initialize
         mPreBound = -1
         mBound = -1
+        ReDim Preserve mArray(0)
     End Sub
 
     Public Sub SetPreBound(sValue)
@@ -249,7 +250,7 @@ Class VariableArray
 
         'MsgBox("seq="&seq&" mBound="&mBound)
         If seq < 0 Or seq > mBound Then
-            MsgBox("Error: Get V(seq) seq out of bound")
+            MsgBox("Error: Get V(seq) seq out of bound! seq="&seq&" mBound="&mBound)
             Exit Property
         End If
 
@@ -273,14 +274,17 @@ Class VariableArray
             Exit Property
         End If
 
-        mArray(seq) = sValue
+        If isObject(sValue) Then
+            Set mArray(seq) = sValue
+        Else
+            mArray(seq) = sValue
+        End If
     End Property
 
     Public Sub Append(value)
         mBound = mBound + 1
-        If mBound > mPreBound Then
+        If mBound > UBound(mArray) Then
             ReDim Preserve mArray(mBound)
-            mPreBound = mBound
         End If
 
         If isObject(value) Then
@@ -345,6 +349,41 @@ Class VariableArray
         End If
     End Sub
 
+    Public Sub InsertBySeq(seq, value)
+        If Not isNumeric(seq) Then
+            MsgBox("Error: insertBySeq(seq) seq is not a number")
+            Exit Sub
+        ELse
+            seq = Cint(seq)
+        End If
+
+        If seq < 0 Or seq > mBound Then
+            MsgBox("Error: insertBySeq(seq) seq out of bound")
+            Exit Sub
+        End If
+
+        mBound = mBound + 1
+        ReDim Preserve mArray(mBound + 1)
+
+        Dim i
+        If isObject(value) Then
+            If seq <> mBound - 1 Then
+                For i = mBound To seq + 2 Step -1
+                    Set mArray(i) = mArray(i - 1)
+                Next
+            End If
+
+            Set mArray(seq + 1) = value
+        Else
+            If seq <> mBound - 1 Then
+                For i = mBound To seq + 2 Step -1
+                    mArray(i) = mArray(i - 1)
+                Next
+            End If
+
+            mArray(seq + 1) = value
+        End If
+    End Sub
     Public Sub PopBySeq(seq)
         If Not isNumeric(seq) Then
             MsgBox("Error: PopBySeq(seq) seq is not a number")
@@ -372,6 +411,7 @@ Class VariableArray
         End If
 
         mBound = mBound - 1
+        ReDim Preserve mArray(mBound)
     End Sub
 
     Public Sub MoveToTop(seq)
@@ -469,7 +509,7 @@ Class VariableArray
     End Function
 
     Public Sub SortArray()
-        If mBound = -1 Then
+        If mBound <= 0 Then
             'MsgBox("Error: SortArray() mBound <= 0, no need to sort")
             Exit Sub
         End If
